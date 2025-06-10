@@ -10,7 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@3dverse/livelink": "^0.8.39",
+    "@3dverse/api": "^0.8.8",
+    "@3dverse/livelink": "^0.8.40",
     "@3dverse/livelink-react": "^0.2.47",
     "@3dverse/livelink-react-ui": "^0.3.2",
     "@3dverse/livelink-three": "^0.2.6",

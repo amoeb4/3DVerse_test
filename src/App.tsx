@@ -5,12 +5,13 @@ import {
     CameraController,
     useCameraEntity,
 } from "@3dverse/livelink-react";
+
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 
-const scene_id = "6391ff06-c881-441d-8ada-4184b2050751";
-const token = "public_i1-8nmpu9dTKaQvl";
+const scene_id = "66299402-5a92-4f50-97d6-c30f04a38e1b";
+const token = "public_OvrLzN5abV1Qa65V";
 
-function App() {
+export function App() {
     return (
         <Livelink
             sceneId={scene_id}
@@ -19,20 +20,21 @@ function App() {
         >
             <AppLayout />
         </Livelink>
+
     );
 }
+
+function Canvas(params: PropsWithChildren<CanvasContext & HTMLProps<HTMLDivElement>>): JSX.Element;
 
 function AppLayout() {
     const { cameraEntity } = useCameraEntity();
 
     return (
-        <Canvas className="max-h-screen">
+			<Canvas className="w-screen h-screen bg-red-500" height={1000} width={1000}>
             <Viewport cameraEntity={cameraEntity} className="w-full h-full">
                 <CameraController />
             </Viewport>
         </Canvas>
+
     );
 }
-
-export default App;
-
