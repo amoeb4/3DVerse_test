@@ -1,6 +1,6 @@
 import * as api from "@3dverse/api";
 
-const YOUR_API_KEY = "62ccfc12-66ff-404d-be22-44d86d6de9f8.5R5aVITtct3GzjVK0BDgWrE4XgCMZt944n1JTXbuYKc";
+const YOUR_API_KEY = "27752cb4-00a2-43b6-9cba-41090ec0221e.5aZ1Ycj2H4LFqSQng_e6QClEpLcMVQE940HOcP981VA";
 
 api.setApiKey(YOUR_API_KEY);
 
