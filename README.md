@@ -7,8 +7,11 @@ composants principaux : React, Node, 3Dverse, ws, esLint, vite
 Utilisations :
 
 'npm run dev' : Lancer le site en mode développement
+
 'npm run build' : Construire l'executable à déployer
+
 'npm run preview' : Lancer le site avec l'intégration Vite
+
 'npm run server' : Lancer le serveur de communication par Websocket *WIP*
 
 *-------------------------------------------------------------*
