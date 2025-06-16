@@ -1,48 +1,105 @@
-//------------------------------------------------------------------------------
+import { useState, useContext } from "react";
 import {
-    Livelink,
-    Canvas,
-    Viewport,
-    CameraController,
-    useCameraEntity,
+  Livelink,
+  Canvas,
+  Viewport,
+  CameraController,
+  useCameraEntity,
+  LivelinkContext,
 } from "@3dverse/livelink-react";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
+
 import "./App.css";
 
-//------------------------------------------------------------------------------
-const scene_id = "6391ff06-c881-441d-8ada-4184b2050751";
-const token = "public_i1-8nmpu9dTKaQvl";
+export function App() {
+  const [credentials, setCredentials] = useState(null);
 
-//------------------------------------------------------------------------------
-export function App() { 
-    return (
-        <div className="app-container">
-            <div className="livelink-container">
-                <Livelink
-                    sceneId={scene_id}
-                    token={token}
-                    LoadingPanel={LoadingOverlay}
-                >
-                    <AppLayout />
-                </Livelink>
-            </div>
-        </div>
-    );
+  return (
+    <>
+      {!credentials ? (
+        <StartupModal onSubmit={setCredentials} />
+      ) : (
+        <Livelink
+          sceneId={credentials.sceneId}
+          token="public_OvrLzN5abV1Qa65V"
+          LoadingPanel={LoadingOverlay}
+        >
+          <AppLayout />
+        </Livelink>
+      )}
+    </>
+  );
 }
 
-//------------------------------------------------------------------------------
+function StartupModal({ onSubmit }) {
+  const [sceneId, setSceneId] = useState("");
+  const [token, setToken] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({ sceneId, token });
+  };
+
+  return (
+    <div style={modalStyle}>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Scene ID :
+          <input
+            type="text"
+            value={sceneId}
+            onChange={(e) => setSceneId(e.target.value)}
+            required
+          />
+        </label>
+        <br />
+        <label>
+{/*
+  Token :
+  <input
+    type="text"
+    value="public_OvrLzN5abV1Qa65V"
+    onSubmit={(e) => setToken(e.target.value)}
+    required
+  />
+*/}
+        </label>
+        <br />
+        <button type="submit" hidden></button>
+      </form>
+    </div>
+  );
+}
+
 function AppLayout() {
-    const { cameraEntity } = useCameraEntity();
-    return (
-        <div className="app-layout">
-            <Canvas className="canvas-container">
-                <Viewport 
-                    cameraEntity={cameraEntity} 
-                    className="viewport-container"
-                >
-                    <CameraController />
-                </Viewport>
-            </Canvas>
-        </div>
-    );
+  const { cameraEntity } = useCameraEntity();
+  const { isConnecting } = useContext(LivelinkContext);
+
+  return (
+    <Canvas className="max-h-screen">
+      <Viewport cameraEntity={cameraEntity} className="w-full h-full">
+        {!isConnecting && (
+          <div>
+            <a href="https://docs.3dverse.com/livelink.react/" target="_blank">
+            </a>
+          </div>
+        )}
+        <CameraController />
+      </Viewport>
+    </Canvas>
+  );
 }
+
+const modalStyle = {
+  position: "fixed",
+  top: "30%",
+  left: "30%",
+  backgroundColor: "#fff",
+  padding: "20px",
+  borderRadius: "8px",
+  boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.3)",
+  zIndex: 9999,
+};
+
+//------------------------------------------------------------------------------
+export default App;
