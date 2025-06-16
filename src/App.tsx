@@ -54,23 +54,32 @@ function StartupModal({ onSubmit }) {
         </label>
         <br />
         <label>
-{/*
-  Token :
-  <input
-    type="text"
-    value="public_OvrLzN5abV1Qa65V"
-    onSubmit={(e) => setToken(e.target.value)}
-    required
-  />
-*/}
+          {/*
+          Token :
+          <input
+            type="text"
+            value="public_OvrLzN5abV1Qa65V"
+            onSubmit={(e) => setToken(e.target.value)}
+            required
+          />
+        */}
         </label>
         <br />
-        <button type="submit" onClick={(e) => setSceneId("776d1d2a-5c8e-4a96-9360-1536329a0db0")} >Empty layout</button>
+        <button
+          type="submit"
+          onClick={(e) =>
+            setSceneId("776d1d2a-5c8e-4a96-9360-1536329a0db0")
+          }
+          className="border border-black px-4 py-2 rounded hover:bg-gray-100"
+        >
+          Empty layout
+        </button>
         <button type="submit" hidden></button>
       </form>
     </div>
   );
 }
+
 
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
