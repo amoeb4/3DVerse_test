@@ -11,7 +11,6 @@ import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import "./App.css";
 
 const root = document.querySelector('#root') // or const root = document.body
-
 root.addEventListener('H', (e) => {
   if (e.target.tagName === 'BUTTON' && e.target.className === 'my-button') {
     e.stopPropagation()
@@ -90,6 +89,7 @@ function StartupModal({ onSubmit }) {
   );
 }
 
+import CameraEventListener from "./CameraEventListener";
 
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
@@ -106,14 +106,18 @@ function AppLayout() {
     borderRadius: "7px",
     boxShadow: "0px 0px 20px rgba(255, 255, 255, 0.81)",
     zIndex: 1000,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center", 
   };
 
   return (
     <>
       <div style={control_interface}>
         <h1>Control Panel</h1>
-        <button className="right 7% border border-white px-4 py-2 rounded hover:bg-gray-100">DO A FLIP!!!</button>
+        <button className="border border-white px-4 py-2 rounded hover:bg-gray-100">DO A FLIP!!!</button>
       </div>
+      <CameraEventListener />
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
