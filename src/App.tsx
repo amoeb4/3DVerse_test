@@ -112,6 +112,7 @@ function AppLayout() {
     <>
       <div style={control_interface}>
         <h1>Control Panel</h1>
+        <button className="right 7% border border-white px-4 py-2 rounded hover:bg-gray-100">DO A FLIP!!!</button>
       </div>
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
