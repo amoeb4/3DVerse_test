@@ -65,6 +65,7 @@ function StartupModal({ onSubmit }) {
 */}
         </label>
         <br />
+        <button type="submit" onClick={(e) => setSceneId("776d1d2a-5c8e-4a96-9360-1536329a0db0")} >Empty layout</button>
         <button type="submit" hidden></button>
       </form>
     </div>
