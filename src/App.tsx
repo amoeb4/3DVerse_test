@@ -48,6 +48,7 @@ function StartupModal({ onSubmit }) {
           <input
             type="text"
             value={sceneId}
+            className="border border-black px-3 py-1"
             onChange={(e) => setSceneId(e.target.value)}
             required
           />
@@ -65,15 +66,16 @@ function StartupModal({ onSubmit }) {
         */}
         </label>
         <br />
-        <button
-          type="submit"
-          onClick={(e) =>
-            setSceneId("776d1d2a-5c8e-4a96-9360-1536329a0db0")
-          }
-          className="border border-black px-4 py-2 rounded hover:bg-gray-100"
-        >
-          Empty layout
-        </button>
+<div className="flex justify-center">
+  <button
+    type="submit"
+    onClick={(e) =>
+      setSceneId("776d1d2a-5c8e-4a96-9360-1536329a0db0")
+    }
+    className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+    Empty layout
+  </button>
+</div>
         <button type="submit" hidden></button>
       </form>
     </div>
