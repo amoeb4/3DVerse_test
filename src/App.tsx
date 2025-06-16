@@ -8,8 +8,16 @@ import {
   LivelinkContext,
 } from "@3dverse/livelink-react";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
-
 import "./App.css";
+
+const root = document.querySelector('#root') // or const root = document.body
+
+root.addEventListener('H', (e) => {
+  if (e.target.tagName === 'BUTTON' && e.target.className === 'my-button') {
+    e.stopPropagation()
+    window.alert("Click registered");
+  }
+})
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
@@ -87,18 +95,35 @@ function AppLayout() {
   const { cameraEntity } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
 
+  const control_interface = {
+    position: "fixed",
+    left: "5%",
+    right: "5%",
+    top: "3%",
+    backgroundColor: "#455a64",
+    color: "white",
+    padding: "2rem",
+    borderRadius: "7px",
+    boxShadow: "0px 0px 20px rgba(255, 255, 255, 0.81)",
+    zIndex: 1000,
+  };
+
   return (
-    <Canvas className="max-h-screen">
-      <Viewport cameraEntity={cameraEntity} className="w-full h-full">
-        {!isConnecting && (
-          <div>
-            <a href="https://docs.3dverse.com/livelink.react/" target="_blank">
-            </a>
-          </div>
-        )}
-        <CameraController />
-      </Viewport>
-    </Canvas>
+    <>
+      <div style={control_interface}>
+        <h1>Control Panel</h1>
+      </div>
+      <Canvas className="w-full h-screen">
+        <Viewport cameraEntity={cameraEntity} className="w-full h-full">
+          {!isConnecting && (
+            <div>
+              <a href="https://docs.3dverse.com/livelink.react/" target="_blank" />
+            </div>
+          )}
+          <CameraController />
+        </Viewport>
+      </Canvas>
+    </>
   );
 }
 
@@ -113,5 +138,4 @@ const modalStyle = {
   zIndex: 9999,
 };
 
-//------------------------------------------------------------------------------
 export default App;
