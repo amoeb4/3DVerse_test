@@ -7,14 +7,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "cd server && node server.js && node client.js"
   },
   "dependencies": {
     "@3dverse/livelink-react": "^0.2.48",
     "@3dverse/livelink-react-ui": "^0.3.3",
     "@tailwindcss/vite": "^4.1.5",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

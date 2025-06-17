@@ -104,7 +104,7 @@ function AppLayout() {
     color: "white",
     padding: "2rem",
     borderRadius: "7px",
-    boxShadow: "0px 0px 20px rgba(255, 255, 255, 0.81)",
+    boxShadow: "0px 0px 20px rgba(88, 87, 87, 0.81)",
     zIndex: 1000,
     display: "flex",
     justifyContent: "space-between",
