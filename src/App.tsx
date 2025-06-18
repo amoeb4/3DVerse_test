@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Slider } from "@material-tailwind/react";
 import {
   Livelink,
@@ -10,12 +10,14 @@ import {
 } from "@3dverse/livelink-react";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import "./App.css";
+import KeyboardHandler from "./keyBindings.tsx";
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
 
   return (
     <>
+	<KeyboardHandler />
       {!credentials ? (
         <StartupModal onSubmit={setCredentials} />
       ) : (
@@ -47,7 +49,6 @@ function StartupModal({ onSubmit }) {
           Scene ID :
           <input
             type="text"
-            value={sceneId}
             className="border border-black px-3 py-1"
             onChange={(e) => setSceneId(e.target.value)}
             required
@@ -110,9 +111,9 @@ function AppLayout() {
     <>
       <div style={control_interface}>
         <h1>Control Panel</h1>
-        <button className="border border-white px-4 py-2 rounded hover:bg-gray-100">DO A FLIP!!!</button>
-        <button className="border border-white px-4 py-2 rounded hover:bg-gray-100">Apply changes</button>
-      <input type="range" min="0" max="100" value="50" className="w-70 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 length:50"></input>
+        <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">DO A FLIP!!!</button>
+        <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">Apply changes</button>
+      <input type="range"  min="0"  max="100"  defaultValue={70}  className="w-64 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-500"/>
       </div>
       <CameraEventListener />
       <Canvas className="w-full h-screen">
