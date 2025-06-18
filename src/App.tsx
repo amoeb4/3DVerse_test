@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { Slider } from "@material-tailwind/react";
 import {
   Livelink,
   Canvas,
@@ -9,14 +10,6 @@ import {
 } from "@3dverse/livelink-react";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import "./App.css";
-
-const root = document.querySelector('#root') // or const root = document.body
-root.addEventListener('H', (e) => {
-  if (e.target.tagName === 'BUTTON' && e.target.className === 'my-button') {
-    e.stopPropagation()
-    window.alert("Click registered");
-  }
-})
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
@@ -116,6 +109,9 @@ function AppLayout() {
       <div style={control_interface}>
         <h1>Control Panel</h1>
         <button className="border border-white px-4 py-2 rounded hover:bg-gray-100">DO A FLIP!!!</button>
+        <button className="border border-white px-4 py-2 rounded hover:bg-gray-100">Apply changes</button>
+      {/*  <label for="disabled-range" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Default range</label>*/}
+      <input id="disabled-range" type="range" value="50" class="w-70 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 length:50" disabled></input>
       </div>
       <CameraEventListener />
       <Canvas className="w-full h-screen">

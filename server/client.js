@@ -1,6 +1,11 @@
 import WebSocket from "ws";
+import readline from "readline";
+const socket = new WebSocket("ws://localhost:8081");
 
-const socket = new WebSocket("ws://localhost:8080");
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 socket.on("open", () => {
   console.log("connection established");
@@ -9,6 +14,5 @@ socket.on("open", () => {
 socket.on("message", (data) => {
   console.log("message from server:", data.toString());
 socket.on("close", ()=>
-    socket.send("client disconnected");
-    console.log("disconnected"));
+    console.log("client disconnected"));
 });
