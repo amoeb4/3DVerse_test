@@ -64,12 +64,24 @@ function StartupModal({ onSubmit }) {
     }
     className="border border-black px-4 py-2 rounded hover:bg-gray-100"
   >
-    Empty layout
+    Load empty layout
+  </button>
+</div>
+<div className="flex justify-center">
+  <button
+    type="button"
+    onClick={() =>
+      setSceneId("dc5e3854-c764-4c1b-8d9a-e15143706752")
+    }
+    className="border border-black px-4 py-2 rounded hover:bg-gray-100"
+  >
+    Load Grenoble CEA cell
   </button>
 </div>
 <div className= "flex justify-center">
         <button className="border position:centered border-black px-4 py-2 rounded hover:bg-gray-100" type="submit">Submit</button>
 </div>
+
       </form>
     </div>
   );
