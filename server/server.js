@@ -23,7 +23,7 @@ function parseMessage(message)
 		const apply = entry();
 		console.log(apply);
 	} else
-	 {
+	 	{
 		console.log(`${messageLibrary[msg]}`);
 		}
 	}

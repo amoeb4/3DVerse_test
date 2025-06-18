@@ -24,7 +24,9 @@ Renseigner le Scene UUID du projet 3Dverse à consulter, ou appuyer sur "Empty l
 
 Utilisation du serveur :
 
-La syntaxe est la suivante : "[commande] (entité) (valeur)"
+La syntaxe est la suivante : "[!commande] (entité) (valeur)"
+
+Toute commande doit commencer par '!', auquel cas, elle ne sera pas interpretée
 
 vous pouvez obtenir la liste des commandes avec la commande "!help"
 
