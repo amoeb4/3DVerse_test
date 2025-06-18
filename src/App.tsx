@@ -76,7 +76,9 @@ function StartupModal({ onSubmit }) {
     Empty layout
   </button>
 </div>
-        <button type="submit" hidden></button>
+<div className= "flex justify-center">
+        <button className="border position:centered border-black px-4 py-2 rounded hover:bg-gray-100" type="submit">Submit</button>
+</div>
       </form>
     </div>
   );
@@ -110,8 +112,7 @@ function AppLayout() {
         <h1>Control Panel</h1>
         <button className="border border-white px-4 py-2 rounded hover:bg-gray-100">DO A FLIP!!!</button>
         <button className="border border-white px-4 py-2 rounded hover:bg-gray-100">Apply changes</button>
-      {/*  <label for="disabled-range" class="block mb-1 text-sm font-medium text-gray-900 dark:text-white">Default range</label>*/}
-      <input id="disabled-range" type="range" value="50" class="w-70 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 length:50" disabled></input>
+      <input type="range" min="0" max="100" value="50" className="w-70 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 length:50"></input>
       </div>
       <CameraEventListener />
       <Canvas className="w-full h-screen">
