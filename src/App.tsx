@@ -45,35 +45,25 @@ function StartupModal({ onSubmit }) {
   return (
     <div style={modalStyle}>
       <form onSubmit={handleSubmit}>
-        <label>
-          Scene ID :
-          <input
-            type="text"
-            className="border border-black px-3 py-1"
-            onChange={(e) => setSceneId(e.target.value)}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          {/*
-          Token :
-          <input
-            type="text"
-            value="public_OvrLzN5abV1Qa65V"
-            onSubmit={(e) => setToken(e.target.value)}
-            required
-          />
-        */}
-        </label>
-        <br />
+<label>
+  Scene ID :
+  <input
+    type="text"
+    className="border border-black px-3 py-1"
+    value={sceneId}
+    onChange={(e) => setSceneId(e.target.value)}
+    required
+  />
+</label>
+
 <div className="flex justify-center">
   <button
-    type="submit"
-    onClick={(e) =>
+    type="button"
+    onClick={() =>
       setSceneId("776d1d2a-5c8e-4a96-9360-1536329a0db0")
     }
-    className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+    className="border border-black px-4 py-2 rounded hover:bg-gray-100"
+  >
     Empty layout
   </button>
 </div>
