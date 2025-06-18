@@ -22,4 +22,16 @@ Renseigner le Scene UUID du projet 3Dverse à consulter, ou appuyer sur "Empty l
 
 *-------------------------------------------------------------*
 
+Utilisation du serveur :
+
+La syntaxe est la suivante : "[commande] (entité) (valeur)"
+
+vous pouvez obtenir la liste des commandes avec la commande "!help"
+
+le nom de l'entité correspond à son UUID (ex : 123-456-78910112-420)
+
+la valeur est exprimée en int
+
+*-------------------------------------------------------------*
+
 Développé par David FRANCOIS(amoeb4) et Clément BILLY(billygrosmollets) pour la societé VLM-Robotics
