@@ -24,15 +24,15 @@ Renseigner le Scene UUID du projet 3Dverse à consulter, ou appuyer sur "Empty l
 
 Keybinds de l'application :
 
-Souris =   Click gauche : Travelling
-           Molette : +/- Zoom
-           Click droit : Dragging fluide
-           Click molette : Dragging fixe
+`Souris =   Click gauche : Travelling`
+`           Molette : +/- Zoom`
+`           Click droit : Dragging fluide`
+`           Click molette : Dragging fixe`
 
-Clavier =  'J' : Affiche le nom de toutes les entités présents ainsi que leurs UUID
-           'M' : Modifie la position de l'entité principale de Y+0.5 et Z+5
-           'R' : Réinitialise la position de l'entité principale à X=0 Y=0 Z=0
-`*           'K' : Fixe la caméra sur l'entité principal de la scène *WIP*`
+`Clavier =  'J' : Affiche le nom de toutes les entités présents ainsi que leurs UUID`
+`           'M' : Modifie la position de l'entité principale de Y+0.5 et Z+5`
+`           'R' : Réinitialise la position de l'entité principale à X=0 Y=0 Z=0`
+`           'K' : Fixe la caméra sur l'entité principal de la scène *WIP*`
 
 *-------------------------------------------------------------*
 
