@@ -30,6 +30,7 @@ Souris =   Click gauche : Travelling
            Click molette : Dragging fixe
 
 Clavier =  'J' : Affiche le nom de tous les éléments présents ainsi que leurs UUID
+           'M' : Modifie la position de l'entité principale de Y+0.5 et Z+5
            'K' : Fixe la caméra sur l'élément principal de la scène *WIP*
 
 *-------------------------------------------------------------*
