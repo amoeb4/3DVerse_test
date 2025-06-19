@@ -22,6 +22,18 @@ Renseigner le Scene UUID du projet 3Dverse à consulter, ou appuyer sur "Empty l
 
 *-------------------------------------------------------------*
 
+Keybinds de l'application :
+
+Souris =   Click gauche : Travelling
+           Molette : +/- Zoom
+           Click droit : Dragging fluide
+           Click molette : Dragging fixe
+
+Clavier =  'J' : Affiche le nom de tous les éléments présents ainsi que leurs UUID
+           'K' : Fixe la caméra sur l'élément principal de la scène *WIP*
+
+*-------------------------------------------------------------*
+
 Utilisation du serveur :
 
 La syntaxe est la suivante : "[!commande] (entité) (valeur)"
