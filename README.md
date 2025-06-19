@@ -29,9 +29,10 @@ Souris =   Click gauche : Travelling
            Click droit : Dragging fluide
            Click molette : Dragging fixe
 
-Clavier =  'J' : Affiche le nom de tous les éléments présents ainsi que leurs UUID
+Clavier =  'J' : Affiche le nom de toutes les entités présents ainsi que leurs UUID
            'M' : Modifie la position de l'entité principale de Y+0.5 et Z+5
-           'K' : Fixe la caméra sur l'élément principal de la scène *WIP*
+           'R' : Réinitialise la position de l'entité principale à X=0 Y=0 Z=0
+           'K' : Fixe la caméra sur l'entité principal de la scène *WIP*
 
 *-------------------------------------------------------------*
 

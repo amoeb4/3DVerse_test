@@ -25,7 +25,7 @@ export function App() {
           token="public_OvrLzN5abV1Qa65V"
           LoadingPanel={LoadingOverlay}
         >
-          <KeyboardHandler /> {/* maintenant à la bonne place */}
+          <KeyboardHandler /> {}
           <AppLayout />
         </Livelink>
       )}

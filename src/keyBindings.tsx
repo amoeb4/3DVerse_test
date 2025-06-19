@@ -10,13 +10,12 @@ export default function KeyboardHandler() {
     const handleKeyDown = async (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
 
-      if (key === "j" || key === "m") {
+      if (key === "j" || key === "m" || key === "r") {
         try {
           const entities = await instance.scene.findEntitiesWithComponents({
             mandatory_components: ["local_transform"],
             forbidden_components: [],
           });
-
           if (key === "j") {
             const entitiesWithNames = entities.map((entity) => ({
               uuid: entity.id,
@@ -24,7 +23,6 @@ export default function KeyboardHandler() {
             }));
             console.table(entitiesWithNames);
           }
-
           if (key === "m") {
             for (const entity of entities) {
               const [fullEntity] = await instance.scene.findEntities({
@@ -36,6 +34,21 @@ export default function KeyboardHandler() {
 
                 fullEntity.local_transform = {
                   position: [x + 1, y + 0.5, z] as [number, number, number],
+                };
+              }
+            }
+          }
+          if (key === "r") {
+            for (const entity of entities) {
+              const [fullEntity] = await instance.scene.findEntities({
+                entity_uuid: entity.id,
+              });
+
+              if (fullEntity) {
+                const [x, y, z] = fullEntity.local_transform.position;
+
+                fullEntity.local_transform = {
+                  position: [0, 0, 0] as [number, number, number],
                 };
               }
             }
