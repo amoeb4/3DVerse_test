@@ -1,26 +1,43 @@
-import { useEffect } from "react";
-import { startVals } from "./CameraEventListener.jsx";
+import { useContext, useEffect } from "react";
+import { LivelinkContext } from "@3dverse/livelink-react";
+
 export default function KeyboardHandler() {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => 
-	{
-      if (event.key === "k" || event.key === "K") 
-	  {
-        console.log("Pressed 'K' key!");
+  const { instance, isConnecting, isDisconnected } = useContext(LivelinkContext);
+
+useEffect(() => {
+  if (!instance) return;
+
+  const handleKeyDown = async (event: KeyboardEvent) => {
+    if (event.key.toLowerCase() === "j") {
+      try {
+        const entities = await instance.scene.findEntitiesWithComponents({
+          mandatory_components: ["local_transform"],
+          forbidden_components: [],
+        });
+
+        // Récupération des UUIDs
+        const uuids = entities.map(e => e.id);
+
+        // Récupération des noms via findEntities (par UUID)
+        const entitiesWithNames = await Promise.all(
+          uuids.map(async (uuid) => {
+            const result = await instance.scene.findEntities({ entity_uuid: uuid });
+            // result est un tableau, on prend le premier (s'il existe)
+            const ent = result[0];
+            return {
+              uuid,
+              name: ent?.name || "(sans nom)",
+            };
+          })
+        );
+
+        console.log("Entités avec nom et UUID :", entitiesWithNames);
+      } catch (error) {
+        console.error("Erreur :", error);
       }
-	  if (event.key === "j" || event.key === "J")
-	  {
-		
-	  }
-	  if (even.key === "l" || event.key === "L")
-	  {
+    }
+  };
 
-	  }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-  return null;
- }
-
-
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [instance]);}
