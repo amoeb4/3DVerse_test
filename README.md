@@ -1,53 +1,75 @@
-# APP VLM-Robotics avec 3DVerse #
+# APP VLM-Robotics avec 3DVerse
 
-composants principaux : React, Node, 3Dverse, ws, esLint, vite
+**Composants principaux** : React, Node.js, [3Dverse](https://3dverse.com), WebSockets (`ws`), ESLint, Vite
 
-*-------------------------------------------------------------*
+---
 
-Utilisations :
+## Commandes disponibles
 
-'npm run dev' : Lancer le site en mode développement
+```bash
+npm run dev       # Lancer le site en mode développement
+npm run build     # Construire l'exécutable à déployer
+npm run preview   # Lancer le site avec l’intégration Vite
+npm run server    # Lancer le serveur WebSocket (en cours de développement)
+```
 
-'npm run build' : Construire l'executable à déployer
+---
 
-'npm run preview' : Lancer le site avec l'intégration Vite
+## Accès à l'application
 
-'npm run server' : Lancer le serveur de communication par Websocket *WIP*
+1. Lancer le site (`npm run dev`).
+2. Ouvrir **Google Chrome** (de préférence).
+3. Naviguer vers : [http://localhost:5173/](http://localhost:5173/)
+4. Entrer le **UUID de la scène** du projet 3DVerse **ou** cliquer sur **"Empty layout"** pour tester une version légère.
 
-*-------------------------------------------------------------*
+---
 
-Une fois le site lancé, ouvrir un navigateur (chrome de préfèrence) et lancer http://localhost:5173/ 
+## Contrôles de navigation
 
-Renseigner le Scene UUID du projet 3Dverse à consulter, ou appuyer sur "Empty layout" pour accéder à une version de test d'affichage légère.
+### Souris
 
-*-------------------------------------------------------------*
+- **Click gauche** : Travelling
+- **Molette** : Zoom in/out
+- **Click droit** : Drag fluide
+- **Click molette** : Drag fixe
 
-Keybinds de l'application :
+### Clavier
 
-`Souris =   Click gauche : Travelling`
-`           Molette : +/- Zoom`
-`           Click droit : Dragging fluide`
-`           Click molette : Dragging fixe`
+- `J` : Affiche le nom et l'UUID de toutes les entités
+- `M` : Déplace l'entité principale de `Y +0.5` et `Z +5`
+- `R` : Réinitialise la position de l'entité principale (`X=0`, `Y=0`, `Z=0`)
+- `K` : Fixe la caméra sur l'entité principale *(WIP)*
 
-`Clavier =  'J' : Affiche le nom de toutes les entités présents ainsi que leurs UUID`
-`           'M' : Modifie la position de l'entité principale de Y+0.5 et Z+5`
-`           'R' : Réinitialise la position de l'entité principale à X=0 Y=0 Z=0`
-`           'K' : Fixe la caméra sur l'entité principal de la scène *WIP*`
+---
 
-*-------------------------------------------------------------*
+## Utilisation du serveur WebSocket
 
-Utilisation du serveur :
+### Syntaxe :
 
-La syntaxe est la suivante : "[!commande] (entité) (valeur)"
+```
+[!commande] (entité_UUID) (valeur)
+```
 
-Toute commande doit commencer par '!', auquel cas, elle ne sera pas interpretée
+- Toute commande **doit** commencer par un `!`
+- Les commandes non préfixées **ne seront pas interprétées**
+- L'UUID correspond à l'identifiant unique d'une entité (exemple : `123-456-78910112-420`)
+- La valeur est un **entier (`int`)**
 
-vous pouvez obtenir la liste des commandes avec la commande "!help"
+### Aide :
 
-le nom de l'entité correspond à son UUID (ex : 123-456-78910112-420)
+```bash
+!help
+```
 
-la valeur est exprimée en int
+Affiche la liste des commandes disponibles.
 
-*-------------------------------------------------------------*
+---
 
-Développé par David FRANCOIS(amoeb4) et Clément BILLY(billygrosmollets) pour la societé VLM-Robotics
+## Développé par
+
+- **David FRANCOIS** (`amoeb4`)
+- **Clément BILLY** (`billygrosmollets`)
+
+pour la société **VLM-Robotics**
+
+---
