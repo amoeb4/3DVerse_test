@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-
+import { startVals } from "./CameraEventListener.jsx";
 export default function KeyboardHandler() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => 

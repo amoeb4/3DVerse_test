@@ -18,3 +18,5 @@ export default function CameraEventListener() {
 
   return null;
 }
+
+export const startVals =["2,2", "6,2", "13,8", "4,7", "6,2", "57,1"];

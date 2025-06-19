@@ -55,7 +55,7 @@ function StartupModal({ onSubmit }) {
     required
   />
 </label>
-
+ <div className="space-y-2 mt-4">
 <div className="flex justify-center">
   <button
     type="button"
@@ -67,6 +67,8 @@ function StartupModal({ onSubmit }) {
     Load empty layout
   </button>
 </div>
+</div>
+<div className="space-y-2 mt-4">
 <div className="flex justify-center">
   <button
     type="button"
@@ -77,11 +79,14 @@ function StartupModal({ onSubmit }) {
   >
     Load Grenoble CEA cell
   </button>
+  </div>
 </div>
+
+ <div className="space-y-2 mt-4">
 <div className= "flex justify-center">
         <button className="border position:centered border-black px-4 py-2 rounded hover:bg-gray-100" type="submit">Submit</button>
 </div>
-
+</div>
       </form>
     </div>
   );
@@ -137,8 +142,8 @@ const modalStyle = {
   top: "30%",
   left: "30%",
   backgroundColor: "#fff",
-  padding: "20px",
-  borderRadius: "8px",
+  padding: "50px",
+  borderRadius: "10px",
   boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.3)",
   zIndex: 9999,
 };
