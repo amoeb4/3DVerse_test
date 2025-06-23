@@ -93,7 +93,7 @@ async function camKey(instance: any, entities: { id: string }[], param1: number,
       const [x, y, z] = fullEntity.local_transform.position;
       if (param1 === 0 && param2 === 0 && param3 === 0) {
         fullEntity.local_transform = {
-          position: [200,86, 30] as [number, number, number],
+          position: [200, 86, 30] as [number, number, number],
         };
         fullEntity.local_transform = {
           orientation: [3.5, 88, 0] as [number, number, number],
