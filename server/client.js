@@ -6,7 +6,6 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
-
 socket.on("open", () => {
   console.log("Connexion au serveur établie\nUtilisez la commande !help pour obtenir la liste des commandes\n");
   socket.send("Client connected");
@@ -30,4 +29,3 @@ function promptUser() {
     promptUser();
   });
 }
-
