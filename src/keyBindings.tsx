@@ -50,13 +50,8 @@ export default function KeyboardHandler() {
   return null;
 }
 
-async function posKey(
-  instance: any,
-  entities: { id: string }[],
-  param1: number,
-  param2: number,
-  param3: number
-) {
+async function posKey( instance: any, entities: { id: string }[], param1: number, param2: number, param3: number)
+{
   for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,
@@ -76,13 +71,7 @@ async function posKey(
   }
 }
 
-async function oriKey(
-  instance: any,
-  entities: { id: string }[],
-  param1: number,
-  param2: number,
-  param3: number,
-  eulerToQuat: (x: number, y: number, z: number) => [number, number, number, number]
+async function oriKey( instance: any, entities: { id: string }[], param1: number, param2: number, param3: number, eulerToQuat: (x: number, y: number, z: number) => [number, number, number, number]
 ) {
   for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
@@ -104,13 +93,7 @@ async function oriKey(
   }
 }
 
-async function camKey(
-  instance: any,
-  entities: { id: string }[],
-  moveX: number,
-  moveY: number,
-  moveZ: number
-) {
+async function camKey(instance: any, entities: { id: string }[], moveX: number, moveY: number,moveZ: number) {
   for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,
