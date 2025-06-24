@@ -1,8 +1,10 @@
 import { useContext, useEffect } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
+import { useSpeed } from "./Interface"; // 🧠 Import du hook
 
 export default function KeyboardHandler() {
   const { instance } = useContext(LivelinkContext);
+  const { speed } = useSpeed(); // 📦 Utilisation de la vitesse
 
   useEffect(() => {
     if (!instance) return;
@@ -10,33 +12,37 @@ export default function KeyboardHandler() {
     const handleKeyDown = async (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
 
-      if (key) {
-        try {
-          const entities = await instance.scene.findEntitiesWithComponents({
-            mandatory_components: ["local_transform"],
-            forbidden_components: [],
-          });
-          if (key === "j") { nfoKey(entities); }
-          if (key === "m") { posKey(instance, entities, 10, 10, 10); }
-          if (key === "r") { posKey(instance, entities, 0, 0, 0); }
-          if (key === "k") { oriKey(instance, entities, 10, 10, 10); }
-          if (key === "l") { oriKey(instance, entities, -90, 0, 0); }
-          if (key === "z") { camKey(instance, entities, -5, 0, 0); }
-          if (key === "s") { camKey(instance, entities, 5, 0, 0); }
-          if (key === "q") { camKey(instance, entities, 0, 0, 5); }
-          if (key === "d") { camKey(instance, entities, 0, 0, -5); }
-          if (key === "+") { camKey(instance, entities, 0, 5, 0); }
-          if (key === "-") { camKey(instance, entities, 0, -5, 0); }
-          if (key === " ") { camKey(instance, entities, 0, 0, 0);}
-        }
-		catch (error) {
-			console.error("Erreur lors de la manipulation des entités :", error);
-        }
+      try {
+        const entities = await instance.scene.findEntitiesWithComponents({
+          mandatory_components: ["local_transform"],
+          forbidden_components: [],
+        });
+
+        if (key === "j") nfoKey(entities);
+        if (key === "m") posKey(instance, entities, 10, 10, 10);
+        if (key === "r") posKey(instance, entities, 0, 0, 0);
+        if (key === "k") oriKey(instance, entities, 10, 10, 10);
+        if (key === "l") oriKey(instance, entities, -90, 0, 0);
+
+        const move = (x = 0, y = 0, z = 0) => camKey(instance, entities, x * speed, y * speed, z * speed);
+
+        if (key === "z") move(-1, 0, 0);
+        if (key === "s") move(1, 0, 0);
+        if (key === "q") move(0, 0, 1);
+        if (key === "d") move(0, 0, -1);
+        if (key === "+") move(0, 1, 0);
+        if (key === "-") move(0, -1, 0);
+
+        if (key === " ") camKey(instance, entities, 0, 0, 0);
+      } catch (error) {
+        console.error("Erreur lors de la manipulation des entités :", error);
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [instance]);
+  }, [instance, speed]);
+
   return null;
 }
 
