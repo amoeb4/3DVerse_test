@@ -71,3 +71,5 @@ Affiche la liste des commandes disponibles.
 - **Clément BILLY** (`billygrosmollets`)
 
 pour la société **VLM-Robotics**
+
+https://www.linkedin.com/company/vlm-robotics/posts/?feedView=all
