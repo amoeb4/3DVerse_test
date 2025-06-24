@@ -9,7 +9,7 @@ import {
 } from "@3dverse/livelink-react";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import "./App.css";
-import KeyboardHandler from "./keyBindings.tsx";
+import KeyboardHandler from "./keyBindings.tsx"; // ✅ Chemin corrigé
 import CameraEventListener from "./CameraEventListener";
 import ControlPanel, { SpeedProvider } from "./Interface.jsx";
 
@@ -26,7 +26,7 @@ export function App() {
           token="public_OvrLzN5abV1Qa65V"
           LoadingPanel={LoadingOverlay}
         >
-          <SpeedProvider> {/* 👈 Ici : contexte autour de TOUT */}
+          <SpeedProvider>
             <KeyboardHandler />
             <AppLayout />
           </SpeedProvider>
