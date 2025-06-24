@@ -1,35 +1,39 @@
 import { useContext, useEffect } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
-import { useSpeed } from "./Interface"; // 🧠 Import du hook
+import { useSpeed } from "./Interface";
+import { quat, vec3 } from "gl-matrix";
 
 export default function KeyboardHandler() {
   const { instance } = useContext(LivelinkContext);
-  const { speed } = useSpeed(); // 📦 Utilisation de la vitesse
+  const { speed } = useSpeed();
 
   useEffect(() => {
     if (!instance) return;
 
+    const eulerToQuat = (x: number, y: number, z: number) => {
+      const q = quat.create();
+      quat.fromEuler(q, x, y, z);
+      return [q[0], q[1], q[2], q[3]] as [number, number, number, number];
+    };
+
     const handleKeyDown = async (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-
       try {
         const entities = await instance.scene.findEntitiesWithComponents({
           mandatory_components: ["local_transform"],
           forbidden_components: [],
         });
-
         if (key === "j") nfoKey(entities);
         if (key === "m") posKey(instance, entities, 10, 10, 10);
         if (key === "r") posKey(instance, entities, 0, 0, 0);
-        if (key === "k") oriKey(instance, entities, 10, 10, 10);
-        if (key === "l") oriKey(instance, entities, -90, 0, 0);
-
-        const move = (x = 0, y = 0, z = 0) => camKey(instance, entities, x * speed, y * speed, z * speed);
-
-        if (key === "z") move(-1, 0, 0);
-        if (key === "s") move(1, 0, 0);
-        if (key === "q") move(0, 0, 1);
-        if (key === "d") move(0, 0, -1);
+        if (key === "k") oriKey(instance, entities, 10, 10, 10, eulerToQuat);
+        if (key === "l") oriKey(instance, entities, -90, 0, 0, eulerToQuat);
+        const move = (x = 0, y = 0, z = 0) =>
+          camKey(instance, entities, x * speed, y * speed, z * speed);
+        if (key === "z") move(0, 0, -1);
+        if (key === "s") move(0, 0, 1);
+        if (key === "q") move(-1, 0, 0);
+        if (key === "d") move(1, 0, 0);
         if (key === "+") move(0, 1, 0);
         if (key === "-") move(0, -1, 0);
 
@@ -46,8 +50,14 @@ export default function KeyboardHandler() {
   return null;
 }
 
-async function posKey(instance: any, entities: { id: string }[], param1: number, param2: number, param3: number)
-{  for (const entity of entities) {
+async function posKey(
+  instance: any,
+  entities: { id: string }[],
+  param1: number,
+  param2: number,
+  param3: number
+) {
+  for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,
     });
@@ -66,50 +76,73 @@ async function posKey(instance: any, entities: { id: string }[], param1: number,
   }
 }
 
-async function oriKey(instance: any, entities: { id: string }[], param1: number, param2: number, param3: number)
-{  for (const entity of entities) {
+async function oriKey(
+  instance: any,
+  entities: { id: string }[],
+  param1: number,
+  param2: number,
+  param3: number,
+  eulerToQuat: (x: number, y: number, z: number) => [number, number, number, number]
+) {
+  for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,
     });
     if (fullEntity) {
-      const [x, y, z] = fullEntity.local_transform.orientation;
+      const [x, y, z, w] = fullEntity.local_transform.orientation || [0, 0, 0, 1];
+
       if (param1 === -90 && param2 === 0 && param3 === 0) {
         fullEntity.local_transform = {
-          orientation: [-90, 0, 0] as [number, number, number],
+          orientation: eulerToQuat(-90, 0, 0),
         };
       } else {
         fullEntity.local_transform = {
-          orientation: [x + param1, y + param2, z + param3] as [number, number, number],
+          orientation: eulerToQuat(x + param1, y + param2, z + param3),
         };
       }
     }
   }
 }
 
-async function camKey(instance: any, entities: { id: string }[], param1: number, param2: number, param3: number)
-{
+async function camKey(
+  instance: any,
+  entities: { id: string }[],
+  moveX: number,
+  moveY: number,
+  moveZ: number
+) {
   for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,
     });
+    if (!fullEntity) continue;
+
     const name = fullEntity?.name?.toLowerCase?.();
     const type = fullEntity?.type?.toLowerCase?.();
     const isCamera = name === "camera" || type === "camera";
-    if (fullEntity && isCamera) {
-      const [x, y, z] = fullEntity.local_transform.position;
-      if (param1 === 0 && param2 === 0 && param3 === 0) {
-        fullEntity.local_transform = {
-          position: [200, 86, 30] as [number, number, number],
-        };
-        fullEntity.local_transform = {
-          orientation: [3.5, 88, 0] as [number, number, number],
-        };
-      } else {
-        fullEntity.local_transform = {
-          position: [x + param1, y + param2, z + param3] as [ number, number, number ],
-        };
-      }
+    if (!isCamera) continue;
+
+    const position = vec3.fromValues(...fullEntity.local_transform.position);
+    const orientation = fullEntity.local_transform.orientation || [0, 0, 0, 1];
+    const rotationQuat = quat.fromValues(...orientation);
+
+    if (moveX === 0 && moveY === 0 && moveZ === 0) {
+      fullEntity.local_transform.position = [200, 86, 30];
+      const defaultQuat = quat.create();
+      quat.fromEuler(defaultQuat, 3.5, 88, 0);
+      fullEntity.local_transform.orientation = [
+        defaultQuat[0],
+        defaultQuat[1],
+        defaultQuat[2],
+        defaultQuat[3],
+      ];
+      continue;
     }
+    const localMove = vec3.fromValues(moveX, moveY, moveZ);
+    const worldMove = vec3.create();
+    vec3.transformQuat(worldMove, localMove, rotationQuat);
+    vec3.add(position, position, worldMove);
+    fullEntity.local_transform.position = [position[0], position[1], position[2]];
   }
 }
 
@@ -120,4 +153,3 @@ function nfoKey(entities: { id: string; name?: string }[]) {
   }));
   console.table(entitiesWithNames);
 }
-
