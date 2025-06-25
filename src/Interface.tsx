@@ -1,8 +1,11 @@
 import { createContext, useContext, useState, useEffect, ReactNode, ChangeEvent } from "react";
-
+import { quat, vec3 } from "gl-matrix";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+
+
+// 1.988/4.896 * (calcul de l'angle) -> Euler to Quaternions
 
 type SpeedContextType = {
   speed: number;
@@ -73,6 +76,7 @@ const controlInterfaceStyle = {
 export default function ControlPanel() {
   const { speed, setSpeed } = useSpeed();
   const { selectedEntity } = useEntity();
+  const { instance } = useContext(LivelinkContext);
 
   const handleSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newSpeed = parseFloat(e.target.value) / 10;
@@ -87,11 +91,18 @@ export default function ControlPanel() {
     <div style={controlInterfaceStyle}>
       <h1>Control Panel</h1>
       <EntityDropdown />
+
       <button
         onClick={handleApply}
         className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100"
       >
         Apply changes
+      </button>
+
+      <button
+        className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100"
+      >
+        Focus on entity
       </button>
 
       <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">

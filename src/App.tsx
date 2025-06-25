@@ -67,7 +67,7 @@ function StartupModal({ onSubmit }) {
               }
               className="border border-black px-4 py-2 rounded hover:bg-gray-100"
             >
-              Load empty layout
+              Load Compaqt V.2
             </button>
           </div>
         </div>
