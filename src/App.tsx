@@ -11,7 +11,7 @@ import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import "./App.css";
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener";
-import ControlPanel, { SpeedProvider } from "./Interface.jsx";
+import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
@@ -105,7 +105,9 @@ function AppLayout() {
 
   return (
     <>
-      <ControlPanel />
+      <EntityProvider> {/* ✅ Intégration ici */}
+        <ControlPanel />
+      </EntityProvider>
       <CameraEventListener />
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
