@@ -1,10 +1,9 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  ChangeEvent,
-} from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, ChangeEvent } from "react";
+
+import { LivelinkContext } from "@3dverse/livelink-react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+
 
 type SpeedContextType = {
   speed: number;
@@ -57,9 +56,9 @@ export default function ControlPanel() {
   return (
     <div style={controlInterfaceStyle}>
       <h1>Control Panel</h1>
-      <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">
-        DO A FLIP!!!
-      </button>
+
+      <EntityDropdown />
+
       <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">
         Apply changes
       </button>
@@ -80,4 +79,62 @@ export default function ControlPanel() {
     </div>
   );
 }
+export function EntityDropdown() {
+  const { instance } = useContext(LivelinkContext);
+  const [entities, setEntities] = useState<{ id: string; name?: string }[]>([]);
 
+  useEffect(() => {
+    const fetchEntities = async () => {
+      if (!instance) return;
+
+      try {
+        const foundEntities = await instance.scene.findEntitiesWithComponents({
+          mandatory_components: ["local_transform"],
+          forbidden_components: [],
+        });
+
+        const entitiesWithNames = foundEntities.map((entity) => ({
+          id: entity.id,
+          name: entity.name || "(sans nom)",
+        }));
+
+        setEntities(entitiesWithNames);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des entités :", err);
+      }
+    };
+
+    fetchEntities();
+  }, [instance]);
+
+  return (
+    <Menu as="div" className="relative inline-block text-left">
+      <div>
+        <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50">
+          Entités
+          <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
+        </MenuButton>
+      </div>
+
+      <MenuItems
+        className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+      >
+        <div className="py-1">
+          {entities.map((entity) => (
+            <MenuItem key={entity.id}>
+              {({ active }) => (
+                <button
+                  className={`${
+                    active ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                  } block w-full text-left px-4 py-2 text-sm`}
+                >
+                  {entity.name}
+                </button>
+              )}
+            </MenuItem>
+          ))}
+        </div>
+      </MenuItems>
+    </Menu>
+  );
+}

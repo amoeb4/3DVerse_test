@@ -1,6 +1,65 @@
 import { useEffect, useContext } from "react";
 import { quat, vec3 } from "gl-matrix";
 import { SpeedContext } from "./Interface";
+import { LivelinkContext,
+} from "@3dverse/livelink-react";
+import { useSpeed } from "./Interface";
+
+export default function KeyboardHandler() {
+  const { instance } = useContext(LivelinkContext);
+  const { speed } = useSpeed();
+
+  useEffect(() => {
+    if (!instance) return;
+
+    const eulerToQuat = (x: number, y: number, z: number) => {
+      const q = quat.create();
+      quat.fromEuler(q, x, y, z);
+      return [q[0], q[1], q[2], q[3]] as [number, number, number, number];
+    };
+
+    const handleKeyDown = async (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      try {
+        const entities = await instance.scene.findEntitiesWithComponents({
+          mandatory_components: ["local_transform"],
+          forbidden_components: [],
+        });
+        if (key === "j") nfoKey(entities);
+        if (key === "m") posKey(instance, entities, 10, 10, 10);
+        if (key === "r") posKey(instance, entities, 0, 0, 0);
+        if (key === "k") oriKey(instance, entities, 10, 10, 10, eulerToQuat);
+        if (key === "l") oriKey(instance, entities, -90, 0, 0, eulerToQuat);
+
+        const move = (x = 0, y = 0, z = 0) =>
+          camKey(instance, entities, x * speed, y * speed, z * speed);
+
+        if (key === "z") move(0, 0, -1);
+        if (key === "s") move(0, 0, 1);
+        if (key === "q") move(-1, 0, 0);
+        if (key === "d") move(1, 0, 0);
+        if (key === "+") move(0, 1, 0);
+        if (key === "-") move(0, -1, 0);
+
+        const cameraEntities = entities.filter((entity) => {
+          const name = entity.name?.toLowerCase?.();
+          const type = entity.type?.toLowerCase?.();
+          return name === "camera" || type === "camera";
+        });
+        if (key === "a") oriKey(instance, cameraEntities, 0, 10, 0, eulerToQuat);
+        if (key === "e") oriKey(instance, cameraEntities, 0, -10, 0, eulerToQuat); 
+        if (key === " ") camKey(instance, entities, 0, 0, 0);
+      } catch (error) {
+        console.error("Erreur lors de la manipulation des entités :", error);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [instance, speed]);
+
+  return null;
+}
 
 export async function posKey(
   instance: any,
@@ -50,7 +109,6 @@ export async function oriKey(
       entity_uuid: entity.id,
     });
     if (fullEntity) {
-      // Correction ici: orientation est un quaternion à 4 valeurs
       const [x, y, z, w] = fullEntity.local_transform.orientation || [0, 0, 0, 1];
 
       if (param1 === -90 && param2 === 0 && param3 === 0) {
@@ -119,28 +177,4 @@ export function nfoKey(entities: { id: string; name?: string }[]) {
     name: entity.name || "(sans nom)",
   }));
   console.table(entitiesWithNames);
-}
-
-// --- Ajout d'un composant React par défaut pour KeyboardHandler ---
-
-export default function KeyboardHandler() {
-  const { speed } = useContext(SpeedContext);
-
-  useEffect(() => {
-    if (!speed) return;
-
-    const handleKeyDown = async (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase();
-      // Ici tu peux appeler les fonctions ci-dessus (posKey, oriKey, camKey, nfoKey)
-      // Exemple d'usage minimal :
-      // const instance = ... ; const entities = ... ; à compléter selon ton contexte
-      // await camKey(instance, entities, 0, 0, 1 * speed);
-      console.log("Key pressed:", key, "Speed:", speed);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [speed]);
-
-  return null;
 }

@@ -23,7 +23,7 @@ export function App() {
       ) : (
         <Livelink
           sceneId={credentials.sceneId}
-          token="public_OvrLzN5abV1Qa65V"
+          token="public_k4WYhr1przbiqsR-"
           LoadingPanel={LoadingOverlay}
         >
           <SpeedProvider>
@@ -63,7 +63,7 @@ function StartupModal({ onSubmit }) {
             <button
               type="button"
               onClick={() =>
-                setSceneId("776d1d2a-5c8e-4a96-9360-1536329a0db0")
+                setSceneId("282c2734-02f4-478c-a21b-6454e2f98be9")
               }
               className="border border-black px-4 py-2 rounded hover:bg-gray-100"
             >
@@ -76,7 +76,7 @@ function StartupModal({ onSubmit }) {
             <button
               type="button"
               onClick={() =>
-                setSceneId("dc5e3854-c764-4c1b-8d9a-e15143706752")
+                setSceneId("282c2734-02f4-478c-a21b-6454e2f98be9")
               }
               className="border border-black px-4 py-2 rounded hover:bg-gray-100"
             >
