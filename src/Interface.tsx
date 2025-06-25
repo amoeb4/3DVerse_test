@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-  ChangeEvent,
-} from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, ChangeEvent } from "react";
 
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -34,7 +27,6 @@ export const SpeedProvider = ({ children }: { children: ReactNode }) => {
     </SpeedContext.Provider>
   );
 };
-
 
 type Entity = { id: string; name?: string };
 
@@ -87,18 +79,25 @@ export default function ControlPanel() {
     setSpeed(newSpeed);
   };
 
+  const handleApply = () => {
+    console.log("Entité sélectionnée :", selectedEntity);
+  };
+
   return (
     <div style={controlInterfaceStyle}>
       <h1>Control Panel</h1>
-
       <EntityDropdown />
-
-      <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">
+      <button
+        onClick={handleApply}
+        className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100"
+      >
         Apply changes
       </button>
+
       <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">
         Back to start
       </button>
+
       <div className="flex flex-col items-center">
         <span className="mb-1 text-sm">{speed.toFixed(1)}x</span>
         <input

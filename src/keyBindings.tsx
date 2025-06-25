@@ -46,8 +46,8 @@ export default function KeyboardHandler() {
           const type = entity.type?.toLowerCase?.();
           return name === "camera" || type === "camera";
         });
-        if (key === "a") oriKey(instance, cameraEntities, 0, 10, 0, eulerToQuat);
-        if (key === "e") oriKey(instance, cameraEntities, 0, -10, 0, eulerToQuat); 
+        if (key === "a") oriKey(instance, cameraEntities, 0, 2, 0, eulerToQuat);
+        if (key === "e") oriKey(instance, cameraEntities, 0, -2, 0, eulerToQuat); 
         if (key === " ") camKey(instance, entities, 0, 0, 0);
       } catch (error) {
         console.error("Erreur lors de la manipulation des entités :", error);

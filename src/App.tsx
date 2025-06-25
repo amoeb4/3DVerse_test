@@ -105,7 +105,7 @@ function AppLayout() {
 
   return (
     <>
-      <EntityProvider> {/* ✅ Intégration ici */}
+      <EntityProvider> {}
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
