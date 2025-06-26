@@ -63,7 +63,7 @@ function StartupModal({ onSubmit }) {
             <button
               type="button"
               onClick={() =>
-                setSceneId("282c2734-02f4-478c-a21b-6454e2f98be9")
+                setSceneId("60f523ed-2229-4ed6-8f19-a19c28d3d4e2")
               }
               className="border border-black px-4 py-2 rounded hover:bg-gray-100"
             >
