@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, ReactNode, ChangeEvent } from "react";
-import { quat, vec3 } from "gl-matrix";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
