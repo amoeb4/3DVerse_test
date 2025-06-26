@@ -1,16 +1,12 @@
-import { useState, useContext } from "react";
-import {
-  Livelink,
-  Canvas,
-  Viewport,
-  CameraController,
-  useCameraEntity,
-  LivelinkContext,
-} from "@3dverse/livelink-react";
+import { useState, useContext, useRef } from "react";
+import { CameraEntityContext } from "./cameraControl.tsx";
+import {  Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController } from "@3dverse/livelink-react";
+import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import "./App.css";
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener";
+import type { CameraControllerPreset } from "@3dverse/livelink";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 
 export function App() {
@@ -63,7 +59,7 @@ function StartupModal({ onSubmit }) {
             <button
               type="button"
               onClick={() =>
-                setSceneId("60f523ed-2229-4ed6-8f19-a19c28d3d4e2")
+                setSceneId("6e6cdc4e-df12-41b8-94ad-d963b8b0e71d")
               }
               className="border border-black px-4 py-2 rounded hover:bg-gray-100"
             >
@@ -103,12 +99,32 @@ function AppLayout() {
   const { cameraEntity } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
 
-  return (
-    <>
-      <EntityProvider> {}
+    const cameraControllerRef = useRef<DefaultCameraController>(null);
+    const [cameraControllerPreset, setCameraControllerPreset] =
+        useState<CameraControllerPreset>(CameraControllerPresets.orbital);
+
+    const presetKeys = Object.keys(
+        CameraControllerPresets,
+    ) as (keyof typeof CameraControllerPresets)[];
+
+    const moveCamera = () => {
+        const targetPosition = [-30, 250, 150] as const;
+        const lookAtPosition = [-280, -100, -120] as const;
+        cameraControllerRef.current?.setLookAt(
+            ...targetPosition,
+            ...lookAtPosition,
+            true,
+        );
+    };
+
+return (
+  <>
+    <CameraEntityContext.Provider value={cameraEntity}>
+      <EntityProvider>
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
+
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
@@ -119,11 +135,41 @@ function AppLayout() {
               />
             </div>
           )}
-          <CameraController />
+          <CameraController
+            ref={cameraControllerRef}
+            preset={cameraControllerPreset}
+          />
         </Viewport>
       </Canvas>
-    </>
-  );
+
+      {}
+      <div className="absolute top-14 left-1 flex flex-col">
+        <div className="flex flex-row">
+          <button
+            className="button button-overlay mr-2"
+            onClick={moveCamera}
+          >
+            Move Camera
+          </button>
+          {presetKeys.map((presetKey, index) => {
+            const preset = CameraControllerPresets[presetKey];
+            const name = presetKey.replace("_", " ");
+            const isCurrentPreset = preset === cameraControllerPreset;
+            return (
+              <button
+                key={index}
+                className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
+                onClick={() => setCameraControllerPreset(preset)}
+              >
+                {name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </CameraEntityContext.Provider>
+  </>
+);
 }
 
 const modalStyle = {

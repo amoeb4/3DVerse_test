@@ -2,9 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode, ChangeEvent 
 import { LivelinkContext } from "@3dverse/livelink-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-
-
-// 1.988/4.896 * (calcul de l'angle) -> Euler to Quaternions
+import { useSharedCameraEntity } from "./cameraControl";
 
 type SpeedContextType = {
   speed: number;
