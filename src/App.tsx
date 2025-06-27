@@ -74,8 +74,7 @@ function StartupModal({ onSubmit }) {
               onClick={() =>
                 setSceneId("282c2734-02f4-478c-a21b-6454e2f98be9")
               }
-              className="border border-black px-4 py-2 rounded hover:bg-gray-100"
-            >
+              className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Load Grenoble CEA cell
             </button>
           </div>
@@ -97,6 +96,7 @@ function StartupModal({ onSubmit }) {
 
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
+  const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
 
     const cameraControllerRef = useRef<DefaultCameraController>(null);
@@ -139,9 +139,16 @@ return (
             ref={cameraControllerRef}
             preset={cameraControllerPreset}
           />
+          <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
+          <Viewport
+              cameraEntity={pipCamera}
+              className="w-full h-full"
+          >
+          <CameraController />
+          </Viewport>
+        </Canvas>
         </Viewport>
       </Canvas>
-
       {}
       <div className="absolute top-14 left-1 flex flex-col">
         <div className="flex flex-row">
