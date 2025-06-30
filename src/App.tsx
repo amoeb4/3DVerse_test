@@ -84,7 +84,7 @@ function StartupModal({ onSubmit }) {
             <button
               type="button"
               onClick={() =>
-                setSceneId("2090b58a-70f4-4965-badc-55b3684b3f9f")
+                setSceneId("d730eabb-0286-47d5-9a86-b9d98fa8a780")
               }
               className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Load Test_Kuka

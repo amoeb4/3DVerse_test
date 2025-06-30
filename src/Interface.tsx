@@ -1,8 +1,19 @@
-import { createContext, useContext, useState, useEffect, ReactNode, ChangeEvent } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  ChangeEvent,
+} from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { useSharedCameraEntity } from "./cameraControl";
 
 type SpeedContextType = {
   speed: number;
@@ -54,8 +65,47 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// ---- Orientation Function ----
+
+function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const c1 = Math.cos(rad(y) / 2);
+  const s1 = Math.sin(rad(y) / 2);
+  const c2 = Math.cos(rad(z) / 2);
+  const s2 = Math.sin(rad(z) / 2);
+  const c3 = Math.cos(rad(x) / 2);
+  const s3 = Math.sin(rad(x) / 2);
+
+  const qw = c1 * c2 * c3 + s1 * s2 * s3;
+  const qx = c1 * c2 * s3 - s1 * s2 * c3;
+  const qy = c1 * s2 * c3 + s1 * c2 * s3;
+  const qz = s1 * c2 * c3 - c1 * s2 * s3;
+
+  return [qx, qy, qz, qw];
+}
+
+async function setOrientation(
+  instance: any,
+  entityId: string,
+  x: number,
+  y: number,
+  z: number
+) {
+  const [fullEntity] = await instance.scene.findEntities({
+    entity_uuid: entityId,
+  });
+
+  if (fullEntity) {
+    fullEntity.local_transform = {
+      orientation: eulerToQuat(x, y, z),
+    };
+  }
+}
+
+// ---- UI ----
+
 const controlInterfaceStyle = {
-  position: "fixed",
+  position: "fixed" as const,
   left: "5%",
   right: "5%",
   top: "3%",
@@ -75,7 +125,17 @@ export default function ControlPanel() {
   const { selectedEntity } = useEntity();
   const { instance } = useContext(LivelinkContext);
 
+  const [rotationY, setRotationY] = useState(0);
+
   const handleSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const angle = parseFloat(e.target.value);
+    setRotationY(angle);
+    if (instance && selectedEntity?.id) {
+      setOrientation(instance, selectedEntity.id, 0, angle, 0);
+    }
+  };
+
+  const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newSpeed = parseFloat(e.target.value) / 10;
     setSpeed(newSpeed);
   };
@@ -96,9 +156,7 @@ export default function ControlPanel() {
         Apply changes
       </button>
 
-      <button
-        className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100"
-      >
+      <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">
         Focus on entity
       </button>
 
@@ -113,8 +171,21 @@ export default function ControlPanel() {
           min="0.1"
           max="50"
           value={speed * 10}
-          onChange={handleSliderChange}
+          onChange={handleSpeedChange}
           className="w-64 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-500"
+        />
+      </div>
+
+      <div className="flex flex-col items-center ml-8">
+        <span className="mb-1 text-sm">Rotation Y : {rotationY}°</span>
+        <input
+          type="range"
+          min={-180}
+          max={180}
+          step={1}
+          value={rotationY}
+          onChange={handleSliderChange}
+          className="w-64 h-2 bg-blue-300 rounded-lg appearance-none cursor-pointer accent-green-600"
         />
       </div>
     </div>
