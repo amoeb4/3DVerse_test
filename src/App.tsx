@@ -79,6 +79,18 @@ function StartupModal({ onSubmit }) {
             </button>
           </div>
         </div>
+                <div className="space-y-2 mt-4">
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() =>
+                setSceneId("2090b58a-70f4-4965-badc-55b3684b3f9f")
+              }
+              className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+              Load Test_Kuka
+            </button>
+          </div>
+        </div>
         <div className="space-y-2 mt-4">
           <div className="flex justify-center">
             <button
