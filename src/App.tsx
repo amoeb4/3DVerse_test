@@ -19,7 +19,7 @@ export function App() {
       ) : (
         <Livelink
           sceneId={credentials.sceneId}
-          token="public_k4WYhr1przbiqsR-"
+          token="public_ml59vXKlgs9fTJlx"
           LoadingPanel={LoadingOverlay}
         >
           <SpeedProvider>
@@ -84,7 +84,7 @@ function StartupModal({ onSubmit }) {
             <button
               type="button"
               onClick={() =>
-                setSceneId("d730eabb-0286-47d5-9a86-b9d98fa8a780")
+                setSceneId("516d270a-5a6b-44e6-99c6-44df631bf475")
               }
               className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Load Test_Kuka
@@ -136,7 +136,6 @@ return (
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
-
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (

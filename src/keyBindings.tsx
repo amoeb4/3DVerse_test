@@ -171,10 +171,21 @@ export async function camKey(
   }
 }
 
-export function nfoKey(entities: { id: string; name?: string }[]) {
-  const entitiesWithNames = entities.map((entity) => ({
-    uuid: entity.id,
-    name: entity.name || "(sans nom)",
-  }));
-  console.table(entitiesWithNames);
+export async function setOrientation(
+  instance: any,
+  entityId: string,
+  param1: number,
+  param2: number,
+  param3: number,
+  eulerToQuat: (x: number, y: number, z: number) => [number, number, number, number]
+) {
+  const [fullEntity] = await instance.scene.findEntities({
+    entity_uuid: entityId,
+  });
+
+  if (fullEntity) {
+    fullEntity.local_transform = {
+      orientation: eulerToQuat(param1, param2, param3),
+    };
+  }
 }
