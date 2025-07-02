@@ -128,7 +128,7 @@ function AppLayout() {
             true,
         );
     };
-
+    
 return (
   <>
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -152,6 +152,7 @@ return (
           />
           <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
           <Viewport
+            //  ref={cameraControllerRef}
               cameraEntity={pipCamera}
               className="w-full h-full"
           >
@@ -180,7 +181,7 @@ return (
                 onClick={() => setCameraControllerPreset(preset)}
               >
                 {name}
-              </button>
+             </button>
             );
           })}
         </div>
