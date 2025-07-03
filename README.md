@@ -49,8 +49,12 @@ npm run server    # Lancer le serveur WebSocket (en cours de développement)
 blender && import server_blender.py
 run server_blender.py -> port 8767 (local)
 python3 client_blender.py
->>> [name] [arg1] [arg2] [arg3]
+>>> [name] [flag] [arg1] [arg2] [arg3]
 ```
+Flags :
+-I : Incrémente la position initiale
+-P : Donne une position à l'objet
+-A : Donne une orientation à l'objet (En Quaternions)
 
 ### Syntaxe :
 
