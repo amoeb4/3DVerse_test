@@ -19,19 +19,18 @@ async def send_command(uri):
                     print("❌ Format invalide. Exemple : Cube -P 1.0 2.0 3.0")
                     continue
 
-                name, mode = parts[0], parts[1]
+                name, mode = parts[0], parts[1].upper()
                 try:
                     coords = [float(parts[2]), float(parts[3]), float(parts[4])]
                 except ValueError:
                     print("❌ Coordonnées invalides. Utilisez des nombres.")
                     continue
 
-                if mode == "-P" or mode == "-I":
-                    message = json.dumps({"name": name, "location": coords, "mode": mode})
-                elif mode == "-A":
-                    message = json.dumps({"name": name, "rotation": coords, "mode": mode})
+                if mode in ("-P", "-I", "-S", "-A"):
+                    key = "location" if mode in ("-P", "-I", "-S") else "rotation"
+                    message = json.dumps({"name": name, key: coords, "mode": mode})
                 else:
-                    print("❌ Mode inconnu. Utilisez -P, -I ou -A")
+                    print("❌ Mode inconnu. Utilisez -P, -I, -A ou -S")
                     continue
 
                 await websocket.send(message)
