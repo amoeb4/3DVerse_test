@@ -18,7 +18,6 @@ async def handler(websocket):
                 location = data.get("location")
 
                 if name and location:
-                    print(f">>> Cherche l'objet '{name}'")
                     obj = bpy.data.objects.get(name)
                     if obj:
                         print(f">>> Objet trouvé : {obj.name}, position actuelle : {obj.location}")

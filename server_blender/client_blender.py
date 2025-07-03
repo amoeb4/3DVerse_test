@@ -12,7 +12,7 @@ async def send_command(uri):
                     continue
                 if line.lower() in ('exit', 'quit', 'q'):
                     print("Fermeture du client...")
-                    break  # Sort de la boucle
+                    break
                 parts = line.split()
                 if len(parts) != 4:
                     print("Format invalide. Exemple : Cube 1.0 2.0 3.0")
