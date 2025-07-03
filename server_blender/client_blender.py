@@ -5,45 +5,54 @@ import json
 async def send_command(uri):
     try:
         async with websockets.connect(uri) as websocket:
-            print("Connecté au serveur WebSocket.")
+            print("✅ Connecté au serveur WebSocket.")
             while True:
-                line = input("Entrez commande (ex: Cube 1.0 2.0 3.0) : ").strip()
+                line = input("Commande (ex: Cube -P 1.0 2.0 3.0) : ").strip()
                 if not line:
                     continue
                 if line.lower() in ('exit', 'quit', 'q'):
-                    print("Fermeture du client...")
+                    print("👋 Fermeture du client...")
                     break
+
                 parts = line.split()
-                if len(parts) != 4:
-                    print("Format invalide. Exemple : Cube 1.0 2.0 3.0")
+                if len(parts) != 5:
+                    print("❌ Format invalide. Exemple : Cube -P 1.0 2.0 3.0")
                     continue
 
-                name = parts[0]
+                name, mode = parts[0], parts[1]
                 try:
-                    location = [float(parts[1]), float(parts[2]), float(parts[3])]
+                    coords = [float(parts[2]), float(parts[3]), float(parts[4])]
                 except ValueError:
-                    print("Les coordonnées doivent être des nombres.")
+                    print("❌ Coordonnées invalides. Utilisez des nombres.")
                     continue
 
-                message = json.dumps({"name": name, "location": location})
+                if mode == "-P" or mode == "-I":
+                    message = json.dumps({"name": name, "location": coords, "mode": mode})
+                elif mode == "-A":
+                    message = json.dumps({"name": name, "rotation": coords, "mode": mode})
+                else:
+                    print("❌ Mode inconnu. Utilisez -P, -I ou -A")
+                    continue
+
                 await websocket.send(message)
-                print(f"Commande envoyée : {message}")
+                print(f"📤 Commande envoyée : {message}")
     except KeyboardInterrupt:
-        print("\nInterruption clavier détectée, fermeture du client.")
+        print("\n🛑 Interruption clavier détectée, fermeture du client.")
+    except Exception as e:
+        print(f"❌ Erreur : {e}")
 
 async def main():
     uri = "ws://localhost:8767"
     while True:
         try:
             await send_command(uri)
-            break  # Quitte la boucle si send_command se termine normalement
+            break
         except (ConnectionRefusedError, websockets.exceptions.InvalidURI) as e:
-            print(f"Erreur de connexion : {e}. Nouvelle tentative dans 5 secondes...")
+            print(f"⚠️ Connexion refusée : {e}. Nouvelle tentative dans 5 secondes...")
             await asyncio.sleep(5)
         except KeyboardInterrupt:
-            print("\nInterruption clavier détectée, arrêt du programme.")
+            print("\n🛑 Interruption clavier détectée, arrêt du programme.")
             break
 
 if __name__ == "__main__":
     asyncio.run(main())
-
