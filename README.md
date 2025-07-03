@@ -44,6 +44,14 @@ npm run server    # Lancer le serveur WebSocket (en cours de développement)
 
 ## Utilisation du serveur WebSocket
 
+### Websocket blender :
+```
+blender && import server_blender.py
+run server_blender.py -> port 8767 (local)
+python3 client_blender.py
+>>> [name] [arg1] [arg2] [arg3]
+```
+
 ### Syntaxe :
 
 ```
