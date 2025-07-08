@@ -19,7 +19,6 @@ async def smooth_increment(obj, prop, target, sleep_ms=50):
 
     setattr(obj, prop, target)
 
-
 async def handler(websocket):
     print(">>> Nouveau client connecté")
     try:
