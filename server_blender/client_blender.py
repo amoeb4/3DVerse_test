@@ -1,8 +1,4 @@
 import asyncio
-import websockets
-import json
-
-import asyncio
 import json
 import websockets
 
@@ -38,23 +34,16 @@ async def send_command(uri):
 
                 elif mode == "-A":
                     key = "rotation"
-                    message = json.dumps({"name": name, key: coords, "mode": mode})
+                    message = json.dumps({"name": name,key: coords,"mode": mode,"smooth": "P"})
                     await websocket.send(message)
                     print(f"Commande envoyée : {message}")
 
                 elif mode == "-S":
                     key = "location"
-                    print("Démarrage de la simulation -S (100 steps)")
-                    for i in range(100):
-                        step_coords = [
-                            coords[0] + (i / 100),
-                            coords[1] + (i / 100),
-                            coords[2] + (i / 100)
-                        ]
-                        message = json.dumps({"name": name, key: step_coords, "mode": mode})
-                        await websocket.send(message)
-                        print(f"[{i+1}/100] Commande envoyée : {message}")
-                        await asyncio.sleep(0.2)  # 200 ms entre chaque envoi
+                    print("Démarrage du déplacement smooth depuis la position actuelle.")
+                    message = json.dumps({"name": name,key: coords,"mode": mode,"smooth": "P"})
+                    await websocket.send(message)
+                    print(f"Commande envoyée : {message}")
 
                 else:
                     print("Mode inconnu. Utilisez -P, -A ou -S")
@@ -64,7 +53,6 @@ async def send_command(uri):
         print("\nInterruption clavier détectée, fermeture du client.")
     except Exception as e:
         print(f"Erreur : {e}")
-
 async def main():
     uri = "ws://localhost:8767"
     while True:
