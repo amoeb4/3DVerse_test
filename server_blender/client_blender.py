@@ -13,26 +13,22 @@ async def send_command(uri):
                 if line.lower() in ('exit', 'quit', 'q'):
                     print("👋 Fermeture du client...")
                     break
-
                 parts = line.split()
                 if len(parts) != 5:
                     print("❌ Format invalide. Exemple : Cube -P 1.0 2.0 3.0")
                     continue
-
                 name, mode = parts[0], parts[1].upper()
                 try:
                     coords = [float(parts[2]), float(parts[3]), float(parts[4])]
                 except ValueError:
                     print("❌ Coordonnées invalides. Utilisez des nombres.")
                     continue
-
                 if mode in ("-P", "-I", "-S", "-A"):
                     key = "location" if mode in ("-P", "-I", "-S") else "rotation"
                     message = json.dumps({"name": name, key: coords, "mode": mode})
                 else:
                     print("❌ Mode inconnu. Utilisez -P, -I, -A ou -S")
                     continue
-
                 await websocket.send(message)
                 print(f"📤 Commande envoyée : {message}")
     except KeyboardInterrupt:
