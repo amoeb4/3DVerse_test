@@ -9,12 +9,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "cd server && ./start.sh && cd ..",
-	"nrd": "npm run dev",
-	"server_blender": "cd server_blender && python3 client_blender.py && cd .."
+    "nrd": "npm run dev",
+    "server_blender": "cd server_blender && python3 client_blender.py && cd ..",
+	"full": "vite && node ./src/server.js"
   },
   "dependencies": {
-    "@3dverse/livelink-react": "^0.2.48",
-    "@3dverse/livelink-react-ui": "^0.3.3",
+    "@3dverse/livelink": "^0.8.43",
+    "@3dverse/livelink-react": "^0.2.49",
+    "@3dverse/livelink-react-ui": "^0.3.5",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@material-tailwind/react": "^2.1.10",
@@ -22,7 +24,7 @@
     "gl-matrix": "^3.4.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "ws": "^8.18.2"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

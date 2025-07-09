@@ -1,14 +1,76 @@
-import { useState, useContext, useRef } from "react";
-import { CameraEntityContext } from "./cameraControl.tsx";
-import {  Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController } from "@3dverse/livelink-react";
+import { useState, useContext, useRef, useEffect, createContext, useCallback } from "react";
+import {
+  Livelink,
+  Canvas,
+  Viewport,
+  CameraController,
+  useCameraEntity,
+  useEntity,
+  LivelinkContext,
+  DefaultCameraController
+} from "@3dverse/livelink-react";
 import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
-import "./App.css";
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener";
-import type { CameraControllerPreset } from "@3dverse/livelink";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
+import { CameraEntityContext } from "./cameraControl.tsx";
+import "./App.css";
+import type { CameraControllerPreset } from "@3dverse/livelink";
 
+// --- WebSocket Context Setup ---
+const WSContext = createContext({
+  register: (_setTransform: any, _name: string) => {},
+});
+
+function WebSocketProvider({ children }) {
+  const registry = useRef<{ setter: any; name: string }[]>([]);
+
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8767");
+
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const entry = registry.current.find((e) => e.name === data.name);
+
+      if (entry && entry.setter) {
+        const transform: any = {};
+        if (data.mode === "-P" && data.location) {
+          transform.position = data.location;
+        } else if (data.mode === "-A" && data.rotation) {
+          transform.rotation = data.rotation;
+        }
+        entry.setter(transform);
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    socket.onclose = () => {
+      console.warn("WebSocket closed");
+    };
+
+    return () => socket.close();
+  }, []);
+
+  const register = useCallback((setter: any, name: string) => {
+    registry.current.push({ setter, name });
+  }, []);
+
+  return <WSContext.Provider value={{ register }}>{children}</WSContext.Provider>;
+}
+
+export function useWebSocket() {
+  return useContext(WSContext);
+}
+
+// --- App Component ---
 export function App() {
   const [credentials, setCredentials] = useState(null);
 
@@ -22,10 +84,12 @@ export function App() {
           token="public_ml59vXKlgs9fTJlx"
           LoadingPanel={LoadingOverlay}
         >
-          <SpeedProvider>
-            <KeyboardHandler />
-            <AppLayout />
-          </SpeedProvider>
+          <WebSocketProvider>
+            <SpeedProvider>
+              <KeyboardHandler />
+              <AppLayout />
+            </SpeedProvider>
+          </WebSocketProvider>
         </Livelink>
       )}
     </>
@@ -34,11 +98,9 @@ export function App() {
 
 function StartupModal({ onSubmit }) {
   const [sceneId, setSceneId] = useState("");
-  const [token, setToken] = useState("");
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ sceneId, token });
+    onSubmit({ sceneId });
   };
 
   return (
@@ -56,47 +118,27 @@ function StartupModal({ onSubmit }) {
         </label>
         <div className="space-y-2 mt-4">
           <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() =>
-                setSceneId("6e6cdc4e-df12-41b8-94ad-d963b8b0e71d")
-              }
-              className="border border-black px-4 py-2 rounded hover:bg-gray-100"
-            >
+            <button type="button" onClick={() => setSceneId("6e6cdc4e-df12-41b8-94ad-d963b8b0e71d")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Load Compaqt V.2
             </button>
           </div>
-        </div>
-        <div className="space-y-2 mt-4">
           <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() =>
-                setSceneId("282c2734-02f4-478c-a21b-6454e2f98be9")
-              }
-              className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+            <button type="button" onClick={() => setSceneId("282c2734-02f4-478c-a21b-6454e2f98be9")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Load Grenoble CEA cell
             </button>
           </div>
-        </div>
-                <div className="space-y-2 mt-4">
           <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() =>
-                setSceneId("516d270a-5a6b-44e6-99c6-44df631bf475")
-              }
-              className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+            <button type="button" onClick={() => setSceneId("516d270a-5a6b-44e6-99c6-44df631bf475")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Load Test_Kuka
             </button>
           </div>
-        </div>
-        <div className="space-y-2 mt-4">
           <div className="flex justify-center">
-            <button
-              className="border position:centered border-black px-4 py-2 rounded hover:bg-gray-100"
-              type="submit"
-            >
+            <button type="button" onClick={() => setSceneId("ec33e19d-da9f-4593-8412-a9c0c32cc5ba")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+              Load Test_primitive
+            </button>
+          </div>
+          <div className="flex justify-center mt-4">
+            <button type="submit" className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Submit
             </button>
           </div>
@@ -111,26 +153,20 @@ function AppLayout() {
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
 
-    const cameraControllerRef = useRef<DefaultCameraController>(null);
-    const [cameraControllerPreset, setCameraControllerPreset] =
-        useState<CameraControllerPreset>(CameraControllerPresets.orbital);
+  const cameraControllerRef = useRef<DefaultCameraController>(null);
+  const [cameraControllerPreset, setCameraControllerPreset] = useState<CameraControllerPreset>(
+    CameraControllerPresets.orbital
+  );
 
-    const presetKeys = Object.keys(
-        CameraControllerPresets,
-    ) as (keyof typeof CameraControllerPresets)[];
+  const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
 
-    const moveCamera = () => {
-        const targetPosition = [-30, 250, 150] as const;
-        const lookAtPosition = [-280, -100, -120] as const;
-        cameraControllerRef.current?.setLookAt(
-            ...targetPosition,
-            ...lookAtPosition,
-            true,
-        );
-    };
-    
-return (
-  <>
+  const moveCamera = () => {
+    const targetPosition = [-30, 250, 150] as const;
+    const lookAtPosition = [-280, -100, -120] as const;
+    cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
+  };
+
+  return (
     <CameraEntityContext.Provider value={cameraEntity}>
       <EntityProvider>
         <ControlPanel />
@@ -140,34 +176,20 @@ return (
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
             <div>
-              <a
-                href="https://docs.3dverse.com/livelink.react/"
-                target="_blank"
-              />
+              <a href="https://docs.3dverse.com/livelink.react/" target="_blank" />
             </div>
           )}
-          <CameraController
-            ref={cameraControllerRef}
-            preset={cameraControllerPreset}
-          />
+          <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
           <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
-          <Viewport
-            //  ref={cameraControllerRef}
-              cameraEntity={pipCamera}
-              className="w-full h-full"
-          >
-          <CameraController />
-          </Viewport>
-        </Canvas>
+            <Viewport cameraEntity={pipCamera} className="w-full h-full">
+              <CameraController />
+            </Viewport>
+          </Canvas>
         </Viewport>
       </Canvas>
-      {}
       <div className="absolute top-14 left-1 flex flex-col">
         <div className="flex flex-row">
-          <button
-            className="button button-overlay mr-2"
-            onClick={moveCamera}
-          >
+          <button className="button button-overlay mr-2" onClick={moveCamera}>
             Move Camera
           </button>
           {presetKeys.map((presetKey, index) => {
@@ -181,14 +203,13 @@ return (
                 onClick={() => setCameraControllerPreset(preset)}
               >
                 {name}
-             </button>
+              </button>
             );
           })}
         </div>
       </div>
     </CameraEntityContext.Provider>
-  </>
-);
+  );
 }
 
 const modalStyle = {
