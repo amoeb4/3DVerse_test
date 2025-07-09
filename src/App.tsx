@@ -6,74 +6,65 @@ import CameraEventListener from "./CameraEventListener";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
+import { useEntity } from "./Interface.tsx"
 import type { CameraControllerPreset } from "@3dverse/livelink";
 
-const WSContext = createContext({
+
+
+const WSContext = createContext({ 
   register: (_setTransform: any, _name: string) => {},
 });
 
 function WebSocketProvider({ children }) {
-  console.log("✅ WebSocketProvider mounted");
+
+
+  const { selectedEntity } = useEntity(); // < réference de l'entité à manipuler
+
 
   const registry = useRef<{ setter: any; name: string }[]>([]);
+  const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8767");
-
-    console.log("🔌 Socket created. ReadyState:", socket.readyState);
+    socketRef.current = socket;
 
     socket.onopen = () => {
-      console.log("✅ WebSocket connected, readyState:", socket.readyState);
-    };
-
-    socket.onmessage = (event) => {
-      console.log("📨 Raw WebSocket message:", event.data);
-      try {
-        const data = JSON.parse(event.data);
-        console.log("✅ Parsed message:", data);
-
-        const entry = registry.current.find((e) => e.name === data.name);
-        console.log("📦 Registry content:", registry.current);
-
-        if (entry && entry.setter) {
-          console.log("🔁 Updating entity transform for:", data.name);
-          const transform: any = {};
-          if (data.mode === "-P" && data.location) {
-            transform.position = data.location;
-          } else if (data.mode === "-A" && data.rotation) {
-            transform.rotation = data.rotation;
-          }
-          entry.setter(transform);
-        } else {
-          console.warn("⚠️ Entity not registered:", data.name);
-        }
-      } catch (err) {
-        console.error("❌ JSON parse error:", event.data, err);
+      console.log("✅ WebSocket connected");
+      if (selectedEntity?.name) {
+        socket.send(JSON.stringify({ action: "select", name: selectedEntity.name }));
+        console.log("📤 Sent selected entity to server:", selectedEntity.name);
       }
     };
 
-    socket.onerror = (error) => {
-      console.error("❌ WebSocket error:", error);
-    };
-
-    socket.onclose = () => {
-      console.warn("⚠️ WebSocket closed");
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const entry = registry.current.find((e) => e.name === data.name);
+      if (entry && entry.setter) {
+        const transform: any = {};
+        if (data.mode === "-P" && data.location) transform.position = data.location;
+        else if (data.mode === "-A" && data.rotation) transform.rotation = data.rotation;
+        entry.setter(transform);
+      }
     };
 
     return () => {
-      console.log("🔒 Closing WebSocket");
       socket.close();
     };
   }, []);
 
+  useEffect(() => {
+    if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ action: "select", name: selectedEntity.name }));
+      console.log("📤 Sent selected entity to server (on change):", selectedEntity.name);
+    }
+  }, [selectedEntity]);
+
   const register = useCallback((setter: any, name: string) => {
-    console.log(`🔧 Registered entity: ${name}`);
     registry.current.push({ setter, name });
   }, []);
 
   return <WSContext.Provider value={{ register }}>{children}</WSContext.Provider>;
 }
-
 export function useWebSocket() {
   return useContext(WSContext);
 }
