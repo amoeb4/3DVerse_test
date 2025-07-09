@@ -1,65 +1,73 @@
-import { useState, useContext, useRef, useEffect, createContext, useCallback } from "react";
-import {
-  Livelink,
-  Canvas,
-  Viewport,
-  CameraController,
-  useCameraEntity,
-  useEntity,
-  LivelinkContext,
-  DefaultCameraController
-} from "@3dverse/livelink-react";
+import {  useState,  useContext,  useRef,  useEffect,  createContext,  useCallback } from "react";
+import {  Livelink,  Canvas,  Viewport,  CameraController,  useCameraEntity,  LivelinkContext,  DefaultCameraController } from "@3dverse/livelink-react";
 import { CameraControllerPresets } from "@3dverse/livelink";
-import { LoadingOverlay } from "@3dverse/livelink-react-ui";
-import KeyboardHandler from "./keyBindings.tsx";
+import { LoadingOverlay } from "@3dverse/livelink-react-ui";import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
 import type { CameraControllerPreset } from "@3dverse/livelink";
 
-// --- WebSocket Context Setup ---
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => {},
 });
 
 function WebSocketProvider({ children }) {
+  console.log("✅ WebSocketProvider mounted");
+
   const registry = useRef<{ setter: any; name: string }[]>([]);
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8767");
 
+    console.log("🔌 Socket created. ReadyState:", socket.readyState);
+
     socket.onopen = () => {
-      console.log("WebSocket connected");
+      console.log("✅ WebSocket connected, readyState:", socket.readyState);
     };
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const entry = registry.current.find((e) => e.name === data.name);
+      console.log("📨 Raw WebSocket message:", event.data);
+      try {
+        const data = JSON.parse(event.data);
+        console.log("✅ Parsed message:", data);
 
-      if (entry && entry.setter) {
-        const transform: any = {};
-        if (data.mode === "-P" && data.location) {
-          transform.position = data.location;
-        } else if (data.mode === "-A" && data.rotation) {
-          transform.rotation = data.rotation;
+        const entry = registry.current.find((e) => e.name === data.name);
+        console.log("📦 Registry content:", registry.current);
+
+        if (entry && entry.setter) {
+          console.log("🔁 Updating entity transform for:", data.name);
+          const transform: any = {};
+          if (data.mode === "-P" && data.location) {
+            transform.position = data.location;
+          } else if (data.mode === "-A" && data.rotation) {
+            transform.rotation = data.rotation;
+          }
+          entry.setter(transform);
+        } else {
+          console.warn("⚠️ Entity not registered:", data.name);
         }
-        entry.setter(transform);
+      } catch (err) {
+        console.error("❌ JSON parse error:", event.data, err);
       }
     };
 
     socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      console.error("❌ WebSocket error:", error);
     };
 
     socket.onclose = () => {
-      console.warn("WebSocket closed");
+      console.warn("⚠️ WebSocket closed");
     };
 
-    return () => socket.close();
+    return () => {
+      console.log("🔒 Closing WebSocket");
+      socket.close();
+    };
   }, []);
 
   const register = useCallback((setter: any, name: string) => {
+    console.log(`🔧 Registered entity: ${name}`);
     registry.current.push({ setter, name });
   }, []);
 
@@ -70,7 +78,6 @@ export function useWebSocket() {
   return useContext(WSContext);
 }
 
-// --- App Component ---
 export function App() {
   const [credentials, setCredentials] = useState(null);
 
@@ -117,26 +124,18 @@ function StartupModal({ onSubmit }) {
           />
         </label>
         <div className="space-y-2 mt-4">
-          <div className="flex justify-center">
-            <button type="button" onClick={() => setSceneId("6e6cdc4e-df12-41b8-94ad-d963b8b0e71d")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
-              Load Compaqt V.2
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <button type="button" onClick={() => setSceneId("282c2734-02f4-478c-a21b-6454e2f98be9")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
-              Load Grenoble CEA cell
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <button type="button" onClick={() => setSceneId("516d270a-5a6b-44e6-99c6-44df631bf475")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
-              Load Test_Kuka
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <button type="button" onClick={() => setSceneId("ec33e19d-da9f-4593-8412-a9c0c32cc5ba")} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
-              Load Test_primitive
-            </button>
-          </div>
+          {[
+            ["Compaqt V.2", "6e6cdc4e-df12-41b8-94ad-d963b8b0e71d"],
+            ["Grenoble CEA cell", "282c2734-02f4-478c-a21b-6454e2f98be9"],
+            ["Test_Kuka", "516d270a-5a6b-44e6-99c6-44df631bf475"],
+            ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
+          ].map(([label, id]) => (
+            <div className="flex justify-center" key={id}>
+              <button type="button" onClick={() => setSceneId(id)} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+                Load {label}
+              </button>
+            </div>
+          ))}
           <div className="flex justify-center mt-4">
             <button type="submit" className="border border-black px-4 py-2 rounded hover:bg-gray-100">
               Submit

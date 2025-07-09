@@ -11,6 +11,7 @@ npm run dev       # Lancer le site en mode développement
 npm run build     # Construire l'exécutable à déployer
 npm run preview   # Lancer le site avec l’intégration Vite
 npm run server    # Lancer le serveur WebSocket (en cours de développement)
+npm run full      # Lancer le WSComm pour 3Dverse, voir doc ci dessous 
 ```
 
 ---
