@@ -1,73 +1,14 @@
-import {  useState,  useContext,  useRef,  useEffect,  createContext,  useCallback } from "react";
+import {  useState,  useContext,  useRef } from "react";
 import {  Livelink,  Canvas,  Viewport,  CameraController,  useCameraEntity,  LivelinkContext,  DefaultCameraController } from "@3dverse/livelink-react";
 import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";import KeyboardHandler from "./keyBindings.tsx";
-import CameraEventListener from "./CameraEventListener";
+import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
-import { useEntity } from "./Interface.tsx"
+import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
-
-
-
-const WSContext = createContext({ 
-  register: (_setTransform: any, _name: string) => {},
-});
-
-function WebSocketProvider({ children }) {
-
-
-  const { selectedEntity } = useEntity(); // < réference de l'entité à manipuler
-
-
-  const registry = useRef<{ setter: any; name: string }[]>([]);
-  const socketRef = useRef<WebSocket | null>(null);
-
-  useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8767");
-    socketRef.current = socket;
-
-    socket.onopen = () => {
-      console.log("✅ WebSocket connected");
-      if (selectedEntity?.name) {
-        socket.send(JSON.stringify({ action: "select", name: selectedEntity.name }));
-        console.log("📤 Sent selected entity to server:", selectedEntity.name);
-      }
-    };
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const entry = registry.current.find((e) => e.name === data.name);
-      if (entry && entry.setter) {
-        const transform: any = {};
-        if (data.mode === "-P" && data.location) transform.position = data.location;
-        else if (data.mode === "-A" && data.rotation) transform.rotation = data.rotation;
-        entry.setter(transform);
-      }
-    };
-
-    return () => {
-      socket.close();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify({ action: "select", name: selectedEntity.name }));
-      console.log("📤 Sent selected entity to server (on change):", selectedEntity.name);
-    }
-  }, [selectedEntity]);
-
-  const register = useCallback((setter: any, name: string) => {
-    registry.current.push({ setter, name });
-  }, []);
-
-  return <WSContext.Provider value={{ register }}>{children}</WSContext.Provider>;
-}
-export function useWebSocket() {
-  return useContext(WSContext);
-}
+import { EntitySync } from "./webSockets.tsx";
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
@@ -82,12 +23,17 @@ export function App() {
           token="public_ml59vXKlgs9fTJlx"
           LoadingPanel={LoadingOverlay}
         >
-          <WebSocketProvider>
-            <SpeedProvider>
-              <KeyboardHandler />
-              <AppLayout />
-            </SpeedProvider>
-          </WebSocketProvider>
+          <EntityProvider>
+            <WebSocketProvider>
+              <EntitySync name="Cone" />
+              <EntitySync name="Cube" />
+              <EntitySync name="Cylinder" />
+              <SpeedProvider>
+                <KeyboardHandler />
+                <AppLayout />
+              </SpeedProvider>
+            </WebSocketProvider>
+          </EntityProvider>
         </Livelink>
       )}
     </>
@@ -116,8 +62,8 @@ function StartupModal({ onSubmit }) {
         </label>
         <div className="space-y-2 mt-4">
           {[
-            ["Compaqt V.2", "6e6cdc4e-df12-41b8-94ad-d963b8b0e71d"],
-            ["Grenoble CEA cell", "282c2734-02f4-478c-a21b-6454e2f98be9"],
+            ["NJ40 2.5", "c8dc2ac0-4601-4279-a01f-9c57a924f725"],
+            ["Grenoble CEA cell", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
             ["Test_Kuka", "516d270a-5a6b-44e6-99c6-44df631bf475"],
             ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
           ].map(([label, id]) => (
@@ -158,9 +104,10 @@ function AppLayout() {
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
-      <EntityProvider>
-        <ControlPanel />
-      </EntityProvider>
+    <EntityProvider>
+     <ControlPanel />
+     <EntitySync />
+    </EntityProvider>
       <CameraEventListener />
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">

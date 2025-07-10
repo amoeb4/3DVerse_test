@@ -65,8 +65,6 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// ---- Orientation Function ----
-
 function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const c1 = Math.cos(rad(y) / 2);
@@ -101,8 +99,6 @@ async function setOrientation(
     };
   }
 }
-
-// ---- UI ----
 
 const controlInterfaceStyle = {
   position: "fixed" as const,
@@ -191,6 +187,7 @@ export default function ControlPanel() {
     </div>
   );
 }
+
 
 export function EntityDropdown() {
   const { instance } = useContext(LivelinkContext);
