@@ -18,26 +18,26 @@ export function useWebSocket() {
   return useContext(WSContext);
 }
 
-function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
-  const degToRad = (deg: number) => (deg * Math.PI) / 180;
-  const ex = degToRad(x);
-  const ey = degToRad(y);
-  const ez = degToRad(z);
-
-  const cy = Math.cos(ez * 0.5);
-  const sy = Math.sin(ez * 0.5);
-  const cp = Math.cos(ey * 0.5);
-  const sp = Math.sin(ey * 0.5);
-  const cr = Math.cos(ex * 0.5);
-  const sr = Math.sin(ex * 0.5);
-
-  return [
-    sr * cp * cy - cr * sp * sy,
-    cr * sp * cy + sr * cp * sy,
-    cr * cp * sy - sr * sp * cy,
-    cr * cp * cy + sr * sp * sy,
-  ];
-}
+//function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
+//  const degToRad = (deg: number) => (deg * Math.PI) / 180;
+//  const ex = degToRad(x);
+//  const ey = degToRad(y);
+//  const ez = degToRad(z);
+//
+//  const cy = Math.cos(ez * 0.5);
+//  const sy = Math.sin(ez * 0.5);
+//  const cp = Math.cos(ey * 0.5);
+//  const sp = Math.sin(ey * 0.5);
+//  const cr = Math.cos(ex * 0.5);
+//  const sr = Math.sin(ex * 0.5);
+//
+//  return [
+//    sr * cp * cy - cr * sp * sy,
+//    cr * sp * cy + sr * cp * sy,
+//    cr * cp * sy - sr * sp * cy,
+//    cr * cp * cy + sr * sp * sy,
+//  ];
+//}
 
 //export function EntitySync({ name }: { name: string }) {
 //  const { register } = useWebSocket();
@@ -96,7 +96,7 @@ export function WebSocketProvider({ children }) {
 
   const registry = useRef<{ setter: any; name: string }[]>([]);
   const socketRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
 
   const connectWebSocket = useCallback(() => {
