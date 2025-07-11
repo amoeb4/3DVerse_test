@@ -8,7 +8,6 @@ import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
 import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
-import { EntitySync } from "./webSockets.tsx";
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
@@ -25,9 +24,6 @@ export function App() {
         >
           <EntityProvider>
             <WebSocketProvider>
-              <EntitySync name="Cone" />
-              <EntitySync name="Cube" />
-              <EntitySync name="Cylinder" />
               <SpeedProvider>
                 <KeyboardHandler />
                 <AppLayout />
@@ -106,7 +102,6 @@ function AppLayout() {
     <CameraEntityContext.Provider value={cameraEntity}>
     <EntityProvider>
      <ControlPanel />
-     <EntitySync />
     </EntityProvider>
       <CameraEventListener />
       <Canvas className="w-full h-screen">

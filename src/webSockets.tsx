@@ -8,7 +8,7 @@ import {
 } from "react";
 import "./App.css";
 import { useEntity } from "@3dverse/livelink-react";
-import { LivelinkContext } from "@3dverse/livelink-react";
+//import { LivelinkContext } from "@3dverse/livelink-react";
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},
@@ -39,56 +39,56 @@ function eulerToQuat(x: number, y: number, z: number): [number, number, number, 
   ];
 }
 
-export function EntitySync({ name }: { name: string }) {
-  const { register } = useWebSocket();
-  const livelink = useContext(LivelinkContext);
-  const [transform, setTransform] = useState({
-    position: [0, 0, 0],
-    rotation: [0, 0, 0],
-  });
-
-  useEffect(() => {
-    if (name) {
-      register(setTransform, name);
-      console.log("🧩 Registered entity:", name);
-    }
-  }, [name, register]);
-
-  useEffect(() => {
-    if (!livelink.instance) return;
-
-    const applyTransform = async () => {
-      const [entity] = await livelink.instance.scene.findEntitiesByNames({ name });
-      if (!entity) {
-        console.warn(`⚠️ Entity "${name}" not found.`);
-        return;
-      }
-
-      console.log(`🎯 Applying transform to entity "${name}":`, transform);
-
-      const updates: any = {};
-
-      if (transform.position) {
-        updates.position = transform.position;
-      }
-
-      if (transform.rotation) {
-        updates.orientation = eulerToQuat(
-          transform.rotation[0],
-          transform.rotation[1],
-          transform.rotation[2]
-        );
-      }
-
-    livelink.instance.entities.setComponent(entity, "local_transform", updates);
-
-    };
-
-    applyTransform();
-  }, [transform, livelink, name]);
-
-  return null;
-}
+//export function EntitySync({ name }: { name: string }) {
+//  const { register } = useWebSocket();
+//  const livelink = useContext(LivelinkContext);
+//  const [transform, setTransform] = useState({
+//    position: [0, 0, 0],
+//    rotation: [0, 0, 0],
+//  });
+//
+//  useEffect(() => {
+//    if (name) {
+//      register(setTransform, name);
+//      console.log("🧩 Registered entity:", name);
+//    }
+//  }, [name, register]);
+//
+//  useEffect(() => {
+//    if (!livelink.instance) return;
+//
+//    //const applyTransform = async () => {
+//      const [entity] = await livelink.instance.scene.findEntitiesByNames({ name });
+//      if (!entity) {
+//        console.warn(`⚠️ Entity "${name}" not found.`);
+//        return;
+//      }
+//
+//      console.log(`🎯 Applying transform to entity "${name}":`, transform);
+//
+//      const updates: any = {};
+//
+//      if (transform.position) {
+//        updates.position = transform.position;
+//      }
+//
+//      if (transform.rotation) {
+//        updates.orientation = eulerToQuat(
+//          transform.rotation[0],
+//          transform.rotation[1],
+//          transform.rotation[2]
+//        );
+//      }
+//
+//    livelink.instance.entities.setComponent(entity, "local_transform", updates);
+//
+//    };
+//
+//    applyTransform();
+//  }, [transform, livelink, name]);
+//
+//  return null;
+//}
 
 export function WebSocketProvider({ children }) {
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
@@ -151,15 +151,15 @@ export function WebSocketProvider({ children }) {
       }
     };
 
-    socket.onerror = (err) => {
-      console.error("❌ WebSocket error:", err);
-    };
-
     socket.onclose = () => {
       console.log("❌ WebSocket closed");
-      // Tentative de reconnexion avec backoff exponentiel
       const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
       reconnectAttempts.current += 1;
+      if (reconnectAttempts.current == 5)
+      {
+        console.log("Too much connection attempts, something might be fishy");
+        return ;
+      }
       reconnectTimeoutRef.current = setTimeout(() => {
         connectWebSocket();
       }, timeout);
