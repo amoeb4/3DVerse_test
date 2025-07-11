@@ -58,7 +58,7 @@ export function EntitySync({ name }: { name: string }) {
     if (!livelink.instance) return;
 
     const applyTransform = async () => {
-      const [entity] = await livelink.instance.scene.findEntities({ name });
+      const [entity] = await livelink.instance.scene.findEntitiesByNames({ name });
       if (!entity) {
         console.warn(`⚠️ Entity "${name}" not found.`);
         return;

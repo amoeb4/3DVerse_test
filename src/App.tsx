@@ -137,8 +137,7 @@ function AppLayout() {
               <button
                 key={index}
                 className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
-                onClick={() => setCameraControllerPreset(preset)}
-              >
+                onClick={() => setCameraControllerPreset(preset)}>
                 {name}
               </button>
             );
