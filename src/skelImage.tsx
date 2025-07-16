@@ -261,7 +261,7 @@ function setUpThreeJsSkeleton(canvas: HTMLCanvasElement) {
     const gridHelper = new THREE.GridHelper(size, divisions);
     scene.add(gridHelper);
     // Z Axis
-    const points = [];
+    const points: THREE.Vector3[] = [];
     points.push(new THREE.Vector3(0, 0.001, 0));
     points.push(new THREE.Vector3(0, 0.001, size / 2));
     const zAxis = new THREE.Line(
