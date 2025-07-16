@@ -8,6 +8,7 @@ import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
 import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
+import { ThreeJSCanvas } from "./skelImage.tsx";
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
@@ -17,11 +18,8 @@ export function App() {
       {!credentials ? (
         <StartupModal onSubmit={setCredentials} />
       ) : (
-        <Livelink
-          sceneId={credentials.sceneId}
-          token="public_ml59vXKlgs9fTJlx"
-          LoadingPanel={LoadingOverlay}
-        >
+        <ThreeJSCanvas />
+        <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
             <WebSocketProvider>
               <SpeedProvider>
