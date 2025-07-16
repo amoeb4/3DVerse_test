@@ -12,15 +12,16 @@ import { ThreeJSCanvas } from "./skelImage.tsx";
 
 export function App() {
   const [credentials, setCredentials] = useState(null);
-
+//
   return (
     <>
       {!credentials ? (
         <StartupModal onSubmit={setCredentials} />
       ) : (
-        <ThreeJSCanvas />
+
         <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
+    {/*    <ThreeJSCanvas /> */}
             <WebSocketProvider>
               <SpeedProvider>
                 <KeyboardHandler />
@@ -40,6 +41,7 @@ function StartupModal({ onSubmit }) {
     e.preventDefault();
     onSubmit({ sceneId });
   };
+
 
   return (
     <div style={modalStyle}>
@@ -103,7 +105,7 @@ function AppLayout() {
     </EntityProvider>
       <CameraEventListener />
       <Canvas className="w-full h-screen">
-        <Viewport cameraEntity={cameraEntity} className="w-full h-full">
+        <Viewport cameraEntity={cameraEntity} className="œw-full h-full">
           {!isConnecting && (
             <div>
               <a href="https://docs.3dverse.com/livelink.react/" target="_blank" />
