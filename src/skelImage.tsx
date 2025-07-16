@@ -83,154 +83,154 @@ export function ThreeJSCanvas() {
 }
 
 //------------------------------------------------------------------------------
-//function SkeletonController() {
-//    const { instance } = useContext(LivelinkContext);
-//    const { entity: controller } = useEntity({
-//        euid: "dbe0b7de-fd0c-46d8-a90c-8a9f2f896002",});
-//
-//    const [animation, setAnimation] = useState<string | null>(null);
-//
-//    useEffect(() => {
-//        if (!instance || !controller) {
-//            return;
-//        }
-//
-//        jointGizmo!.addEventListener("rotationAngle-changed", e => {
-//            const joint = e.target.object!;
-//            const bone_index = parseInt(joint.name);
-//            const partial_pose: Commands.SkeletonPartialPose = {
-//                orientations: [
-//                    { bone_index, value: joint.quaternion.toArray() },
-//                ],
-//            };
-//            instance.sendSkeletonPose({ controller, partial_pose });
-//        });
-//    }, [instance, controller]);
-//
-//    useEffect(() => {
-//        if (!animation) {
-//            return;
-//        }
-//
-//        if (animation === "user-controlled") {
-//            handleUserControlledSkeleton(instance, controller);
-//            return;
-//        }
-//
-//        const intervalId = handleAnimatedSkeleton(
-//            animation,
-//            instance,
-//            controller,
-//        );
-//        return () => {
-//            clearInterval(intervalId);
-//        };
-//    }, [animation]);
-//
-//    return (
-//        <div className="absolute bottom-4 flex items-center w-full justify-center z-10">
-//            <select className="select select-primary"
-//                name="animations"
-//                id="animation"
-//                onChange={e => setAnimation(e.target.value)}>
-//
-//                <option value="user-controlled">User Controlled</option>
-//                <option value="idle">Idle</option>
-//                <option value="walk">Walk</option>
-//            </select>
-//        </div>
-//    );
-//}
-//
-////------------------------------------------------------------------------------
-//
-//let joints: Array<THREE.Object3D> | undefined = undefined;
-//let jointGizmo: TransformControls | undefined = undefined;
-//
-////------------------------------------------------------------------------------
-//function handleUserControlledSkeleton(
-//    instance: LivelinkInstance | null,
-//    controller: Entity | null,
-//) {
-//    // Attach joint gizmo to root
-//    jointGizmo!.attach(joints![0]);
-//
-//    // Set T Pose in 3js
-//    for (let jointIndex = 0; jointIndex < joints!.length; ++jointIndex) {
-//        const quat = droid_tpose.rotations[jointIndex];
-//        joints![jointIndex].quaternion.set(quat[0], quat[1], quat[2], quat[3]);
-//    }
-//
-//    // Update livelink skeleton
-//    if (instance && controller) {
-//        const partial_pose: Commands.SkeletonPartialPose = {
-//            orientations: joints!.map((joint, bone_index) => ({
-//                bone_index,
-//                value: joint.quaternion.toArray(),
-//            })),
-//        };
-//        instance.sendSkeletonPose({ controller, partial_pose });
-//    }
-//}
-//
-////------------------------------------------------------------------------------
-//function handleAnimatedSkeleton(
-//    animation: string,
-//    instance: LivelinkInstance | null,
-//    controller: Entity | null,
-//) {
-//    // Disable joint gizmo for animations
-//    jointGizmo!.detach();
-//
-//    let chosenAnimation = [] as Animation;
-//    if (animation === "idle") {
-//        chosenAnimation = droid_idle;
-//    } else if (animation === "walk") {
-//        chosenAnimation = droid_walk;
-//    }
-//
-//    // Start sending poses every frame
-//    const fps = 30;
-//    const numFrames = chosenAnimation.length;
-//    let frameIndex = 0;
-//    const intervalId = setInterval(() => {
-//        if (frameIndex === numFrames) {
-//            frameIndex = 0;
-//        }
-//
-//        // Update 3js skeleton
-//        for (let jointIndex = 0; jointIndex < joints!.length; ++jointIndex) {
-//            const quat = chosenAnimation[frameIndex].rotations[jointIndex];
-//            joints![jointIndex].quaternion.set(
-//                quat[0],
-//                quat[1],
-//                quat[2],
-//                quat[3],
-//            );
-//        }
-//
-//        // Update livelink skeleton
-//        if (instance && controller) {
-//            const rotations = chosenAnimation[frameIndex].rotations;
-//            const partial_pose: Commands.SkeletonPartialPose = {
-//                orientations: rotations.map((quat, bone_index) => ({
-//                    bone_index,
-//                    value: quat,
-//                })),
-//            };
-//            instance.sendSkeletonPose({
-//                controller,
-//                partial_pose,
-//            });
-//        }
-//
-//        ++frameIndex;
-//    }, 1000 / fps);
-//
-//    return intervalId;
-//}
-//
+function SkeletonController() {
+    const { instance } = useContext(LivelinkContext);
+    const { entity: controller } = useEntity({
+        euid: "dbe0b7de-fd0c-46d8-a90c-8a9f2f896002",});
+
+    const [animation, setAnimation] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!instance || !controller) {
+            return;
+        }
+
+        jointGizmo!.addEventListener("rotationAngle-changed", e => {
+            const joint = e.target.object!;
+            const bone_index = parseInt(joint.name);
+            const partial_pose: Commands.SkeletonPartialPose = {
+                orientations: [
+                    { bone_index, value: joint.quaternion.toArray() },
+                ],
+            };
+            instance.sendSkeletonPose({ controller, partial_pose });
+        });
+    }, [instance, controller]);
+
+    useEffect(() => {
+        if (!animation) {
+            return;
+        }
+
+        if (animation === "user-controlled") {
+            handleUserControlledSkeleton(instance, controller);
+            return;
+        }
+
+        const intervalId = handleAnimatedSkeleton(
+            animation,
+            instance,
+            controller,
+        );
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [animation]);
+
+    return (
+        <div className="absolute bottom-4 flex items-center w-full justify-center z-10">
+            <select className="select select-primary"
+                name="animations"
+                id="animation"
+                onChange={e => setAnimation(e.target.value)}>
+
+                <option value="user-controlled">User Controlled</option>
+                <option value="idle">Idle</option>
+                <option value="walk">Walk</option>
+            </select>
+        </div>
+    );
+}
+
 //------------------------------------------------------------------------------
+
+let joints: Array<THREE.Object3D> | undefined = undefined;
+let jointGizmo: TransformControls | undefined = undefined;
+
+//------------------------------------------------------------------------------
+function handleUserControlledSkeleton(
+    instance: LivelinkInstance | null,
+    controller: Entity | null,
+) {
+    // Attach joint gizmo to root
+    jointGizmo!.attach(joints![0]);
+
+    // Set T Pose in 3js
+    for (let jointIndex = 0; jointIndex < joints!.length; ++jointIndex) {
+        const quat = droid_tpose.rotations[jointIndex];
+        joints![jointIndex].quaternion.set(quat[0], quat[1], quat[2], quat[3]);
+    }
+
+    // Update livelink skeleton
+    if (instance && controller) {
+        const partial_pose: Commands.SkeletonPartialPose = {
+            orientations: joints!.map((joint, bone_index) => ({
+                bone_index,
+                value: joint.quaternion.toArray(),
+            })),
+        };
+        instance.sendSkeletonPose({ controller, partial_pose });
+    }
+}
+
+//------------------------------------------------------------------------------
+function handleAnimatedSkeleton(
+    animation: string,
+    instance: LivelinkInstance | null,
+    controller: Entity | null,
+) {
+    // Disable joint gizmo for animations
+    jointGizmo!.detach();
+
+    let chosenAnimation = [] as Animation;
+    if (animation === "idle") {
+        chosenAnimation = droid_idle;
+    } else if (animation === "walk") {
+        chosenAnimation = droid_walk;
+    }
+
+    // Start sending poses every frame
+    const fps = 30;
+    const numFrames = chosenAnimation.length;
+    let frameIndex = 0;
+    const intervalId = setInterval(() => {
+        if (frameIndex === numFrames) {
+            frameIndex = 0;
+        }
+
+        // Update 3js skeleton
+        for (let jointIndex = 0; jointIndex < joints!.length; ++jointIndex) {
+            const quat = chosenAnimation[frameIndex].rotations[jointIndex];
+            joints![jointIndex].quaternion.set(
+                quat[0],
+                quat[1],
+                quat[2],
+                quat[3],
+            );
+        }
+
+        // Update livelink skeleton
+        if (instance && controller) {
+            const rotations = chosenAnimation[frameIndex].rotations;
+            const partial_pose: Commands.SkeletonPartialPose = {
+                orientations: rotations.map((quat, bone_index) => ({
+                    bone_index,
+                    value: quat,
+                })),
+            };
+            instance.sendSkeletonPose({
+                controller,
+                partial_pose,
+            });
+        }
+
+        ++frameIndex;
+    }, 1000 / fps);
+
+    return intervalId;
+}
+
+------------------------------------------------------------------------------
 
 function setUpThreeJsSkeleton(canvas: HTMLCanvasElement) {
     const width = canvas.offsetWidth;
@@ -378,46 +378,46 @@ function setUpThreeJsSkeleton(canvas: HTMLCanvasElement) {
 //    // Joint Gizmo
 //    jointGizmo = new TransformControls(camera, renderer.domElement);
 //    jointGizmo.attach(joints[0]);
-//    jointGizmo.setSize(0.25);
-//    jointGizmo.setSpace("local");
-//    jointGizmo.setMode("rotate");
-//    jointGizmo.addEventListener("dragging-changed", event => {
-//        // Disable camera controller when rotating joint
-//        orbit.enabled = !event.value;
-//    });
-//    scene.add(jointGizmo.getHelper());
-//
-//    // Raycaster to check for hovered joints
-//    const raycaster = new THREE.Raycaster();
-//    raycaster.layers.set(jointRaycastLayer);
-//    const pointer = new THREE.Vector2();
-//    function onPointerMove(event: PointerEvent) {
-//        // Calculate pointer position in normalized device coordinates (-1 to +1)
-//        const rect = renderer.domElement.getBoundingClientRect();
-//        const x = event.clientX - rect.left;
-//        const y = event.clientY - rect.top;
-//
-//        pointer.x = (x / renderer.domElement.clientWidth) * 2 - 1;
-//        pointer.y = -(y / renderer.domElement.clientHeight) * 2 + 1;
-//    }
-//    renderer.domElement.addEventListener("pointermove", onPointerMove);
-//
-//    function animate() {
-//        const userControlledMode = jointGizmo!.getHelper().visible;
-//        if (userControlledMode && !jointGizmo!.dragging) {
-//            // Check for hovered joints to attach gizmo to them
-//            raycaster.setFromCamera(pointer, camera);
-//            const intersects = raycaster.intersectObjects(joints!);
-//            for (const intersect of intersects) {
-//                jointGizmo!.detach();
-//                jointGizmo!.attach(intersect.object);
-//            }
-//        }
-//
-//        orbit.update();
-//        renderer.render(scene, camera);
-//    }
-//    renderer.setAnimationLoop(animate);
+    jointGizmo.setSize(0.25);
+    jointGizmo.setSpace("local");
+    jointGizmo.setMode("rotate");
+    jointGizmo.addEventListener("dragging-changed", event => {
+        // Disable camera controller when rotating joint
+        orbit.enabled = !event.value;
+    });
+    scene.add(jointGizmo.getHelper());
+
+    // Raycaster to check for hovered joints
+    const raycaster = new THREE.Raycaster();
+    raycaster.layers.set(jointRaycastLayer);
+    const pointer = new THREE.Vector2();
+    function onPointerMove(event: PointerEvent) {
+        // Calculate pointer position in normalized device coordinates (-1 to +1)
+        const rect = renderer.domElement.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        pointer.x = (x / renderer.domElement.clientWidth) * 2 - 1;
+        pointer.y = -(y / renderer.domElement.clientHeight) * 2 + 1;
+    }
+    renderer.domElement.addEventListener("pointermove", onPointerMove);
+
+    function animate() {
+        const userControlledMode = jointGizmo!.getHelper().visible;
+        if (userControlledMode && !jointGizmo!.dragging) {
+            // Check for hovered joints to attach gizmo to them
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(joints!);
+            for (const intersect of intersects) {
+                jointGizmo!.detach();
+                jointGizmo!.attach(intersect.object);
+            }
+        }
+
+        orbit.update();
+        renderer.render(scene, camera);
+    }
+    renderer.setAnimationLoop(animate);
 
     return { renderer, scene, camera };
 }

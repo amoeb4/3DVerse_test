@@ -25,7 +25,7 @@ export default function KeyboardHandler() {
           mandatory_components: ["local_transform"],
           forbidden_components: [],
         });
-        if (key === "j") nfoKey(entities);
+        //if (key === "j") nfoKey(entities);
         if (key === "m") posKey(instance, entities, 10, 10, 10);
         if (key === "r") posKey(instance, entities, 0, 0, 0);
         if (key === "k") oriKey(instance, entities, 10, 10, 10, eulerToQuat);

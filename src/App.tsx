@@ -1,31 +1,85 @@
-import {  useState,  useContext,  useRef } from "react";
-import {  Livelink,  Canvas,  Viewport,  CameraController,  useCameraEntity,  LivelinkContext,  DefaultCameraController } from "@3dverse/livelink-react";
+import { useState, useContext, useRef, useEffect } from "react";
+import {
+  Livelink,
+  Canvas,
+  Viewport,
+  CameraController,
+  useCameraEntity,
+  LivelinkContext,
+  DefaultCameraController,
+} from "@3dverse/livelink-react";
 import { CameraControllerPresets } from "@3dverse/livelink";
-import { LoadingOverlay } from "@3dverse/livelink-react-ui";import KeyboardHandler from "./keyBindings.tsx";
+import { LoadingOverlay } from "@3dverse/livelink-react-ui";
+import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
 import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
-// import { ThreeJSCanvas } from "./skelImage.tsx";
+import { traverseAndCollectJoints } from "./useSkeleton.tsx";
+
+function printTree(node: EntityNode, depth = 0): string[] {
+  const lines = [`${"─".repeat(depth)} ${node.name}`];
+  for (const child of node.children) {
+    lines.push(...printTree(child, depth + 1));
+  }
+  return lines;
+}
+
+// Maintenant tu peux exporter ton type à ce niveau
+export type EntityNode = {
+  id: string;
+  name: string;
+  children: EntityNode[];
+};
+
+async function buildHierarchy(entities: any, entityId: string): Promise<EntityNode> {
+  const entity = await entities.get(entityId);
+  if (!entity) throw new Error(`Entity ${entityId} not found`);
+
+  const name = (await entity.getName?.()) ?? entity.id;
+  const childrenIds = entity.getChildren?.() ?? [];
+
+  const children: EntityNode[] = [];
+  for (const childId of childrenIds) {
+    const childNode = await buildHierarchy(entities, childId);
+    children.push(childNode);
+  }
+
+  return { id: entityId, name, children };
+}
+
+export function useEntityHierarchy(rootEntityId?: string) {
+  const { instance } = useContext(LivelinkContext);
+  const [hierarchy, setHierarchy] = useState<EntityNode | null>(null);
+
+  useEffect(() => {
+    if (!instance || !rootEntityId) return;
+
+    buildHierarchy(instance, rootEntityId)
+      .then(setHierarchy)
+      .catch(console.error);
+  }, [instance, rootEntityId]);
+
+  return hierarchy;
+}
 
 export function App() {
-  const [credentials, setCredentials] = useState(null);
+  const [credentials, setCredentials] = useState<{ sceneId: string } | null>(null);
   return (
     <>
       {!credentials ? (
         <StartupModal onSubmit={setCredentials} />
       ) : (
-
         <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
-            <WebSocketProvider>
+           {/* <WebSocketProvider> */}
               <SpeedProvider>
                 <KeyboardHandler />
                 <AppLayout />
               </SpeedProvider>
-            </WebSocketProvider>
+            {/*</WebSocketProvider>*/}
           </EntityProvider>
         </Livelink>
       )}
@@ -33,9 +87,9 @@ export function App() {
   );
 }
 
-function StartupModal({ onSubmit }) {
+function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ sceneId });
   };
@@ -61,7 +115,11 @@ function StartupModal({ onSubmit }) {
             ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
           ].map(([label, id]) => (
             <div className="flex justify-center" key={id}>
-              <button type="button" onClick={() => setSceneId(id)} className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+              <button
+                type="button"
+                onClick={() => setSceneId(id)}
+                className="border border-black px-4 py-2 rounded hover:bg-gray-100"
+              >
                 Load {label}
               </button>
             </div>
@@ -82,27 +140,43 @@ function AppLayout() {
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
 
+  const rootEntityId = cameraEntity?.id ?? undefined;
+  const hierarchy = useEntityHierarchy(rootEntityId);
+
   const cameraControllerRef = useRef<DefaultCameraController>(null);
   const [cameraControllerPreset, setCameraControllerPreset] = useState<CameraControllerPreset>(
     CameraControllerPresets.orbital
   );
-
   const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
-
   const moveCamera = () => {
     const targetPosition = [-30, 250, 150] as const;
     const lookAtPosition = [-280, -100, -120] as const;
     cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
   };
 
+useEffect(() => {
+  if (!cameraEntity) return;
+
+  const run = async () => {
+    try {
+      const joints = await traverseAndCollectJoints(cameraEntity);
+      console.log(`✅ ${joints.length} joints collectés.`);
+    } catch (err) {
+      console.error("❌ Erreur lors du parcours des joints :", err);
+    }
+  };
+
+  run();
+}, [cameraEntity]);
+
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
-    <EntityProvider>
-     <ControlPanel />
-    </EntityProvider>
+      <EntityProvider>
+        <ControlPanel />
+      </EntityProvider>
       <CameraEventListener />
       <Canvas className="w-full h-screen">
-        <Viewport cameraEntity={cameraEntity} className="œw-full h-full">
+        <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
             <div>
               <a href="https://docs.3dverse.com/livelink.react/" target="_blank" />
@@ -129,7 +203,8 @@ function AppLayout() {
               <button
                 key={index}
                 className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
-                onClick={() => setCameraControllerPreset(preset)}>
+                onClick={() => setCameraControllerPreset(preset)}
+              >
                 {name}
               </button>
             );
@@ -139,6 +214,7 @@ function AppLayout() {
     </CameraEntityContext.Provider>
   );
 }
+
 
 const modalStyle = {
   position: "fixed",
