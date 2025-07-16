@@ -15,7 +15,7 @@ import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
-import { WebSocketProvider } from "./webSockets.tsx";
+//import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
 import { traverseAndCollectJoints } from "./useSkeleton.tsx";
 
@@ -27,7 +27,6 @@ function printTree(node: EntityNode, depth = 0): string[] {
   return lines;
 }
 
-// Maintenant tu peux exporter ton type à ce niveau
 export type EntityNode = {
   id: string;
   name: string;

@@ -211,7 +211,6 @@ export function EntityDropdown() {
         console.error("Erreur lors de la récupération des entités :", err);
       }
     };
-
     fetchEntities();
   }, [instance]);
 

@@ -26,7 +26,6 @@ import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { useContext, useEffect, useRef, useState } from "react";
 
 //------------------------------------------------------------------------------
-
 //function AppLayout() {
 //    const { cameraEntity } = useCameraEntity();
 //
@@ -38,7 +37,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 //        </Canvas>
 //    );
 //}
-
 //------------------------------------------------------------------------------
 
 export function ThreeJSCanvas() {
