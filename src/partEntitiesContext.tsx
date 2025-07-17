@@ -12,6 +12,34 @@ const PartEntitiesContext = createContext<PartEntitiesContextType>({
   entitiesMap: new Map(),
 });
 
+type EntityWithParent = Entity & {
+  getParent?: () => Promise<Entity | null>;
+};
+
+async function getDescendants(root: Entity, entitiesMap: Map<string, Entity>): Promise<Entity[]> {
+  const descendants: Entity[] = [];
+  const visited = new Set<string>();
+
+  const walk = async (entity: Entity) => {
+    visited.add(entity.id);
+
+    for (const [, child] of entitiesMap) {
+      const withParent = child as EntityWithParent;
+      try {
+        const parent = await withParent.getParent?.();
+        if (parent?.id === entity.id && !visited.has(child.id)) {
+          descendants.push(child);
+          await walk(child);
+        }
+      } catch (err) {
+        console.warn(`⚠️ Erreur getParent sur ${child.name ?? "(sans nom)"}`, err);
+      }
+    }
+  };
+  await walk(root);
+  return descendants;
+}
+
 export function PartEntitiesProvider({ children }: { children: React.ReactNode }) {
   const { instance } = useContext(LivelinkContext);
   const [entities, setEntities] = useState<Entity[]>([]);
