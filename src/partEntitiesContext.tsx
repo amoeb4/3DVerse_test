@@ -1,13 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
+import type { Entity } from "@3dverse/livelink";
 
-type Entity = { id: string; name?: string };
 type PartEntitiesContextType = {
   entities: Entity[];
   entitiesMap: Map<string, Entity>;
 };
 
-const PartEntitiesContext = createContext<PartEntitiesContextType>({
+export const PartEntitiesContext = createContext<PartEntitiesContextType>({
   entities: [],
   entitiesMap: new Map(),
 });

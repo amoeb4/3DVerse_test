@@ -7,7 +7,7 @@ async def send_command(uri):
         async with websockets.connect(uri) as websocket:
             print("Connecté au serveur WebSocket.")
             while True:
-                line = input("Commande (ex: Cube -P 1.0 2.0 3.0) : ").strip()
+                line = input("Commande (ex: Cube 1.0 2.0 3.0) : ").strip()
                 if not line:
                     continue
                 if line.lower() in ('exit', 'quit', 'q'):
@@ -15,40 +15,22 @@ async def send_command(uri):
                     break
 
                 parts = line.split()
-                if len(parts) != 5:
-                    print("Format invalide. Exemple : Cube -P 1.0 2.0 3.0")
+                if len(parts) != 4:
+                    print("Format invalide. Exemple : Cube 1.0 2.0 3.0")
                     continue
 
-                name, mode = parts[0], parts[1].upper()
+                name = parts[0]
                 try:
-                    coords = [float(parts[2]), float(parts[3]), float(parts[4])]
+                    coords = [float(parts[1]), float(parts[2]), float(parts[3])]
                 except ValueError:
                     print("Coordonnées invalides. Utilisez des nombres.")
                     continue
 
-                if mode == "-P":
-                    key = "location"
-                    message = json.dumps({"name": name, key: coords, "mode": mode})
-                    await websocket.send(message)
-                    print(f"Commande envoyée : {message}")
-
-                elif mode == "-S":
-                    key = "location"
-                    print("Démarrage du déplacement smooth depuis la position actuelle.")
-                    message = json.dumps({"name": name, key: coords, "mode": mode, "smooth": "P"})
-                    await websocket.send(message)
-                    print(f"Commande envoyée : {message}")
-
-                elif mode == "-A":
-                    key = "rotation"
-                    print("Démarrage de la rotation smooth depuis la rotation actuelle.")
-                    message = json.dumps({"name": name, key: coords, "mode": mode, "smooth": "A"})
-                    await websocket.send(message)
-                    print(f"Commande envoyée : {message}")
-
-                else:
-                    print("Mode inconnu. Utilisez -P, -S ou -A")
-                    continue
+                mode = "-P"
+                key = "location"
+                message = json.dumps({"name": name, key: coords, "mode": mode})
+                await websocket.send(message)
+                print(f"Commande envoyée : {message}")
 
     except KeyboardInterrupt:
         print("\nInterruption clavier détectée, fermeture du client.")

@@ -8,7 +8,6 @@ export type EntityNode = {
 };
 
 async function buildHierarchy(instance: any, entityId: string): Promise<EntityNode> {
-  // On utilise instance.entities.get() au lieu de engine.entities.get()
   const entity = await instance.entities.get(entityId);
   const name = entity.getName() ?? entity.id;
   const childrenIds = entity.getChildren();

@@ -7,7 +7,7 @@ import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
-//import { WebSocketProvider } from "./webSockets.tsx";
+import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
 import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
 
@@ -20,14 +20,14 @@ export function App() {
       ) : (
         <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
-           {/* <WebSocketProvider>     Uncomment for server usage */}
+          <PartEntitiesProvider>
+           <WebSocketProvider>
               <SpeedProvider>
-             <PartEntitiesProvider>
           <KeyboardHandler />
           <AppLayout />
-               </PartEntitiesProvider>
               </SpeedProvider>
-            {/*</WebSocketProvider>*/}
+            </WebSocketProvider>
+            </PartEntitiesProvider>
           </EntityProvider>
         </Livelink>
       )}

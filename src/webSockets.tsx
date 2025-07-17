@@ -1,7 +1,14 @@
-import { useContext, useRef, useEffect, createContext, useCallback, useState } from "react";
+import {
+  useContext,
+  useRef,
+  useEffect,
+  createContext,
+  useCallback,
+  useState,
+} from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
-import { usePartEntities } from "./partEntitiesContext"; // chemin selon ton arborescence
-import { moveEntityAndChildren } from "./manipulationSkel"; // idem chemin
+import { PartEntitiesContext } from "./partEntitiesContext"; // ⚠️ importer le CONTEXTE, pas le Provider
+import { moveEntityAndChildren } from "./manipulationSkel";
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},
@@ -11,12 +18,13 @@ export function useWebSocket() {
   return useContext(WSContext);
 }
 
-export function WebSocketProvider({ children }) {
+export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
-  const { entity: selectedEntity } = useEntity(selectedEntityName ? { name: selectedEntityName } : { name: "" });
-
-  const { entitiesMap, entities } = usePartEntities(); // récupère map & instance ici
-  const { instance } = useContext(LivelinkContext); // instance LiveLink
+  const { entity: selectedEntity } = useEntity(
+    selectedEntityName ? { name: selectedEntityName } : { name: "" }
+  );
+  const { entitiesMap } = useContext(PartEntitiesContext);
+  const { instance } = useContext(LivelinkContext);
 
   const registry = useRef<{ setter: any; name: string }[]>([]);
   const socketRef = useRef<WebSocket | null>(null);
@@ -31,77 +39,57 @@ export function WebSocketProvider({ children }) {
       console.log("✅ WebSocket connected");
       reconnectAttempts.current = 0;
 
-      if (selectedEntity?.name && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ action: "select", name: selectedEntity.name }));
+      if (selectedEntity?.name) {
+        socket.send(`select ${selectedEntity.name}`);
       }
     };
 
     socket.onmessage = async (event) => {
-      console.log("📨 Message received:", event.data);
+      const msg = event.data.trim();
+      console.log("📨 Message received:", msg);
 
-      try {
-        const data = JSON.parse(event.data);
-        if (!data?.name) {
-          console.warn("⚠️ Message without 'name' field:", data);
-          return;
-        }
+      const parts = msg.split(" ");
 
-        if (data.action === "select") {
-          setSelectedEntityName(data.name);
-          return;
-        }
+      if (parts.length === 4) {
+        // Format: "part_1 1.0 2.0 3.0"
+        const [name, xStr, yStr, zStr] = parts;
+        const x = parseFloat(xStr);
+        const y = parseFloat(yStr);
+        const z = parseFloat(zStr);
 
-        const entry = registry.current.find((e) => e.name === data.name);
-        if (!entry) {
-          console.warn(`⚠️ Entity not registered: ${data.name}`);
-          return;
-        }
-
-        const transform: any = {};
-        if (data.mode === "-P" && data.location) {
-          transform.position = data.location;
-        } else if (data.mode === "-A" && data.rotation) {
-          transform.rotation = data.rotation;
-        } else {
-          console.warn("⚠️ Unknown mode or missing data:", data);
-        }
-
-        entry.setter((prev: any) => ({ ...prev, ...transform }));
-
-      } catch {
-        const msg = event.data.trim();
-        const parts = msg.split(" ");
-        if (parts.length === 4) {
-          const [name, xStr, yStr, zStr] = parts;
-          const x = parseFloat(xStr);
-          const y = parseFloat(yStr);
-          const z = parseFloat(zStr);
-
-          if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
-            if (instance && entitiesMap.size > 0) {
-              console.log(`🔄 Moving entity ${name} and children by [${x}, ${y}, ${z}]`);
-              await moveEntityAndChildren(name, [x, y, z], entitiesMap, instance);
-            } else {
-              console.warn("⚠️ instance or entitiesMap not ready yet");
-            }
-            return;
+        if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
+          if (instance && entitiesMap.size > 0) {
+            console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
+            await moveEntityAndChildren(name, [x, y, z], entitiesMap, instance);
+          } else {
+            console.warn("⚠️ instance or entitiesMap not ready yet");
           }
+          return;
         }
-        console.error("❌ Unrecognized WebSocket message format:", event.data);
       }
+      if (parts.length === 2 && parts[0] === "select") {
+        const name = parts[1];
+        console.log(`🎯 Selecting entity ${name}`);
+        setSelectedEntityName(name);
+        return;
+      }
+      console.error("❌ Unrecognized WebSocket message format:", msg);
     };
 
     socket.onclose = () => {
       console.log("❌ WebSocket closed");
       const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
       reconnectAttempts.current += 1;
+
       if (reconnectAttempts.current === 5) {
         console.log("Too many connection attempts, aborting.");
         return;
       }
+
       reconnectTimeoutRef.current = window.setTimeout(() => {
         connectWebSocket();
       }, timeout);
+
       console.log(`🔄 Reconnecting in ${timeout}ms...`);
     };
   }, [selectedEntity?.name, instance, entitiesMap]);
@@ -116,7 +104,7 @@ export function WebSocketProvider({ children }) {
 
   useEffect(() => {
     if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify({ action: "select", name: selectedEntity.name }));
+      socketRef.current.send(`select ${selectedEntity.name}`);
     }
   }, [selectedEntity]);
 
@@ -134,6 +122,9 @@ export function WebSocketProvider({ children }) {
     return () => {};
   }, []);
 
-  return <WSContext.Provider value={{ register }}>{children}</WSContext.Provider>;
+  return (
+    <WSContext.Provider value={{ register }}>
+      {children}
+    </WSContext.Provider>
+  );
 }
-
