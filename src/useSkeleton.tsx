@@ -38,7 +38,7 @@ export function CreateJoints() {
     return null;
 }
 
-type JointEntry = { entity: Entity; parent: Entity | null };
+export type JointEntry = { entity: Entity; parent: Entity | null };
 export async function traverseAndCollectJoints(entity: Entity, parent: Entity | null = null): Promise<JointEntry[]> {
     const joints: JointEntry[] = [];
     async function traverse(current: Entity, parent: Entity | null) {

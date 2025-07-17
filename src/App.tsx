@@ -1,14 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
-import {
-  Livelink,
-  Canvas,
-  Viewport,
-  CameraController,
-  useCameraEntity,
-  LivelinkContext,
-  DefaultCameraController,
-} from "@3dverse/livelink-react";
-import { CameraControllerPresets } from "@3dverse/livelink";
+import { Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController } from "@3dverse/livelink-react";
+import { CameraControllerPresets, Entity } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener.jsx";
@@ -17,6 +9,7 @@ import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
 //import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
+import type { JointEntry } from "./useSkeleton.tsx";
 import { traverseAndCollectJoints } from "./useSkeleton.tsx";
 
 function printTree(node: EntityNode, depth = 0): string[] {
@@ -73,7 +66,7 @@ export function App() {
       ) : (
         <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
-           {/* <WebSocketProvider> */}
+           {/* <WebSocketProvider>     Uncomment for server usage */}
               <SpeedProvider>
                 <KeyboardHandler />
                 <AppLayout />
@@ -151,22 +144,43 @@ function AppLayout() {
     const targetPosition = [-30, 250, 150] as const;
     const lookAtPosition = [-280, -100, -120] as const;
     cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
-  };
+};
+
+const { instance } = useContext(LivelinkContext);
 
 useEffect(() => {
-  if (!cameraEntity) return;
-
   const run = async () => {
+    if (!instance) return;
+
     try {
-      const joints = await traverseAndCollectJoints(cameraEntity);
-      console.log(`✅ ${joints.length} joints collectés.`);
+      const scene = instance.scene;
+      const allEntities: Entity[] = await scene.getEntities();
+
+      const allJoints: JointEntry[] = [];
+
+      for (const entity of allEntities) {
+        let parent: Entity | null = null;
+
+        try {
+          parent = await entity.getParent?.();
+        } catch (e) {
+          console.warn(`⚠️ Impossible d’obtenir le parent de ${entity.name ?? "(sans nom)"}`, e);
+        }
+
+        if (!parent) {
+          const joints = await traverseAndCollectJoints(entity);
+          allJoints.push(...joints);
+        }
+      }
+
+      console.log(`✅ ${allJoints.length} joints collectés à partir de toutes les racines.`);
     } catch (err) {
       console.error("❌ Erreur lors du parcours des joints :", err);
     }
   };
 
   run();
-}, [cameraEntity]);
+}, [instance]);
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -213,7 +227,6 @@ useEffect(() => {
     </CameraEntityContext.Provider>
   );
 }
-
 
 const modalStyle = {
   position: "fixed",
