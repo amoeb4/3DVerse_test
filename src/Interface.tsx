@@ -188,11 +188,11 @@ export default function ControlPanel() {
   );
 }
 
-
 export function EntityDropdown() {
   const { instance } = useContext(LivelinkContext);
   const { selectedEntity, setSelectedEntity } = useEntity();
   const [entities, setEntities] = useState<{ id: string; name?: string }[]>([]);
+  const [entitiesMap, setEntitiesMap] = useState<Map<string, { id: string; name?: string }>>(new Map());
 
   useEffect(() => {
     const fetchEntities = async () => {
@@ -202,15 +202,29 @@ export function EntityDropdown() {
           mandatory_components: ["local_transform"],
           forbidden_components: [],
         });
-        const entitiesWithNames = foundEntities.map((entity) => ({
-          id: entity.id,
-          name: entity.name || "(sans nom)",
-        }));
+
+        const entitiesWithNames = foundEntities
+          .map((entity) => ({
+            id: entity.id,
+            name: entity.name || "(sans nom)",
+          }))
+          .filter((entity) => /^part_\d+$/.test(entity.name ?? ""))
+          .sort((a, b) => {
+            const numA = parseInt(a.name!.split("_")[1], 10);
+            const numB = parseInt(b.name!.split("_")[1], 10);
+            return numA - numB;
+          });
+
+        // Crée une map des entités
+        const map = new Map(entitiesWithNames.map((e) => [e.name!, e]));
+
         setEntities(entitiesWithNames);
+        setEntitiesMap(map);
       } catch (err) {
         console.error("Erreur lors de la récupération des entités :", err);
       }
     };
+
     fetchEntities();
   }, [instance]);
 

@@ -11,6 +11,7 @@ import "./App.css";
 import type { CameraControllerPreset } from "@3dverse/livelink";
 import type { JointEntry } from "./useSkeleton.tsx";
 import { traverseAndCollectJoints } from "./useSkeleton.tsx";
+import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
 
 function printTree(node: EntityNode, depth = 0): string[] {
   const lines = [`${"─".repeat(depth)} ${node.name}`];
@@ -68,8 +69,10 @@ export function App() {
           <EntityProvider>
            {/* <WebSocketProvider>     Uncomment for server usage */}
               <SpeedProvider>
-                <KeyboardHandler />
-                <AppLayout />
+             <PartEntitiesProvider> {/* <-- AJOUT ICI */}
+          <KeyboardHandler />
+          <AppLayout />
+               </PartEntitiesProvider>
               </SpeedProvider>
             {/*</WebSocketProvider>*/}
           </EntityProvider>
