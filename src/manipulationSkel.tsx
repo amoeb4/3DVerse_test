@@ -29,18 +29,12 @@ export async function moveEntityAndChildren(
     console.warn(`❌ Entité ${rootName} non trouvée`);
     return;
   }
-
   const descendants = await getDescendants(root, entitiesMap);
   const allToMove = [root, ...descendants];
   const entityList = allToMove.map((e) => ({ id: e.id }));
-
   try {
-    // Appliquer le déplacement de position
     await posKey(instance, entityList, ...delta);
-
-    // Appliquer une rotation éventuelle (exemple : 0°, 0°, 0° → aucun changement)
     await oriKey(instance, entityList, 0, 0, 0, eulerToQuat);
-
     console.log(`✅ Déplacement + orientation appliqués à ${entityList.length} entités`);
   } catch (err) {
     console.error("❌ Erreur lors du déplacement avec posKey / oriKey :", err);
