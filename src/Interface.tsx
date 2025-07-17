@@ -65,7 +65,7 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
+export function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const c1 = Math.cos(rad(y) / 2);
   const s1 = Math.sin(rad(y) / 2);

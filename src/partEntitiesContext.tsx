@@ -16,7 +16,7 @@ type EntityWithParent = Entity & {
   getParent?: () => Promise<Entity | null>;
 };
 
-async function getDescendants(root: Entity, entitiesMap: Map<string, Entity>): Promise<Entity[]> {
+export async function getDescendants(root: Entity, entitiesMap: Map<string, Entity>): Promise<Entity[]> {
   const descendants: Entity[] = [];
   const visited = new Set<string>();
 

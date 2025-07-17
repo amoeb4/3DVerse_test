@@ -1,14 +1,48 @@
-import { usePartEntities } from "./partEntitiesContext";
+import { setOrientation } from "./keyBindings";
+import { usePartEntities, getDescendants } from "./partEntitiesContext";
+import type { Entity } from "@3dverse/livelink";
+import { posKey, oriKey } from "./keyBindings";
+import { eulerToQuat } from "./Interface";
 
-function getPart() {
-  const { entitiesMap } = usePartEntities();
+//function getPart() {
+//  const { entitiesMap } = usePartEntities();
+//
+//  const part7 = entitiesMap.get("part_7");
+//
+//  return <div>{part7?.id}</div>;
+//}
+//
+//export async function move(entity)
+//{
+//
+//    setOrientation(entity.entity_uuid, )
+//}
 
-  const part7 = entitiesMap.get("part_7");
+export async function moveEntityAndChildren(
+  rootName: string,
+  delta: [number, number, number],
+  entitiesMap: Map<string, Entity>,
+  instance: any
+) {
+  const root = [...entitiesMap.values()].find((e) => e.name === rootName);
+  if (!root) {
+    console.warn(`❌ Entité ${rootName} non trouvée`);
+    return;
+  }
 
-  return <div>{part7?.id}</div>;
-}
+  const descendants = await getDescendants(root, entitiesMap);
+  const allToMove = [root, ...descendants];
+  const entityList = allToMove.map((e) => ({ id: e.id }));
 
-export async function move(entity_uuid)
-{
-    se
+  try {
+    // Appliquer le déplacement de position
+    await posKey(instance, entityList, ...delta);
+
+    // Appliquer une rotation éventuelle (exemple : 0°, 0°, 0° → aucun changement)
+    await oriKey(instance, entityList, 0, 0, 0, eulerToQuat);
+
+    console.log(`✅ Déplacement + orientation appliqués à ${entityList.length} entités`);
+  } catch (err) {
+    console.error("❌ Erreur lors du déplacement avec posKey / oriKey :", err);
+  }
 }
