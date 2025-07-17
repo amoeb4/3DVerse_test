@@ -9,54 +9,7 @@ import { CameraEntityContext } from "./cameraControl.tsx";
 import "./App.css";
 //import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
-import type { JointEntry } from "./useSkeleton.tsx";
-import { traverseAndCollectJoints } from "./useSkeleton.tsx";
 import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
-
-function printTree(node: EntityNode, depth = 0): string[] {
-  const lines = [`${"─".repeat(depth)} ${node.name}`];
-  for (const child of node.children) {
-    lines.push(...printTree(child, depth + 1));
-  }
-  return lines;
-}
-
-export type EntityNode = {
-  id: string;
-  name: string;
-  children: EntityNode[];
-};
-
-async function buildHierarchy(entities: any, entityId: string): Promise<EntityNode> {
-  const entity = await entities.get(entityId);
-  if (!entity) throw new Error(`Entity ${entityId} not found`);
-
-  const name = (await entity.getName?.()) ?? entity.id;
-  const childrenIds = entity.getChildren?.() ?? [];
-
-  const children: EntityNode[] = [];
-  for (const childId of childrenIds) {
-    const childNode = await buildHierarchy(entities, childId);
-    children.push(childNode);
-  }
-
-  return { id: entityId, name, children };
-}
-
-export function useEntityHierarchy(rootEntityId?: string) {
-  const { instance } = useContext(LivelinkContext);
-  const [hierarchy, setHierarchy] = useState<EntityNode | null>(null);
-
-  useEffect(() => {
-    if (!instance || !rootEntityId) return;
-
-    buildHierarchy(instance, rootEntityId)
-      .then(setHierarchy)
-      .catch(console.error);
-  }, [instance, rootEntityId]);
-
-  return hierarchy;
-}
 
 export function App() {
   const [credentials, setCredentials] = useState<{ sceneId: string } | null>(null);
@@ -69,7 +22,7 @@ export function App() {
           <EntityProvider>
            {/* <WebSocketProvider>     Uncomment for server usage */}
               <SpeedProvider>
-             <PartEntitiesProvider> {/* <-- AJOUT ICI */}
+             <PartEntitiesProvider>
           <KeyboardHandler />
           <AppLayout />
                </PartEntitiesProvider>
@@ -136,7 +89,6 @@ function AppLayout() {
   const { isConnecting } = useContext(LivelinkContext);
 
   const rootEntityId = cameraEntity?.id ?? undefined;
-  const hierarchy = useEntityHierarchy(rootEntityId);
 
   const cameraControllerRef = useRef<DefaultCameraController>(null);
   const [cameraControllerPreset, setCameraControllerPreset] = useState<CameraControllerPreset>(
@@ -147,43 +99,10 @@ function AppLayout() {
     const targetPosition = [-30, 250, 150] as const;
     const lookAtPosition = [-280, -100, -120] as const;
     cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
-};
-
-const { instance } = useContext(LivelinkContext);
-
-useEffect(() => {
-  const run = async () => {
-    if (!instance) return;
-
-    try {
-      const scene = instance.scene;
-      const allEntities: Entity[] = await scene.getEntities();
-
-      const allJoints: JointEntry[] = [];
-
-      for (const entity of allEntities) {
-        let parent: Entity | null = null;
-
-        try {
-          parent = await entity.getParent?.();
-        } catch (e) {
-          console.warn(`⚠️ Impossible d’obtenir le parent de ${entity.name ?? "(sans nom)"}`, e);
-        }
-
-        if (!parent) {
-          const joints = await traverseAndCollectJoints(entity);
-          allJoints.push(...joints);
-        }
-      }
-
-      console.log(`✅ ${allJoints.length} joints collectés à partir de toutes les racines.`);
-    } catch (err) {
-      console.error("❌ Erreur lors du parcours des joints :", err);
-    }
   };
 
-  run();
-}, [instance]);
+  // On garde l'instance car utilisée ailleurs dans le composant (potentiellement)
+  const { instance } = useContext(LivelinkContext);
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -230,6 +149,7 @@ useEffect(() => {
     </CameraEntityContext.Provider>
   );
 }
+
 
 const modalStyle = {
   position: "fixed",

@@ -55,17 +55,13 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
           forbidden_components: [],
         });
 
-        const filtered = foundEntities
-          .map((entity) => ({
-            id: entity.id,
-            name: entity.name || "(sans nom)",
-          }))
-          .filter((entity) => /^part_\d+$/.test(entity.name ?? ""))
-          .sort((a, b) => {
-            const numA = parseInt(a.name!.split("_")[1], 10);
-            const numB = parseInt(b.name!.split("_")[1], 10);
-            return numA - numB;
-          });
+        const filtered = foundEntities.filter((entity) => /^part_\d+$/.test(entity.name ?? ""));
+
+        filtered.sort((a, b) => {
+          const numA = parseInt(a.name!.split("_")[1], 10);
+          const numB = parseInt(b.name!.split("_")[1], 10);
+          return numA - numB;
+        });
 
         setEntities(filtered);
         setEntitiesMap(new Map(filtered.map((e) => [e.name!, e])));
@@ -82,8 +78,4 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
       {children}
     </PartEntitiesContext.Provider>
   );
-}
-
-export function usePartEntities() {
-  return useContext(PartEntitiesContext);
 }

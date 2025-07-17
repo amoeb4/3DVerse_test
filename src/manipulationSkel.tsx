@@ -1,5 +1,5 @@
 import { setOrientation } from "./keyBindings";
-import { usePartEntities, getDescendants } from "./partEntitiesContext";
+import { getDescendants } from "./partEntitiesContext";
 import type { Entity } from "@3dverse/livelink";
 import { posKey, oriKey } from "./keyBindings";
 import { eulerToQuat } from "./Interface";
