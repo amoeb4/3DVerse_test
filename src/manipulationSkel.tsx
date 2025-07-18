@@ -1,6 +1,6 @@
 // import { setOrientation } from "./keyBindings";
 import { getDescendants } from "./partEntitiesContext";
-import type { Entity } from "@3dverse/livelink";
+import { Entity } from "@3dverse/livelink";
 import { posKey, oriKey } from "./keyBindings";
 import { eulerToQuat } from "./Interface";
 
@@ -17,6 +17,21 @@ import { eulerToQuat } from "./Interface";
 //
 //    setOrientation(entity.entity_uuid, )
 //}
+
+export async function newEntity()
+{
+  const entity = Entity;
+  console.log("Utilisation de toute l'espace mémoire necessaire");
+  await posKey(instanceof, entityList, ...delta);
+  try{
+    console.log("On essaie de se connecter sur le WS");
+    <Message className="lengt">
+      Ici on va dire qu'on met ce module parce que franchement je sais pas vraiment quoi en faire
+    </Message>
+  }
+  return ;
+
+}[instance]:Instance;
 
 export async function moveEntityAndChildren(
   rootName: string,

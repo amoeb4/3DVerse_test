@@ -31,9 +31,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
   const selectedEntityRef = useRef<string | null>(null);
-
-  // ✅ Buffer des messages reçus trop tôt
   const messageQueue = useRef<any[]>([]);
+
+  // ⚠️ Nouveau state pour déclencher les effets
+  const [flushTrigger, setFlushTrigger] = useState(0);
 
   useEffect(() => {
     selectedEntityRef.current = selectedEntity?.name ?? null;
@@ -52,73 +53,76 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-socket.onmessage = async (event) => {
-  const msg = event.data.trim();
-  console.log("📨 onmessage triggered:", msg);
-  try {
-    const parsed = JSON.parse(msg);
-    console.log("✅ Parsed JSON:", parsed);
+    socket.onmessage = async (event) => {
+      const msg = event.data.trim();
+      console.log("📨 onmessage triggered:", msg);
+      try {
+        const parsed = JSON.parse(msg);
+        console.log("✅ Parsed JSON:", parsed);
 
-    if (
-      typeof parsed === "object" &&
-      typeof parsed.name === "string" &&
-      Array.isArray(parsed.location) &&
-      parsed.location.length === 3
-    ) {
-      const [x, y, z] = parsed.location;
-      console.log("🧮 Parsed location:", [x, y, z]);
-      if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-        if (instance && entitiesMap.size > 0) {
-          console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
-          await moveEntityAndChildren(parsed.name, [x, y, z], entitiesMap, instance);
-        } else {
-          console.warn(`⏳ instance or entitiesMap not ready yet, queuing message`);
-          // ici ta queue de messages si tu en as
+        if (
+          typeof parsed === "object" &&
+          typeof parsed.name === "string" &&
+          Array.isArray(parsed.location) &&
+          parsed.location.length === 3
+        ) {
+          const [x, y, z] = parsed.location;
+          console.log("🧮 Parsed location:", [x, y, z]);
+          if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+            if (instance && entitiesMap.size > 0) {
+              console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
+              await moveEntityAndChildren(parsed.name, [x, y, z], entitiesMap, instance);
+            } else {
+              console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
+              messageQueue.current.push(parsed);
+              setFlushTrigger((prev) => prev + 1); // 🔁 Force re-check
+            }
+            return;
+          }
         }
-        return;
-      }
-    }
 
-    if (parsed.select && typeof parsed.select === "string") {
-      console.log(`🎯 Selecting entity ${parsed.select}`);
-      setSelectedEntityName(parsed.select);
-      return;
-    }
-
-    console.warn("⚠️ Ignored unknown JSON message:", parsed);
-    return;
-  } catch (e) {
-    console.warn("⚠️ Message is not JSON, falling back to legacy split-based parsing");
-
-    const parts = msg.split(" ");
-    console.log("🪓 Fallback split parts:", parts);
-
-    if (parts.length === 4) {
-      const [name, xStr, yStr, zStr] = parts;
-      const x = parseFloat(xStr);
-      const y = parseFloat(yStr);
-      const z = parseFloat(zStr);
-
-      if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
-        if (instance && entitiesMap.size > 0) {
-          console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
-          await moveEntityAndChildren(name, [x, y, z], entitiesMap, instance);
-        } else {
-          console.warn("⚠️ instance or entitiesMap not ready yet");
+        if (parsed.select && typeof parsed.select === "string") {
+          console.log(`🎯 Selecting entity ${parsed.select}`);
+          setSelectedEntityName(parsed.select);
+          return;
         }
-        return;
-      }
-    }
 
-    if (parts.length === 2 && parts[0] === "select") {
-      const name = parts[1];
-      console.log(`🎯 Selecting entity ${name}`);
-      setSelectedEntityName(name);
-      return;
-    }
-    console.warn("⚠️ Ignored non-standard message:", msg);
-  }
-};
+        console.warn("⚠️ Ignored unknown JSON message:", parsed);
+      } catch (e) {
+        console.warn("⚠️ Message is not JSON, falling back to legacy split-based parsing");
+
+        const parts = msg.split(" ");
+        console.log("🪓 Fallback split parts:", parts);
+
+        if (parts.length === 4) {
+          const [name, xStr, yStr, zStr] = parts;
+          const x = parseFloat(xStr);
+          const y = parseFloat(yStr);
+          const z = parseFloat(zStr);
+
+          if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
+            if (instance && entitiesMap.size > 0) {
+              console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
+              await moveEntityAndChildren(name, [x, y, z], entitiesMap, instance);
+            } else {
+              console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
+              messageQueue.current.push({ name, location: [x, y, z] });
+              setFlushTrigger((prev) => prev + 1); // 🔁 Force re-check
+            }
+            return;
+          }
+        }
+
+        if (parts.length === 2 && parts[0] === "select") {
+          const name = parts[1];
+          console.log(`🎯 Selecting entity ${name}`);
+          setSelectedEntityName(name);
+          return;
+        }
+
+        console.warn("⚠️ Ignored non-standard message:", msg);
+      }
+    };
 
     socket.onclose = () => {
       console.log("❌ WebSocket closed");
@@ -136,23 +140,25 @@ socket.onmessage = async (event) => {
       console.log(`🔄 Reconnecting in ${timeout}ms...`);
     };
   }, [instance, entitiesMap]);
-useEffect(() => {
-  console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
 
-  if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
-    console.log("📬 Flushing queued messages...");
-    const toProcess = [...messageQueue.current];
-    messageQueue.current = [];
+  // 🧯 Flush de la queue
+  useEffect(() => {
+    console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
 
-    toProcess.forEach(async (parsed) => {
-      const [x, y, z] = parsed.location.map(Number);
-      console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
-      await moveEntityAndChildren(parsed.name, [x, y, z], entitiesMap, instance);
-    });
-  }
-}, [instance, entitiesMap]);
+    if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
+      console.log("📬 Flushing queued messages...");
+      const toProcess = [...messageQueue.current];
+      messageQueue.current = [];
 
-  // 📡 Lancer la connexion dès que le composant est monté
+      toProcess.forEach(async (parsed) => {
+        const [x, y, z] = parsed.location.map(Number);
+        console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
+        await moveEntityAndChildren(parsed.name, [x, y, z], entitiesMap, instance);
+      });
+    }
+  }, [flushTrigger, instance, entitiesMap]);
+
+  // 📡 Connexion WebSocket au montage
   useEffect(() => {
     connectWebSocket();
     return () => {
@@ -161,6 +167,7 @@ useEffect(() => {
     };
   }, []);
 
+  // 🔄 Envoi de la sélection à chaque changement
   useEffect(() => {
     if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(`select ${selectedEntity.name}`);
