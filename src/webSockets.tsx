@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
-import { PartEntitiesContext } from "./partEntitiesContext"; // ⚠️ importer le CONTEXTE, pas le Provider
+import { PartEntitiesContext } from "./partEntitiesContext";
 import { moveEntityAndChildren } from "./manipulationSkel";
 
 const WSContext = createContext({
@@ -31,76 +31,81 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
 
-  const connectWebSocket = useCallback(() => {
-    const socket = new WebSocket("ws://localhost:8767");
-    socketRef.current = socket;
+  const selectedEntityRef = useRef<string | null>(null);
+useEffect(() => {
+  selectedEntityRef.current = selectedEntity?.name ?? null;
+}, [selectedEntity]);
 
-    socket.onopen = () => {
-      console.log("✅ WebSocket connected");
-      reconnectAttempts.current = 0;
+const connectWebSocket = useCallback(() => {
+  const socket = new WebSocket("ws://localhost:8767");
+  socketRef.current = socket;
 
-      if (selectedEntity?.name) {
-        socket.send(`select ${selectedEntity.name}`);
-      }
-    };
+  socket.onopen = () => {
+    console.log("✅ WebSocket connected");
+    reconnectAttempts.current = 0;
 
-    socket.onmessage = async (event) => {
-      const msg = event.data.trim();
-      console.log("📨 Message received:", msg);
+    if (selectedEntityRef.current) {
+      socket.send(`select ${selectedEntityRef.current}`);
+    }
+  };
 
-      const parts = msg.split(" ");
+  socket.onmessage = async (event) => {
+    const msg = event.data.trim();
+    console.log("📨 Message received:", msg);
 
-      if (parts.length === 4) {
-        // Format: "part_1 1.0 2.0 3.0"
-        const [name, xStr, yStr, zStr] = parts;
-        const x = parseFloat(xStr);
-        const y = parseFloat(yStr);
-        const z = parseFloat(zStr);
+    const parts = msg.split(" ");
 
-        if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
-          if (instance && entitiesMap.size > 0) {
-            console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
-            await moveEntityAndChildren(name, [x, y, z], entitiesMap, instance);
-          } else {
-            console.warn("⚠️ instance or entitiesMap not ready yet");
-          }
-          return;
+    if (parts.length === 4) {
+      const [name, xStr, yStr, zStr] = parts;
+      const x = parseFloat(xStr);
+      const y = parseFloat(yStr);
+      const z = parseFloat(zStr);
+
+      if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
+        if (instance && entitiesMap.size > 0) {
+          console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
+          await moveEntityAndChildren(name, [x, y, z], entitiesMap, instance);
+        } else {
+          console.warn("⚠️ instance or entitiesMap not ready yet");
         }
-      }
-      if (parts.length === 2 && parts[0] === "select") {
-        const name = parts[1];
-        console.log(`🎯 Selecting entity ${name}`);
-        setSelectedEntityName(name);
         return;
       }
-      console.error("❌ Unrecognized WebSocket message format:", msg);
-    };
+    }
 
-    socket.onclose = () => {
-      console.log("❌ WebSocket closed");
-      const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
-      reconnectAttempts.current += 1;
+    if (parts.length === 2 && parts[0] === "select") {
+      const name = parts[1];
+      console.log(`🎯 Selecting entity ${name}`);
+      setSelectedEntityName(name);
+      return;
+    }
 
-      if (reconnectAttempts.current === 5) {
-        console.log("Too many connection attempts, aborting.");
-        return;
-      }
+    console.warn("⚠️ Ignored non-standard message:", msg);
+  };
 
-      reconnectTimeoutRef.current = window.setTimeout(() => {
-        connectWebSocket();
-      }, timeout);
+  socket.onclose = () => {
+    console.log("❌ WebSocket closed");
+    const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
+    reconnectAttempts.current += 1;
 
-      console.log(`🔄 Reconnecting in ${timeout}ms...`);
-    };
-  }, [selectedEntity?.name, instance, entitiesMap]);
+    if (reconnectAttempts.current >= 5) {
+      console.log("Too many connection attempts, aborting.");
+      return;
+    }
 
-  useEffect(() => {
-    connectWebSocket();
-    return () => {
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      socketRef.current?.close();
-    };
-  }, [connectWebSocket]);
+    reconnectTimeoutRef.current = window.setTimeout(() => {
+      connectWebSocket();
+    }, timeout);
+    console.log(`🔄 Reconnecting in ${timeout}ms...`);
+  };
+}, [instance, entitiesMap]);
+
+useEffect(() => {
+  connectWebSocket();
+  return () => {
+    if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+    socketRef.current?.close();
+  };
+}, []);
 
   useEffect(() => {
     if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
