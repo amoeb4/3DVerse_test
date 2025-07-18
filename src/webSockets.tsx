@@ -30,31 +30,34 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const socketRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const reconnectAttempts = useRef(0);
-
   const selectedEntityRef = useRef<string | null>(null);
-useEffect(() => {
-  selectedEntityRef.current = selectedEntity?.name ?? null;
-}, [selectedEntity]);
 
-const connectWebSocket = useCallback(() => {
-  const socket = new WebSocket("ws://localhost:8767");
-  socketRef.current = socket;
+  // ✅ Buffer des messages reçus trop tôt
+  const messageQueue = useRef<any[]>([]);
 
-  socket.onopen = () => {
-    console.log("✅ WebSocket connected");
-    reconnectAttempts.current = 0;
+  useEffect(() => {
+    selectedEntityRef.current = selectedEntity?.name ?? null;
+  }, [selectedEntity]);
 
-    if (selectedEntityRef.current) {
-      socket.send(`select ${selectedEntityRef.current}`);
-    }
-  };
+  const connectWebSocket = useCallback(() => {
+    const socket = new WebSocket("ws://localhost:8767");
+    socketRef.current = socket;
 
-  socket.onmessage = async (event) => {
+    socket.onopen = () => {
+      console.log("✅ WebSocket connected");
+      reconnectAttempts.current = 0;
+
+      if (selectedEntityRef.current) {
+        socket.send(`select ${selectedEntityRef.current}`);
+      }
+    };
+
+socket.onmessage = async (event) => {
   const msg = event.data.trim();
-  console.log("📨 Message received:", msg);
-
+  console.log("📨 onmessage triggered:", msg);
   try {
     const parsed = JSON.parse(msg);
+    console.log("✅ Parsed JSON:", parsed);
 
     if (
       typeof parsed === "object" &&
@@ -63,12 +66,14 @@ const connectWebSocket = useCallback(() => {
       parsed.location.length === 3
     ) {
       const [x, y, z] = parsed.location;
+      console.log("🧮 Parsed location:", [x, y, z]);
       if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
         if (instance && entitiesMap.size > 0) {
           console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
           await moveEntityAndChildren(parsed.name, [x, y, z], entitiesMap, instance);
         } else {
-          console.warn("⚠️ instance or entitiesMap not ready yet");
+          console.warn(`⏳ instance or entitiesMap not ready yet, queuing message`);
+          // ici ta queue de messages si tu en as
         }
         return;
       }
@@ -81,10 +86,12 @@ const connectWebSocket = useCallback(() => {
     }
 
     console.warn("⚠️ Ignored unknown JSON message:", parsed);
+    return;
   } catch (e) {
     console.warn("⚠️ Message is not JSON, falling back to legacy split-based parsing");
 
     const parts = msg.split(" ");
+    console.log("🪓 Fallback split parts:", parts);
 
     if (parts.length === 4) {
       const [name, xStr, yStr, zStr] = parts;
@@ -109,34 +116,50 @@ const connectWebSocket = useCallback(() => {
       setSelectedEntityName(name);
       return;
     }
-
     console.warn("⚠️ Ignored non-standard message:", msg);
   }
 };
-  socket.onclose = () => {
-    console.log("❌ WebSocket closed");
-    const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
-    reconnectAttempts.current += 1;
 
-    if (reconnectAttempts.current >= 5) {
-      console.log("Too many connection attempts, aborting.");
-      return;
-    }
+    socket.onclose = () => {
+      console.log("❌ WebSocket closed");
+      const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
+      reconnectAttempts.current += 1;
 
-    reconnectTimeoutRef.current = window.setTimeout(() => {
-      connectWebSocket();
-    }, timeout);
-    console.log(`🔄 Reconnecting in ${timeout}ms...`);
-  };
+      if (reconnectAttempts.current >= 5) {
+        console.log("❌ Too many connection attempts, aborting.");
+        return;
+      }
+
+      reconnectTimeoutRef.current = window.setTimeout(() => {
+        connectWebSocket();
+      }, timeout);
+      console.log(`🔄 Reconnecting in ${timeout}ms...`);
+    };
+  }, [instance, entitiesMap]);
+useEffect(() => {
+  console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
+
+  if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
+    console.log("📬 Flushing queued messages...");
+    const toProcess = [...messageQueue.current];
+    messageQueue.current = [];
+
+    toProcess.forEach(async (parsed) => {
+      const [x, y, z] = parsed.location.map(Number);
+      console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
+      await moveEntityAndChildren(parsed.name, [x, y, z], entitiesMap, instance);
+    });
+  }
 }, [instance, entitiesMap]);
 
-useEffect(() => {
-  connectWebSocket();
-  return () => {
-    if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-    socketRef.current?.close();
-  };
-}, []);
+  // 📡 Lancer la connexion dès que le composant est monté
+  useEffect(() => {
+    connectWebSocket();
+    return () => {
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      socketRef.current?.close();
+    };
+  }, []);
 
   useEffect(() => {
     if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {

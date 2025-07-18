@@ -21,12 +21,12 @@ export function App() {
         <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
           <PartEntitiesProvider>
-           <WebSocketProvider>
+            <WebSocketProvider>
               <SpeedProvider>
           <KeyboardHandler />
           <AppLayout />
               </SpeedProvider>
-            </WebSocketProvider>
+              </WebSocketProvider>
             </PartEntitiesProvider>
           </EntityProvider>
         </Livelink>

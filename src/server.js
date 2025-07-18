@@ -10,36 +10,40 @@ wss.on('connection', (ws) => {
   ws.send("Hello from server");
 
   ws.on('message', (message) => {
-    const text = message.toString();
-    console.log("📨 Message received:", text);
+  const text = message.toString();
+  console.log("📨 Message received:", text);
 
-    try {
-      const data = JSON.parse(text);
+  try {
+    const data = JSON.parse(text);
 
-      if (
-        typeof data.name === "string" &&
-        Array.isArray(data.location) &&
-        data.location.length === 3 &&
-        data.location.every((n) => typeof n === "number")
-      ) {
-        const entity = entities.find(e => e.name === data.name);
-        if (entity) {
-          entity.orientation = data.location;
-          console.log(`🔄 Updated ${entity.name} to new location:`, data.location);
-          ws.send(`Moved ${entity.name} to ${JSON.stringify(data.location)}`);
-        } else {
-          console.warn(`⚠️ Entity not found: ${data.name}`);
-          ws.send(`Entity ${data.name} not found`);
+    if (
+      typeof data.name === "string" &&
+      Array.isArray(data.location) &&
+      data.location.length === 3 &&
+      data.location.every((n) => typeof n === "number")
+    ) {
+      console.log(`➡️ Request to move ${data.name} to ${data.location}`);
+      wss.clients.forEach(client => {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify(data));
+          console.log(text);
         }
-      } else {
-        console.warn("⚠️ Invalid JSON format");
-        ws.send("Invalid JSON format. Expected { name, location: [x,y,z] }");
-      }
-    } catch (err) {
-      console.error("❌ Error parsing message:", err);
-      ws.send("Error: Invalid JSON");
+      });
+    } else if (typeof data.select === "string") {
+      console.log(`🎯 Request to select entity: ${data.select}`);
+      wss.clients.forEach(client => {
+        if (client.readyState === client.OPEN) {
+          client.send(JSON.stringify({ select: data.select }));
+        }
+      });
+    } else {
+      ws.send("Invalid message format");
     }
-  });
+  } catch (err) {
+    console.error("❌ Error parsing message:", err);
+    ws.send("Error: Invalid JSON");
+  }
+});
 
   ws.on('close', () => {
     console.log(`❌ Client disconnected (${wss.clients.size - 1} remaining)`);
