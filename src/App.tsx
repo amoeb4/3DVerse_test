@@ -101,7 +101,6 @@ function AppLayout() {
     cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
   };
 
-  // On garde l'instance car utilisée ailleurs dans le composant (potentiellement)
   const { instance } = useContext(LivelinkContext);
 
   return (
@@ -149,7 +148,6 @@ function AppLayout() {
     </CameraEntityContext.Provider>
   );
 }
-
 
 const modalStyle = {
   position: "fixed",

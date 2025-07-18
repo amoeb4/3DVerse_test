@@ -36,7 +36,6 @@ async def send_command(uri):
     except Exception as e:
         print(f"Erreur : {e}")
 
-
 async def main():
     uri = "ws://localhost:8767"
     while True:
@@ -49,7 +48,6 @@ async def main():
         except KeyboardInterrupt:
             print("\nInterruption clavier détectée, arrêt du programme.")
             break
-
 
 if __name__ == "__main__":
     asyncio.run(main())

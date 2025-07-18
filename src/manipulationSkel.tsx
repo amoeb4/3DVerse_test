@@ -1,4 +1,4 @@
-import { setOrientation } from "./keyBindings";
+// import { setOrientation } from "./keyBindings";
 import { getDescendants } from "./partEntitiesContext";
 import type { Entity } from "@3dverse/livelink";
 import { posKey, oriKey } from "./keyBindings";

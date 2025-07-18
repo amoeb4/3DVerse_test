@@ -50,8 +50,39 @@ const connectWebSocket = useCallback(() => {
   };
 
   socket.onmessage = async (event) => {
-    const msg = event.data.trim();
-    console.log("📨 Message received:", msg);
+  const msg = event.data.trim();
+  console.log("📨 Message received:", msg);
+
+  try {
+    const parsed = JSON.parse(msg);
+
+    if (
+      typeof parsed === "object" &&
+      typeof parsed.name === "string" &&
+      Array.isArray(parsed.location) &&
+      parsed.location.length === 3
+    ) {
+      const [x, y, z] = parsed.location;
+      if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+        if (instance && entitiesMap.size > 0) {
+          console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
+          await moveEntityAndChildren(parsed.name, [x, y, z], entitiesMap, instance);
+        } else {
+          console.warn("⚠️ instance or entitiesMap not ready yet");
+        }
+        return;
+      }
+    }
+
+    if (parsed.select && typeof parsed.select === "string") {
+      console.log(`🎯 Selecting entity ${parsed.select}`);
+      setSelectedEntityName(parsed.select);
+      return;
+    }
+
+    console.warn("⚠️ Ignored unknown JSON message:", parsed);
+  } catch (e) {
+    console.warn("⚠️ Message is not JSON, falling back to legacy split-based parsing");
 
     const parts = msg.split(" ");
 
@@ -80,8 +111,8 @@ const connectWebSocket = useCallback(() => {
     }
 
     console.warn("⚠️ Ignored non-standard message:", msg);
-  };
-
+  }
+};
   socket.onclose = () => {
     console.log("❌ WebSocket closed");
     const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
