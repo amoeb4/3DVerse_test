@@ -7,7 +7,7 @@ async def send_command(uri):
         async with websockets.connect(uri) as websocket:
             print("Connecté au serveur WebSocket.")
             while True:
-                line = input("Commande (ex: Cube 1.0 2.0 3.0) : ").strip()
+                line = input("Attente d'une commande... : ").strip()
                 if not line:
                     continue
                 if line.lower() in ('exit', 'quit', 'q'):
@@ -26,9 +26,8 @@ async def send_command(uri):
                     print("Coordonnées invalides. Utilisez des nombres.")
                     continue
 
-                mode = "-P"
-                key = "location"
-                message = json.dumps({"name": name, key: coords, "mode": mode})
+                key = "location";
+                message = json.dumps({"name": name, key: coords})
                 await websocket.send(message)
                 print(f"Commande envoyée : {message}")
 
@@ -36,6 +35,7 @@ async def send_command(uri):
         print("\nInterruption clavier détectée, fermeture du client.")
     except Exception as e:
         print(f"Erreur : {e}")
+
 
 async def main():
     uri = "ws://localhost:8767"
@@ -49,6 +49,7 @@ async def main():
         except KeyboardInterrupt:
             print("\nInterruption clavier détectée, arrêt du programme.")
             break
+
 
 if __name__ == "__main__":
     asyncio.run(main())
