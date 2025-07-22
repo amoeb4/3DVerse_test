@@ -6,7 +6,7 @@ import { LivelinkContext,
 import { useSpeed } from "./Interface";
 
 export default function KeyboardHandler() {
-  const { instance } = useContext(LivelinkContext);
+  const { instance } = useContext(LivelinkContext); 
   const { speed } = useSpeed();
 
   useEffect(() => {
@@ -61,11 +61,11 @@ export default function KeyboardHandler() {
   return null;
 }
 
-export async function posKey( instance: any,  entities: { id: string }[],
-  param1: number,
-  param2: number,
-  param3: number
-) {
+export async function posKey( instance: any, entities: { id: string }[], param1: number, param2: number,  param3: number)
+{
+  entities.forEach(e => {
+    console.log(`🆔 Entity ID: ${e.id}`);
+  });
   for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,
@@ -89,26 +89,15 @@ export async function posKey( instance: any,  entities: { id: string }[],
   }
 }
 
-export async function oriKey(
-  instance: any,
-  entities: { id: string }[],
-  param1: number,
-  param2: number,
-  param3: number,
-  eulerToQuat: (x: number, y: number, z: number) => [
-    number,
-    number,
-    number,
-    number
-  ]
-) {
+export async function oriKey( instance: any, entities: { id: string }[], param1: number, param2: number, param3: number,
+   eulerToQuat: (x: number, y: number, z: number) => [ number, number, number, number ]) 
+{
   for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,
     });
     if (fullEntity) {
       const [x, y, z, w] = fullEntity.local_transform.orientation || [0, 0, 0, 1];
-
       if (param1 === -90 && param2 === 0 && param3 === 0) {
         fullEntity.local_transform = {
           orientation: eulerToQuat(-90, 0, 0),

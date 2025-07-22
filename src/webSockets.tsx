@@ -32,8 +32,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const reconnectAttempts = useRef(0);
   const selectedEntityRef = useRef<string | null>(null);
   const messageQueue = useRef<any[]>([]);
-
-  // ⚠️ Nouveau state pour déclencher les effets
   const [flushTrigger, setFlushTrigger] = useState(0);
 
   useEffect(() => {
@@ -99,7 +97,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           const x = parseFloat(xStr);
           const y = parseFloat(yStr);
           const z = parseFloat(zStr);
-
           if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
@@ -112,7 +109,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
             return;
           }
         }
-
         if (parts.length === 2 && parts[0] === "select") {
           const name = parts[1];
           console.log(`🎯 Selecting entity ${name}`);
@@ -123,7 +119,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         console.warn("⚠️ Ignored non-standard message:", msg);
       }
     };
-
     socket.onclose = () => {
       console.log("❌ WebSocket closed");
       const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
@@ -141,7 +136,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [instance, entitiesMap]);
 
-  // 🧯 Flush de la queue
   useEffect(() => {
     console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
 
@@ -158,7 +152,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     }
   }, [flushTrigger, instance, entitiesMap]);
 
-  // 📡 Connexion WebSocket au montage
   useEffect(() => {
     connectWebSocket();
     return () => {
@@ -166,8 +159,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       socketRef.current?.close();
     };
   }, []);
-
-  // 🔄 Envoi de la sélection à chaque changement
   useEffect(() => {
     if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(`select ${selectedEntity.name}`);

@@ -12,10 +12,10 @@ export async function getDescendants(
 ): Promise<EntityWithParentId[]> {
   const descendants: EntityWithParentId[] = [];
   const visited = new Set<string>();
-
   const walk = (entity: EntityWithParentId) => {
     visited.add(entity.id);
-
+// Définit une arborescence de parents / Enfants 
+  console.log("$id : probable cause");
     for (const [, child] of entitiesMap) {
       if (child.__parentId === entity.id && !visited.has(child.id)) {
         descendants.push(child);
@@ -23,7 +23,6 @@ export async function getDescendants(
       }
     }
   };
-
   walk(root);
   return descendants;
 }
@@ -77,7 +76,7 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
           return numA - numB;
         });
 
-        console.log("🧩 Entités triées et enrichies :", enriched.map((e) => e.name));
+        console.log("Entités triées et enrichies :", enriched.map((e) => e.name));
 
         setEntities(enriched);
         setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
