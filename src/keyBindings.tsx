@@ -1,6 +1,5 @@
 import { useEffect, useContext } from "react";
 import { quat, vec3 } from "gl-matrix";
-import { SpeedContext } from "./Interface";
 import { LivelinkContext,
 } from "@3dverse/livelink-react";
 import { useSpeed } from "./Interface";

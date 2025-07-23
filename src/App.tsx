@@ -1,6 +1,6 @@
-import { useState, useContext, useRef, useEffect } from "react";
+import { useState, useContext, useRef } from "react";
 import { Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController } from "@3dverse/livelink-react";
-import { CameraControllerPresets, Entity } from "@3dverse/livelink";
+import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener.jsx";
@@ -85,10 +85,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
 
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
-  const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
-
-  const rootEntityId = cameraEntity?.id ?? undefined;
 
   const cameraControllerRef = useRef<DefaultCameraController>(null);
   const [cameraControllerPreset, setCameraControllerPreset] = useState<CameraControllerPreset>(
@@ -100,8 +97,6 @@ function AppLayout() {
     const lookAtPosition = [-280, -100, -120] as const;
     cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
   };
-
-  const { instance } = useContext(LivelinkContext);
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -117,11 +112,11 @@ function AppLayout() {
             </div>
           )}
           <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
-          <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
+          {/*<Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
             <Viewport cameraEntity={pipCamera} className="w-full h-full">
               <CameraController />
             </Viewport>
-          </Canvas>
+          </Canvas>*/}
         </Viewport>
       </Canvas>
       <div className="absolute top-14 left-1 flex flex-col">
@@ -134,11 +129,8 @@ function AppLayout() {
             const name = presetKey.replace("_", " ");
             const isCurrentPreset = preset === cameraControllerPreset;
             return (
-              <button
-                key={index}
-                className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
-                onClick={() => setCameraControllerPreset(preset)}
-              >
+              <button key={index} className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
+                onClick={() => setCameraControllerPreset(preset)}>
                 {name}
               </button>
             );
@@ -148,16 +140,18 @@ function AppLayout() {
     </CameraEntityContext.Provider>
   );
 }
+ 
+import type { CSSProperties } from "react";
 
-const modalStyle = {
-  position: "fixed",
-  top: "30%",
-  left: "30%",
-  backgroundColor: "#fff",
-  padding: "50px",
-  borderRadius: "10px",
-  boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.3)",
-  zIndex: 9999,
+const modalStyle: CSSProperties = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  backgroundColor: "white",
+  padding: "2rem",
+  borderRadius: "0.5rem",
+  boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+  zIndex: 1000,
 };
 
 export default App;
