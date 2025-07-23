@@ -1,0 +1,49 @@
+import * as THREE from 'three';
+
+const entityMap = new Map<string, Entity>(); // Tes entités 3Dverse
+const object3DMap = new Map<string, THREE.Object3D>();
+
+// Étape 1 - Créer un Object3D pour chaque entité
+for (const [id, entity] of entityMap) {
+  const obj = new THREE.Object3D();
+  obj.name = entity.name;
+
+  // Appliquer la transformation actuelle
+  const t = entity.local_transform;
+  if (t?.matrix) {
+    obj.matrix.fromArray(t.matrix);
+    obj.matrix.decompose(obj.position, obj.quaternion, obj.scale);
+  }
+
+  obj.updateMatrix();
+  object3DMap.set(id, obj);
+}
+
+// Étape 2 - Appliquer la hiérarchie
+for (const [id, entity] of entityMap) {
+  const obj = object3DMap.get(id)!;
+  const parent = entity.parent;
+  if (parent) {
+    const parentObj = object3DMap.get(parent.id);
+    if (parentObj) {
+      parentObj.add(obj);
+    }
+  }
+}
+
+// Étape 3 - Appliquer une rotation/translation au parent
+const rootObj = object3DMap.get("id_de_part_1")!;
+rootObj.position.x += 4;
+rootObj.rotation.y += Math.PI / 4;
+
+// Étape 4 - Mettre à jour toute la hiérarchie
+rootObj.updateMatrixWorld(true);
+
+// Étape 5 - Reconvertir vers les entités 3Dverse
+for (const [id, entity] of entityMap) {
+  const obj = object3DMap.get(id)!;
+  obj.updateMatrix();
+
+  const matrix = obj.matrix.toArray() as Mat4;
+  entity.local_transform = { matrix }; // Envoie à 3Dverse
+}
