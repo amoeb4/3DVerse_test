@@ -1,6 +1,6 @@
 // import { setOrientation } from "./keyBindings";
 import { getDescendants, PartEntitiesContext } from "./partEntitiesContext";
-//import { Entity } from "@3dverse/livelink";
+import { Entity } from "@3dverse/livelink";
 import { posKey, oriKey } from "./keyBindings.tsx";
 import type { EntityWithParentId } from "./partEntitiesContext.tsx";
 import { eulerToQuat } from "./Interface.tsx";
@@ -24,10 +24,10 @@ export async function moveEntityAndChildren(
 
   try {
    // await posKey(instance, entityList, ...delta);
+   console.log(`${delta[0]}, ${delta[1]}, ${delta[2]}`);
     await oriKey(instance, entityList, delta[0], delta[1], delta[2], eulerToQuat);
     console.log(`✅ Déplacement + orientation appliqués à ${entityList.length} entités à partir de l'index ${rootIndex}`);
   } catch (err) {
     console.error("❌ Erreur lors du déplacement avec posKey / oriKey :", err);
   }
 }
-

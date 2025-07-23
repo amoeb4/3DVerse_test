@@ -6,16 +6,13 @@ console.log('Server launched, awaiting message from client...');
 
 wss.on('connection', (ws) => {
   console.log(`✅ Client connected (${wss.clients.size} total)`);
-
-  ws.send("Hello from server");
-
+  
   ws.on('message', (message) => {
   const text = message.toString();
   console.log("📨 Message received:", text);
 
   try {
     const data = JSON.parse(text);
-
     if (
       typeof data.name === "string" &&
       Array.isArray(data.location) &&
