@@ -1,9 +1,6 @@
-import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
+import { LivelinkContext } from "@3dverse/livelink-react";
 import { useContext, useEffect, useState } from "react";
 import { Entity } from "@3dverse/livelink";
-import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { TransformControls } from "three/addons/controls/TransformControls.js";
 
 export function CreateJoints() {
     const { instance } = useContext(LivelinkContext);
