@@ -184,7 +184,7 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
 
 export async function rotateHierarchy(
   rootName: string,
-  delta: [number, number, number], // delta d'orientation en radians
+  delta: [number, number, number],
   entitiesMap: Map<string, EntityWithParentId>
 ) {
   const entities = [...entitiesMap.values()];
