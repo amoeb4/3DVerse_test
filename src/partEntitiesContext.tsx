@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
-// import type { Transform } from "@3dverse/livelink";
 import { Entity } from "@3dverse/livelink";
 import { mat4, vec3, quat } from "gl-matrix";
 import type { Vec3, Quat } from "@3dverse/livelink.core";
@@ -8,8 +7,6 @@ import type { Vec3, Quat } from "@3dverse/livelink.core";
 export type EntityWithParentId = Entity & {
   __parentId: string | null;
 };
-
-//type DebugTransform = keyof Transform;
 
 function quaternionToEuler(q: Quat): Vec3 {
   const [x, y, z, w] = q;
@@ -49,33 +46,37 @@ export function applyMatrixToEntity(entity: Entity, matrix: mat4) {
   };
 }
 
-export async function moveEntityHierarchyMatrixFast(
+export async function moveHierarchy(
   rootName: string,
   delta: [number, number, number],
-  entitiesMap: Map<string, EntityWithParentId>,
-  instance: any
+  entitiesMap: Map<string, EntityWithParentId>
 ) {
-  const root = entitiesMap.get(rootName);
-  if (!root) return console.warn("❌ Root not found");
-
-  const descendants = await getDescendants(root, entitiesMap);
-
-  const root_ls_to_ws = root.ls_to_ws;
-  const new_root_ls_to_ws = mat4.clone(root_ls_to_ws);
-  mat4.translate(new_root_ls_to_ws, new_root_ls_to_ws, vec3.fromValues(...delta));
-
-  const new_root_ws_to_ls = mat4.invert(mat4.create(), new_root_ls_to_ws);
-  const updated_root_local = mat4.multiply(mat4.create(), new_root_ws_to_ls!, root_ls_to_ws);
-  applyMatrixToEntity(root, updated_root_local);
-
-  for (const child of descendants) {
-    const childWorldMatrix = child.ls_to_ws;
-    const newParentInverse = mat4.invert(mat4.create(), new_root_ls_to_ws)!;
-    const newChildLocalMatrix = mat4.multiply(mat4.create(), newParentInverse, childWorldMatrix);
-    applyMatrixToEntity(child, newChildLocalMatrix);
+  const entities = [...entitiesMap.values()];
+  const rootIndex = entities.findIndex((e) => e.name === rootName);
+  if (rootIndex === -1) {
+    console.warn(`❌ Entité ${rootName} non trouvée`);
+    return;
   }
 
-  console.log(`✅ Déplacement appliqué avec matrices à ${descendants.length + 1} entités`);
+  const deltaVec = vec3.fromValues(...delta);
+
+  for (let i = rootIndex; i < entities.length; i++) {
+    const entity = entities[i];
+
+    // Calculer la nouvelle matrice globale en ajoutant delta
+    const newGlobalMatrix = mat4.clone(entity.ls_to_ws);
+    mat4.translate(newGlobalMatrix, newGlobalMatrix, deltaVec); // delta global
+
+    // Recalculer la nouvelle matrice locale : inverse du parent * global
+    const parent_ws_to_ls = entity.parent?.ws_to_ls ?? mat4.create();
+    const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
+
+    applyMatrixToEntity(entity, newLocalMatrix);
+
+    console.log(`➡️ Déplacé ${entity.name} avec delta global ${deltaVec}`);
+  }
+
+  console.log(`✅ Déplacement appliqué à ${entities.length - rootIndex} entités à partir de ${rootName}`);
 }
 
 export async function getDescendants(
@@ -84,6 +85,7 @@ export async function getDescendants(
 ): Promise<EntityWithParentId[]> {
   const descendants: EntityWithParentId[] = [];
   const visited = new Set<string>();
+
   const walk = (entity: EntityWithParentId) => {
     visited.add(entity.id);
     for (const [, child] of entitiesMap) {
@@ -146,11 +148,10 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
           return numA - numB;
         });
 
-        console.log("Entités triées et enrichies :", enriched.map((e) => e.name));
-
         setEntities(enriched);
         setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
 
+        console.log("Entités triées et enrichies :", enriched.map((e) => e.name));
         console.log(`✅ Chargé ${enriched.length} entités dans entitiesMap`);
       } catch (err) {
         console.error("❌ Erreur chargement des entités part_x :", err);

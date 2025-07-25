@@ -6,6 +6,7 @@ import {
   ReactNode,
   ChangeEvent,
 } from "react";
+
 import { LivelinkContext } from "@3dverse/livelink-react";
 import {
   Menu,
@@ -18,6 +19,7 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 type SpeedContextType = {
   speed: number;
   setSpeed: (value: number) => void;
+
 };
 
 export const SpeedContext = createContext<SpeedContextType | undefined>(undefined);
@@ -40,7 +42,6 @@ export const SpeedProvider = ({ children }: { children: ReactNode }) => {
 };
 
 type Entity = { id: string; name?: string };
-
 type EntityContextType = {
   selectedEntity: Entity | null;
   setSelectedEntity: (entity: Entity) => void;
