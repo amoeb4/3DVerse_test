@@ -19,7 +19,6 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 type SpeedContextType = {
   speed: number;
   setSpeed: (value: number) => void;
-
 };
 
 export const SpeedContext = createContext<SpeedContextType | undefined>(undefined);
@@ -117,6 +116,8 @@ const controlInterfaceStyle = {
   alignItems: "center",
 };
 
+
+
 export default function ControlPanel() {
   const { speed, setSpeed } = useSpeed();
   const { selectedEntity } = useEntity();
@@ -147,7 +148,7 @@ export default function ControlPanel() {
       <EntityDropdown />
 
       <button
-        onClick={handleApply}
+        onClick={handleApply} 
         className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100"
       >
         Apply changes
@@ -237,7 +238,6 @@ export function EntityDropdown() {
           <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
         </MenuButton>
       </div>
-
       <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
         <div className="py-1">
           {entities.map((entity) => (

@@ -58,7 +58,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
         <div className="space-y-2 mt-4">
           {[
             ["NJ40 2.5", "c8dc2ac0-4601-4279-a01f-9c57a924f725"],
-            ["Grenoble CEA cell", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
+            ["Genoble CEA cell", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
             ["Test_Kuka", "516d270a-5a6b-44e6-99c6-44df631bf475"],
             ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
           ].map(([label, id]) => (
@@ -66,8 +66,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
               <button
                 type="button"
                 onClick={() => setSceneId(id)}
-                className="border border-black px-4 py-2 rounded hover:bg-gray-100"
-              >
+                className="border border-black px-4 py-2 rounded hover:bg-gray-100">
                 Load {label}
               </button>
             </div>

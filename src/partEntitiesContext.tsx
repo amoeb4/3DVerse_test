@@ -3,6 +3,7 @@ import { LivelinkContext } from "@3dverse/livelink-react";
 import { Entity } from "@3dverse/livelink";
 import { mat4, vec3, quat } from "gl-matrix";
 import type { Vec3, Quat } from "@3dverse/livelink.core";
+import { StereoCamera } from "three";
 
 export type EntityWithParentId = Entity & {
   __parentId: string | null;
@@ -13,10 +14,8 @@ function quaternionToEuler(q: Quat): Vec3 {
   const sinr_cosp = 2 * (w * x + y * z);
   const cosr_cosp = 1 - 2 * (x * x + y * y);
   const roll = Math.atan2(sinr_cosp, cosr_cosp);
-
   const sinp = 2 * (w * y - z * x);
   const pitch = Math.abs(sinp) >= 1 ? Math.sign(sinp) * Math.PI / 2 : Math.asin(sinp);
-
   const siny_cosp = 2 * (w * z + x * y);
   const cosy_cosp = 1 - 2 * (y * y + z * z);
   const yaw = Math.atan2(siny_cosp, cosy_cosp);
@@ -57,25 +56,17 @@ export async function moveHierarchy(
     console.warn(`❌ Entité ${rootName} non trouvée`);
     return;
   }
-
   const deltaVec = vec3.fromValues(...delta);
-
   for (let i = rootIndex; i < entities.length; i++) {
     const entity = entities[i];
-
-    // Calculer la nouvelle matrice globale en ajoutant delta
     const newGlobalMatrix = mat4.clone(entity.ls_to_ws);
-    mat4.translate(newGlobalMatrix, newGlobalMatrix, deltaVec); // delta global
-
+    mat4.translate(newGlobalMatrix, newGlobalMatrix, deltaVec);
     // Recalculer la nouvelle matrice locale : inverse du parent * global
     const parent_ws_to_ls = entity.parent?.ws_to_ls ?? mat4.create();
     const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
-
     applyMatrixToEntity(entity, newLocalMatrix);
-
     console.log(`➡️ Déplacé ${entity.name} avec delta global ${deltaVec}`);
   }
-
   console.log(`✅ Déplacement appliqué à ${entities.length - rootIndex} entités à partir de ${rootName}`);
 }
 
@@ -128,9 +119,7 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
           mandatory_components: ["local_transform"],
           forbidden_components: [],
         });
-
         console.log(`📦 ${foundEntities.length} entités récupérées depuis la scène`);
-
         const filtered = foundEntities.filter(
           (entity) => typeof entity.name === "string" && /^part_\d+$/.test(entity.name)
         );
@@ -157,7 +146,6 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
         console.error("❌ Erreur chargement des entités part_x :", err);
       }
     };
-
     fetchEntities();
   }, [instance]);
 
