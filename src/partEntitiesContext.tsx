@@ -45,29 +45,55 @@ export function applyMatrixToEntity(entity: Entity, matrix: mat4) {
   };
 }
 
+function getRotationMatrix(matrix: mat4): mat4 {
+  const rot = mat4.clone(matrix as mat4); // clone & cast si readonly
+  rot[12] = 0;
+  rot[13] = 0;
+  rot[14] = 0;
+  return rot;
+}
+
 export async function moveHierarchy(
   rootName: string,
   delta: [number, number, number],
   entitiesMap: Map<string, EntityWithParentId>
 ) {
   const entities = [...entitiesMap.values()];
-  const rootIndex = entities.findIndex((e) => e.name === rootName);
-  if (rootIndex === -1) {
+  const rootEntity = entities.find((e) => e.name === rootName);
+
+  if (!rootEntity) {
     console.warn(`❌ Entité ${rootName} non trouvée`);
     return;
   }
-  const deltaVec = vec3.fromValues(...delta);
-  for (let i = rootIndex; i < entities.length; i++) {
-    const entity = entities[i];
-    const newGlobalMatrix = mat4.clone(entity.ls_to_ws);
-    mat4.translate(newGlobalMatrix, newGlobalMatrix, deltaVec);
-    // Recalculer la nouvelle matrice locale : inverse du parent * global
-    const parent_ws_to_ls = entity.parent?.ws_to_ls ?? mat4.create();
+
+  const deltaLocalVec = vec3.fromValues(...delta);
+
+  // Calculer le delta dans le repère monde à partir du repère local du root
+  const rootRotationMatrix = getRotationMatrix(mat4.clone(rootEntity.ls_to_ws as mat4));
+  const deltaGlobal = vec3.transformMat4(vec3.create(), deltaLocalVec, rootRotationMatrix);
+
+  for (const entity of entities) {
+    // Adapter ce delta à l’orientation locale de l’entité pour conserver sa direction propre
+    const entityRotationMatrix = getRotationMatrix(mat4.clone(entity.ws_to_ls as mat4));
+    const adjustedDelta = vec3.transformMat4(vec3.create(), deltaGlobal, entityRotationMatrix);
+
+    // Appliquer le déplacement à la matrice globale
+    const newGlobalMatrix = mat4.clone(entity.ls_to_ws as mat4);
+    mat4.translate(newGlobalMatrix, newGlobalMatrix, adjustedDelta);
+
+    // Recalculer la matrice locale depuis la nouvelle position globale
+    const parent_ws_to_ls = entity.parent?.ws_to_ls
+      ? mat4.clone(entity.parent.ws_to_ls as mat4)
+      : mat4.create();
+
     const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
+
     applyMatrixToEntity(entity, newLocalMatrix);
-    console.log(`➡️ Déplacé ${entity.name} avec delta global ${deltaVec}`);
+
+    console.log(`➡️ Déplacé ${entity.name} avec delta ajusté ${adjustedDelta}`);
   }
-  console.log(`✅ Déplacement appliqué à ${entities.length - rootIndex} entités à partir de ${rootName}`);
+
+  console.log(`✅ Déplacement hiérarchique terminé depuis ${rootName}`);
 }
 
 export async function getDescendants(
@@ -154,4 +180,66 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
       {children}
     </PartEntitiesContext.Provider>
   );
+}
+
+export async function rotateHierarchy(
+  rootName: string,
+  delta: [number, number, number], // delta d'orientation en radians
+  entitiesMap: Map<string, EntityWithParentId>
+) {
+  const entities = [...entitiesMap.values()];
+  const rootEntity = entities.find((e) => e.name === rootName);
+
+  if (!rootEntity) {
+    console.warn(`❌ Entité ${rootName} non trouvée`);
+    return;
+  }
+
+  const deltaEuler = delta; // alias pour clarté
+  const deltaQuat = quat.create();
+  quat.fromEuler(
+    deltaQuat,
+    (deltaEuler[0] * 180) / Math.PI,
+    (deltaEuler[1] * 180) / Math.PI,
+    (deltaEuler[2] * 180) / Math.PI
+  );
+
+  // Rotation globale du root sans translation
+  const rootRotationMatrix = mat4.clone(rootEntity.ls_to_ws as mat4);
+  rootRotationMatrix[12] = 0;
+  rootRotationMatrix[13] = 0;
+  rootRotationMatrix[14] = 0;
+
+  const rootRotationQuat = quat.create();
+  mat4.getRotation(rootRotationQuat, rootRotationMatrix);
+
+  const deltaWorldQuat = quat.create();
+  quat.mul(deltaWorldQuat, rootRotationQuat, deltaQuat);
+
+  for (const entity of entities) {
+    const globalMatrix = mat4.clone(entity.ls_to_ws as mat4);
+
+    const position = vec3.create();
+    mat4.getTranslation(position, globalMatrix);
+
+    const currentRot = quat.create();
+    mat4.getRotation(currentRot, globalMatrix);
+
+    const newRot = quat.create();
+    quat.mul(newRot, deltaWorldQuat, currentRot);
+
+    const newGlobalMatrix = mat4.fromRotationTranslation(mat4.create(), newRot, position);
+
+    const parent_ws_to_ls = entity.parent?.ws_to_ls
+      ? mat4.clone(entity.parent.ws_to_ls as mat4)
+      : mat4.create();
+
+    const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
+
+    applyMatrixToEntity(entity, newLocalMatrix);
+
+    console.log(`🔁 Tourné ${entity.name} avec rotation (rad): ${delta}`);
+  }
+
+  console.log(`✅ Rotation hiérarchique appliquée depuis ${rootName}`);
 }

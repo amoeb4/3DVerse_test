@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
-import { moveHierarchy, PartEntitiesContext } from "./partEntitiesContext";
+import { moveHierarchy, rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},
@@ -68,7 +68,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
-              await moveHierarchy(parsed.name, [x, y, z], entitiesMap, instance);
+            await moveHierarchy(parsed.name, [x, y, z], entitiesMap);
+            //await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
             } else {
               console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
               messageQueue.current.push(parsed);
@@ -99,7 +100,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
-              await moveHierarchy(name, [x, y, z], entitiesMap, instance);
+            await moveHierarchy(name, [x, y, z], entitiesMap);
+            //await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
             } else {
               console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
               messageQueue.current.push({ name, location: [x, y, z] });
@@ -146,7 +148,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       toProcess.forEach(async (parsed) => {
         const [x, y, z] = parsed.location.map(Number);
         console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
-        await moveHierarchy(parsed.name, [x, y, z], entitiesMap, instance);
+      await moveHierarchy(parsed.name, [x, y, z], entitiesMap);
+      //await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
       });
     }
   }, [flushTrigger, instance, entitiesMap]);
@@ -163,13 +166,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       socketRef.current.send(`select ${selectedEntity.name}`);
     }
   }, [selectedEntity]);
-
   const register = useCallback((setter: any, name: string) => {
     if (!registry.current.some((e) => e.name === name && e.setter === setter)) {
       const entry = { setter, name };
       registry.current.push(entry);
       console.log(`➕ Registered entity: ${name}`);
-
       return () => {
         registry.current = registry.current.filter((e) => e !== entry);
         console.log(`➖ Unregistered entity: ${name}`);
