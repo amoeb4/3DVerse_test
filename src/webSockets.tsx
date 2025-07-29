@@ -69,7 +69,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
             await moveHierarchy(parsed.name, [x, y, z], entitiesMap);
-            await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
+           // await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
             } else {
               console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
               messageQueue.current.push(parsed);
@@ -100,8 +100,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
-            //await moveHierarchy(name, [x, y, z], entitiesMap);
-            await rotateHierarchy(name, [x, y, z], entitiesMap);
+            await moveHierarchy(name, [x, y, z], entitiesMap);
+            //await rotateHierarchy(name, [x, y, z], entitiesMap);
             } else {
               console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
               messageQueue.current.push({ name, location: [x, y, z] });
@@ -148,8 +148,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       toProcess.forEach(async (parsed) => {
         const [x, y, z] = parsed.location.map(Number);
         console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
-     // await moveHierarchy(parsed.name, [x, y, z], entitiesMap);
-      await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
+      await moveHierarchy(parsed.name, [x, y, z], entitiesMap);
+     // await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
       });
     }
   }, [flushTrigger, instance, entitiesMap]);
