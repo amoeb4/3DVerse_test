@@ -21,7 +21,6 @@ function quaternionToEuler(q: Quat): Vec3 {
   const siny_cosp = 2 * (w * z + x * y);
   const cosy_cosp = 1 - 2 * (y * y + z * z);
   const yaw = Math.atan2(siny_cosp, cosy_cosp);
-
   return [roll, pitch, yaw];
 }
 
@@ -51,41 +50,6 @@ function getRotationMatrix(matrix: mat4): mat4 {
   return rot;
 }
 
-export async function moveHierarchy(
-  rootName: string,
-  delta: [number, number, number],
-  entitiesMap: Map<string, EntityWithParentId>
-) {
-  const entities = [...entitiesMap.values()];
-  const rootEntity = entities.find((e) => e.name === rootName);
-
-  if (!rootEntity) {
-    console.warn(`❌ Entité ${rootName} non trouvée`);
-    return;
-  }
-
-  const deltaLocalVec = vec3.fromValues(...delta);
-
-  const rootRotationMatrix = getRotationMatrix(mat4.clone(rootEntity.ls_to_ws as mat4));
-  const deltaGlobal = vec3.transformMat4(vec3.create(), deltaLocalVec, rootRotationMatrix);
-
-  for (const entity of entities) {
-    // Adapter ce delta à l’orientation locale de l’entité pour conserver sa direction propre
-    const entityRotationMatrix = getRotationMatrix(mat4.clone(entity.ws_to_ls as mat4));
-    const adjustedDelta = vec3.transformMat4(vec3.create(), deltaGlobal, entityRotationMatrix);
-
-    const newGlobalMatrix = mat4.clone(entity.ls_to_ws as mat4);
-    mat4.translate(newGlobalMatrix, newGlobalMatrix, adjustedDelta);
-
-    const parent_ws_to_ls = entity.parent?.ws_to_ls ? mat4.clone(entity.parent.ws_to_ls as mat4) : mat4.create();
-    const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
-    applyMatrixToEntity(entity, newLocalMatrix);
-
-    console.log(`➡️ Déplacé ${entity.name} avec delta ajusté ${adjustedDelta}`);
-  }
-
-  console.log(`✅ Déplacement hiérarchique terminé depuis ${rootName}`);
-}
 
 export async function getDescendants(
   root: EntityWithParentId,
@@ -129,7 +93,6 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
         return;
       }
       console.log("🔍 fetchEntities lancé…");
-
       try {
         const foundEntities = await instance.scene.findEntitiesWithComponents({
           mandatory_components: ["local_transform"],
@@ -151,8 +114,10 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
           const numB = parseInt(b.name!.split("_")[1], 10);
           return numA - numB;
         });
+
         setEntities(enriched);
         setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
+
         console.log(`✅ Chargé ${enriched.length} entités dans entitiesMap`);
       } catch (err) {
         console.error("❌ Erreur chargement des entités part_x :", err);
@@ -223,4 +188,41 @@ export async function rotateHierarchy(
     console.log(`🔁 Tourné ${entity.name} avec rotation (rad): ${delta}`);
   }
   console.log(`✅ Rotation hiérarchique appliquée depuis ${rootName}`);
+}
+
+
+///>>> Add mod movehierarchy : command = [name], [mod], [x], [y], [z];
+
+
+export async function moveHierarchy(
+  rootName: string,
+  delta: [number, number, number],
+  entitiesMap: Map<string, EntityWithParentId>
+) {
+  const entities = [...entitiesMap.values()];
+  const rootEntity = entities.find((e) => e.name === rootName);
+
+  if (!rootEntity) {
+    console.warn(`❌ Entité ${rootName} non trouvée`);
+    return;}
+
+  const deltaLocalVec = vec3.fromValues(...delta);
+  const rootRotationMatrix = getRotationMatrix(mat4.clone(rootEntity.ls_to_ws as mat4));
+  const deltaGlobal = vec3.transformMat4(vec3.create(), deltaLocalVec, rootRotationMatrix);
+
+  for (const entity of entities)
+  {
+    // Adapter ce delta à l’orientation locale de l’entité pour conserver sa direction propre
+    const entityRotationMatrix = getRotationMatrix(mat4.clone(entity.ws_to_ls as mat4));
+    const adjustedDelta = vec3.transformMat4(vec3.create(), deltaGlobal, entityRotationMatrix);
+
+    const newGlobalMatrix = mat4.clone(entity.ls_to_ws as mat4);
+    mat4.translate(newGlobalMatrix, newGlobalMatrix, adjustedDelta);
+
+    const parent_ws_to_ls = entity.parent?.ws_to_ls ? mat4.clone(entity.parent.ws_to_ls as mat4) : mat4.create();
+    const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
+    applyMatrixToEntity(entity, newLocalMatrix);
+    console.log(`➡️ Déplacé ${entity.name} avec delta ajusté ${adjustedDelta}`);
+  }
+  console.log(`✅ Déplacement hiérarchique terminé depuis ${rootName}`);
 }
