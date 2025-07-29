@@ -43,13 +43,12 @@ export function applyMatrixToEntity(entity: Entity, matrix: mat4) {
 }
 
 function getRotationMatrix(matrix: mat4): mat4 {
-  const rot = mat4.clone(matrix as mat4); // clone & cast si readonly
+  const rot = mat4.clone(matrix as mat4);
   rot[12] = 0;
   rot[13] = 0;
   rot[14] = 0;
   return rot;
 }
-
 
 export async function getDescendants(
   root: EntityWithParentId,
@@ -155,7 +154,6 @@ export async function rotateHierarchy(
     (deltaEuler[2] * 180) / Math.PI
   );
 
-  // Rotation globale du root sans translation
   const rootRotationMatrix = mat4.clone(rootEntity.ls_to_ws as mat4);
   rootRotationMatrix[12] = 0;
   rootRotationMatrix[13] = 0;
@@ -191,7 +189,7 @@ export async function rotateHierarchy(
 }
 
 
-///>>> Add mod movehierarchy : command = [name], [mod], [x], [y], [z];
+/// >>> Add mod movehierarchy : command = [name], [mod], [x], [y], [z];
 
 
 export async function moveHierarchy(
