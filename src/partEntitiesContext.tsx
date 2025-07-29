@@ -3,7 +3,9 @@ import { LivelinkContext } from "@3dverse/livelink-react";
 import { Entity } from "@3dverse/livelink";
 import { mat4, vec3, quat } from "gl-matrix";
 import type { Vec3, Quat } from "@3dverse/livelink.core";
-import { StereoCamera } from "three";
+import { OneFactor, StereoCamera } from "three";
+import { add } from "three/tsl";
+import { GPU_CHUNK_BYTES } from "three/src/renderers/common/Constants.js";
 
 export type EntityWithParentId = Entity & {
   __parentId: string | null;
