@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
-import { moveHierarchy, rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
+import { rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},
@@ -64,16 +64,23 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           parsed.location.length === 3
         ) {
           const [x, y, z] = parsed.location;
-          console.log("🧮 Parsed location:", [x, y, z]);
           if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
-          //  await moveHierarchy(parsed.name, [x, y, z], entitiesMap);
-            await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
+              await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
             } else {
               console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
-              messageQueue.current.push(parsed);
-              setFlushTrigger((prev) => prev + 1); // 🔁 Force re-check
+
+              // ✅ Empêche les doublons
+              const alreadyQueued = messageQueue.current.some(
+                (msg) =>
+                  msg.name === parsed.name &&
+                  JSON.stringify(msg.location) === JSON.stringify([x, y, z])
+              );
+              if (!alreadyQueued) {
+                messageQueue.current.push(parsed);
+                setFlushTrigger((prev) => prev + 1); // 🔁 Force re-check
+              }
             }
             return;
           }
@@ -90,8 +97,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         console.warn("⚠️ Message is not JSON, falling back to legacy split-based parsing");
 
         const parts = msg.split(" ");
-        console.log("🪓 Fallback split parts:", parts);
-
         if (parts.length === 4) {
           const [name, xStr, yStr, zStr] = parts;
           const x = parseFloat(xStr);
@@ -100,16 +105,22 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
-           // await moveHierarchy(name, [x, y, z], entitiesMap);
-            await rotateHierarchy(name, [x, y, z], entitiesMap);
+              await rotateHierarchy(name, [x, y, z], entitiesMap);
             } else {
-              console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
-              messageQueue.current.push({ name, location: [x, y, z] });
-              setFlushTrigger((prev) => prev + 1); // 🔁 Force re-check
+              const alreadyQueued = messageQueue.current.some(
+                (msg) =>
+                  msg.name === name &&
+                  JSON.stringify(msg.location) === JSON.stringify([x, y, z])
+              );
+              if (!alreadyQueued) {
+                messageQueue.current.push({ name, location: [x, y, z] });
+                setFlushTrigger((prev) => prev + 1);
+              }
             }
             return;
           }
         }
+
         if (parts.length === 2 && parts[0] === "select") {
           const name = parts[1];
           console.log(`🎯 Selecting entity ${name}`);
@@ -120,6 +131,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         console.warn("⚠️ Ignored non-standard message:", msg);
       }
     };
+
     socket.onclose = () => {
       console.log("❌ WebSocket closed");
       const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
@@ -139,17 +151,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
-
     if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
       console.log("📬 Flushing queued messages...");
-      const toProcess = [...messageQueue.current];
-      messageQueue.current = [];
+      const toProcess = messageQueue.current.splice(0, messageQueue.current.length);
 
       toProcess.forEach(async (parsed) => {
         const [x, y, z] = parsed.location.map(Number);
         console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
-     // await moveHierarchy(parsed.name, [x, y, z], entitiesMap);
-      await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
+        await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
       });
     }
   }, [flushTrigger, instance, entitiesMap]);
@@ -161,11 +170,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       socketRef.current?.close();
     };
   }, []);
+
   useEffect(() => {
     if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(`select ${selectedEntity.name}`);
     }
   }, [selectedEntity]);
+
   const register = useCallback((setter: any, name: string) => {
     if (!registry.current.some((e) => e.name === name && e.setter === setter)) {
       const entry = { setter, name };

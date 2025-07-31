@@ -3,18 +3,22 @@ import { LivelinkContext } from "@3dverse/livelink-react";
 import { Entity } from "@3dverse/livelink";
 import type { Vec3, Quat } from "@3dverse/livelink.core";
 import { debugEntityTransform } from "./debugTools";
+import * as THREE from 'three';
 //import { OneFactor, StereoCamera } from "three";
 //import { add } from "three/tsl";
 //import { GPU_CHUNK_BYTES } from "three/src/renderers/common/Constants.js";
+import { mat4, quat, vec3 } from 'gl-matrix';
+import { WrenchScrewdriverIcon } from "@heroicons/react/20/solid";
+import { eulerToQuat } from "./Interface";
 
 export type EntityWithParentId = Entity & {
   __parentId: string | null;
   ls_to_ws_local?: mat4;
-  localPos: vec3; // position locale par rapport au parent
-  localRot: quat; // rotation locale par rapport au parent
+  localPos: vec3;
+  localRot: quat;
   ls_to_ws: mat4;
-  worldPos?: vec3;  // <- ajoute ça
-  worldRot?: quat;  // <- ajoute ça
+  worldPos?: vec3;
+  worldRot?: quat;
 };
 
 function quaternionToEuler(q: Quat): Vec3 {
@@ -28,24 +32,6 @@ function quaternionToEuler(q: Quat): Vec3 {
   const cosy_cosp = 1 - 2 * (y * y + z * z);
   const yaw = Math.atan2(siny_cosp, cosy_cosp);
   return [roll, pitch, yaw];
-}
-
-export function applyMatrixToEntity(entity: Entity, matrix: mat4) {
-  const translation = vec3.create();
-  const rotation = quat.create();
-
-  mat4.getTranslation(translation, matrix);
-  mat4.getRotation(rotation, matrix);
-
-  const position: Vec3 = Array.from(translation) as Vec3;
-  const orientation: Quat = Array.from(rotation) as Quat;
-  const eulerOrientation: Vec3 = quaternionToEuler(orientation);
-
-  entity.local_transform = {
-    position,
-    orientation,
-    eulerOrientation,
-  };
 }
 
 function getRotationMatrix(matrix: mat4): mat4 {
@@ -138,140 +124,120 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
   );
 }
 
-import { mat4, quat, vec3 } from 'gl-matrix';
-
-export async function rotateHierarchy(
-  rootName: string,
-  delta: [number, number, number], // en radians
-  entitiesMap: Map<string, EntityWithParentId>
-) {
-  const entities = [...entitiesMap.values()];
-  const rootIndex = entities.findIndex((e) => e.name === rootName);
-
-  if (rootIndex === -1) {
-    console.warn(`❌ Entité ${rootName} non trouvée`);
-    return;
-  }
-
-  console.log('📦 Application de rotation à toutes les entités à partir de :', rootName);
-
-  // Fonction pour calculer les transforms locales (pos + rot) par rapport au parent, si non déjà calculées
-  function computeLocalTransforms() {
-    for (const entity of entities) {
-      if (!entity.parent) {
-        // Racine : local = global
-        entity.localPos = vec3.create();
-        mat4.getTranslation(entity.localPos, entity.ls_to_ws);
-        entity.localRot = quat.create();
-        mat4.getRotation(entity.localRot, entity.ls_to_ws);
-      } else {
-        // Local = inverse(parent global) * global
-        const parentInv = mat4.invert(mat4.create(), entity.parent.ls_to_ws);
-        if (!parentInv) {
-          console.warn(`❌ Impossible d'inverser la matrice parent de ${entity.name}`);
-          continue;
-        }
-        const localMat = mat4.multiply(mat4.create(), parentInv, entity.ls_to_ws);
-        entity.localPos = vec3.create();
-        mat4.getTranslation(entity.localPos, localMat);
-        entity.localRot = quat.create();
-        mat4.getRotation(entity.localRot, localMat);
-      }
-    }
-  }
-
-function updateGlobalMatrices(
-  entity: EntityWithParentId,
-  entities: EntityWithParentId[]
-) {
-  // Calcul matrice locale
-  const localMat = mat4.fromRotationTranslation(mat4.create(), entity.localRot, entity.localPos);
-
-  let globalMat: mat4;
-  if (entity.parent) {
-    globalMat = mat4.multiply(mat4.create(), entity.parent.ls_to_ws, localMat);
-  } else {
-    globalMat = localMat;
-  }
-
-  // Extraction position et rotation globale
-  const worldPos = vec3.create();
-  mat4.getTranslation(worldPos, globalMat);
-
-  const worldRot = quat.create();
-  mat4.getRotation(worldRot, globalMat);
-
-  // Stockage custom
-  entity.worldPos = worldPos;
-  entity.worldRot = worldRot;
-
-  // Trouver tous les enfants (entities dont parent === entity)
-  const children = entities.filter(e => e.parent === entity);
-
-  for (const child of children) {
-    updateGlobalMatrices(child, entities);
-  }
-}
-
-
-
-  // Calcul initial des transforms locales
-  computeLocalTransforms();
-
-  const rootEntity = entities[rootIndex];
-
-  // Appliquer delta rotation sur la rotation locale de la racine
-  const deltaQuat = quat.create();
-  quat.fromEuler(
-    deltaQuat,
-    (delta[0] * 180) / Math.PI,
-    (delta[1] * 180) / Math.PI,
-    (delta[2] * 180) / Math.PI
-  );
-
-  quat.mul(rootEntity.localRot, rootEntity.localRot, deltaQuat);
-
-  // Mise à jour des matrices globales à partir de la racine
-  updateGlobalMatrices(rootEntity, entities);
-
-
-  console.log(`✅ Rotation appliquée à tous les éléments depuis ${rootName}`);
-}
-
-
 
 /// >>> Add mod movehierarchy : command = [name], [mod], [x], [y], [z];
 
 
-export async function moveHierarchy(
+//export async function moveHierarchy(
+//  rootName: string,
+//  delta: [number, number, number],
+//  entitiesMap: Map<string, EntityWithParentId>
+//) {
+//  const entities = [...entitiesMap.values()];
+//  const rootEntity = entities.find((e) => e.name === rootName);
+//
+//  if (!rootEntity) {
+//    console.warn(`❌ Entité ${rootName} non trouvée`);
+//    return;}
+//
+//  const deltaLocalVec = vec3.fromValues(...delta);
+//  const rootRotationMatrix = getRotationMatrix(mat4.clone(rootEntity.ls_to_ws as mat4));
+//  const deltaGlobal = vec3.transformMat4(vec3.create(), deltaLocalVec, rootRotationMatrix);
+//
+//  for (const entity of entities)
+//  {
+//    // Adapter ce delta à l’orientation locale de l’entité pour conserver sa direction propre
+//    const entityRotationMatrix = getRotationMatrix(mat4.clone(entity.ws_to_ls as mat4));
+//    const adjustedDelta = vec3.transformMat4(vec3.create(), deltaGlobal, entityRotationMatrix);
+//
+//    const newGlobalMatrix = mat4.clone(entity.ls_to_ws as mat4);
+//    mat4.translate(newGlobalMatrix, newGlobalMatrix, adjustedDelta);
+//
+//    const parent_ws_to_ls = entity.parent?.ws_to_ls ? mat4.clone(entity.parent.ws_to_ls as mat4) : mat4.create();
+//    const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
+//    applyMatrixToEntity(entity, newLocalMatrix);
+//    console.log(`➡️ Déplacé ${entity.name} avec delta ajusté ${adjustedDelta}`);
+//  }
+//  console.log(`✅ Déplacement hiérarchique terminé depuis ${rootName}`);
+//}
+//
+
+
+
+
+
+export function rotateHierarchy(
   rootName: string,
-  delta: [number, number, number],
+  deltaDeg: [number, number, number],
   entitiesMap: Map<string, EntityWithParentId>
 ) {
   const entities = [...entitiesMap.values()];
-  const rootEntity = entities.find((e) => e.name === rootName);
+  const root = entities.find((e) => e.name === rootName);
+  if (!root) return console.warn(`${rootName} introuvable`);
 
-  if (!rootEntity) {
-    console.warn(`❌ Entité ${rootName} non trouvée`);
-    return;}
+  const deltaRad = deltaDeg.map((d) => (d * Math.PI) / 180);
 
-  const deltaLocalVec = vec3.fromValues(...delta);
-  const rootRotationMatrix = getRotationMatrix(mat4.clone(rootEntity.ls_to_ws as mat4));
-  const deltaGlobal = vec3.transformMat4(vec3.create(), deltaLocalVec, rootRotationMatrix);
+  const rootMatrix = new THREE.Matrix4().fromArray([...root.ls_to_ws]);
+  const obj = new THREE.Object3D();
+  obj.applyMatrix4(rootMatrix);
+  obj.updateMatrixWorld(true);
 
-  for (const entity of entities)
-  {
-    // Adapter ce delta à l’orientation locale de l’entité pour conserver sa direction propre
-    const entityRotationMatrix = getRotationMatrix(mat4.clone(entity.ws_to_ls as mat4));
-    const adjustedDelta = vec3.transformMat4(vec3.create(), deltaGlobal, entityRotationMatrix);
+  obj.rotateX(deltaRad[0]);
+  obj.rotateY(deltaRad[1]);
+  obj.rotateZ(deltaRad[2]);
 
-    const newGlobalMatrix = mat4.clone(entity.ls_to_ws as mat4);
-    mat4.translate(newGlobalMatrix, newGlobalMatrix, adjustedDelta);
+  obj.updateMatrixWorld(true);
+  const newMatrix = obj.matrixWorld.clone();
 
-    const parent_ws_to_ls = entity.parent?.ws_to_ls ? mat4.clone(entity.parent.ws_to_ls as mat4) : mat4.create();
-    const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
-    applyMatrixToEntity(entity, newLocalMatrix);
-    console.log(`➡️ Déplacé ${entity.name} avec delta ajusté ${adjustedDelta}`);
-  }
-  console.log(`✅ Déplacement hiérarchique terminé depuis ${rootName}`);
+  applyRotationToEntity(root, [...newMatrix.elements]);
+  console.log(`🔁 Rotation appliquée à ${root.name}`);
+
+  propagate(root, entities);
+}
+
+
+
+export function applyRotationToEntity(entity: Entity, matrix: mat4) {
+  const rotation = quat.create();
+  mat4.getRotation(rotation, matrix);
+  const orientation: Quat = Array.from(rotation) as Quat;
+  entity.local_transform = {
+    orientation,
+  };
+}
+
+
+function propagate(
+  parent: EntityWithParentId,
+  allEntities: EntityWithParentId[]
+) {
+  const parentIndex = allEntities.findIndex((e) => e.name === parent.name);
+  const child = allEntities[parentIndex + 1];
+  if (!child) return console.log(`🛑 Aucun enfant trouvé pour ${parent.name}`);
+
+  const originalParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
+  const originalChildMatrix = new THREE.Matrix4().fromArray([...child.ls_to_ws]);
+
+  const relativeMatrix = new THREE.Matrix4()
+    .copy(originalParentMatrix)
+    .invert()
+    .multiply(originalChildMatrix);
+
+  const updatedParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
+
+  const newGlobalMatrix = new THREE.Matrix4().multiplyMatrices(updatedParentMatrix, relativeMatrix);
+
+  const pos = new THREE.Vector3();
+  const rot = new THREE.Quaternion();
+  const scale = new THREE.Vector3();
+  newGlobalMatrix.decompose(pos, rot, scale);
+
+  child.local_transform = {
+    position: [pos.x, pos.y, pos.z],
+    orientation: [rot.x, rot.y, rot.z, rot.w],
+  };
+
+  console.log(
+    `✅ ${child.name} mis à jour → pos: (${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)})`
+  );
 }
