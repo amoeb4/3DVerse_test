@@ -4,6 +4,7 @@ run:
 	gnome-terminal --tab -- bash -c "cd src && node server.js; exec bash"
 	sleep 0.1
 	gnome-terminal --tab -- bash -c "cd server_blender && python3 client.py; exec bash"
+	sleep 1
 		@if command -v xdg-open > /dev/null; then \
 		xdg-open http://localhost:5173; \
 	else \

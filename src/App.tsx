@@ -10,6 +10,7 @@ import "./App.css";
 import { WebSocketProvider } from "./webSockets.tsx";
 import type { CameraControllerPreset } from "@3dverse/livelink";
 import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
+import  Dtext from "../frontend/text_display.tsx"
 
 export function App() {
   const [credentials, setCredentials] = useState<{ sceneId: string } | null>(null);
@@ -37,50 +38,63 @@ export function App() {
 
 function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ sceneId });
   };
 
   return (
-    <div style={modalStyle}>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Scene ID :
-          <input
-            type="text"
-            className="border border-black px-3 py-1"
-            value={sceneId}
-            onChange={(e) => setSceneId(e.target.value)}
-            required
-          />
-        </label>
-        <div className="space-y-2 mt-4">
-          {[
-            ["NJ40 2.5", "c8dc2ac0-4601-4279-a01f-9c57a924f725"],
-            ["Genoble CEA cell", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
-            ["Test_Kuka", "516d270a-5a6b-44e6-99c6-44df631bf475"],
-            ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
-          ].map(([label, id]) => (
-            <div className="flex justify-center" key={id}>
-              <button
-                type="button"
-                onClick={() => setSceneId(id)}
-                className="border border-black px-4 py-2 rounded hover:bg-gray-100">
-                Load {label}
-              </button>
-            </div>
-          ))}
-          <div className="flex justify-center mt-4">
-            <button type="submit" className="border border-black px-4 py-2 rounded hover:bg-gray-100">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+      <div className="bg-white text-gray-800 rounded-2xl shadow-2xl p-10 max-w-lg w-full border border-gray-200">
+        <Dtext />
+
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <label className="block">
+            <span className="block text-sm font-medium mb-1">Scene ID :</span>
+            <input
+              type="text"
+              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={sceneId}
+              onChange={(e) => setSceneId(e.target.value)}
+              required
+            />
+          </label>
+
+          <div className="space-y-2">
+            {[
+              ["NJ40 2.5", "c8dc2ac0-4601-4279-a01f-9c57a924f725"],
+              ["Genoble CEA cell", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
+              ["Test_Kuka", "516d270a-5a6b-44e6-99c6-44df631bf475"],
+              ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
+            ].map(([label, id]) => (
+              <div className="flex justify-center" key={id}>
+                <button
+                  type="button"
+                  onClick={() => setSceneId(id)}
+                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-400 text-gray-800 px-4 py-2 rounded transition"
+                >
+                  Load {label}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center pt-4">
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+            >
               Submit
             </button>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
+
+export default StartupModal;
 
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
@@ -160,3 +174,10 @@ const modalStyle = {
 };
 
 export default App;
+
+//  const function debugEntityTransform : 
+//  {integrate Menu
+//    <Modalstyle>
+//    Ceci est un text cool
+//    </Modalstyle>
+//  }
