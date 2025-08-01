@@ -116,11 +116,11 @@ function AppLayout() {
             </div>
           )}
           <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
-          {/*<Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
+          <Canvas className="bottom-10 right-4 w-1/3 aspect-video border border-tertiary rounded-xl shadow-xl">
             <Viewport cameraEntity={pipCamera} className="w-full h-full">
               <CameraController />
             </Viewport>
-          </Canvas>*/}
+          </Canvas>
         </Viewport>
       </Canvas>
       <div className="absolute top-14 left-1 flex flex-col">
