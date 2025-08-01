@@ -223,6 +223,7 @@ function propagate(
     .invert()
     .multiply(originalChildMatrix);
 
+  const updateMatrixfromChildren = new THREE.Matrix4().fromArray([...PartEntitiesContext.parents.ls_to_ws]);
   const updatedParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
 
   const newGlobalMatrix = new THREE.Matrix4().multiplyMatrices(updatedParentMatrix, relativeMatrix);
