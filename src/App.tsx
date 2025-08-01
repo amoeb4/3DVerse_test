@@ -1,19 +1,28 @@
-import { useState, useContext, useRef, useEffect } from "react";
-import { Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController } from "@3dverse/livelink-react";
-import { CameraControllerPresets, Entity } from "@3dverse/livelink";
+import { useState, useContext, useRef } from "react";
+import {
+  Livelink,
+  Canvas,
+  Viewport,
+  CameraController,
+  useCameraEntity,
+  LivelinkContext,
+  DefaultCameraController,
+} from "@3dverse/livelink-react";
+import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
+
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
-import "./App.css";
 import { WebSocketProvider } from "./webSockets.tsx";
-import type { CameraControllerPreset } from "@3dverse/livelink";
 import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
-import  Dtext from "../frontend/text_display.tsx"
+import Dtext from "../frontend/text_display.tsx";
+import "./App.css";
 
 export function App() {
   const [credentials, setCredentials] = useState<{ sceneId: string } | null>(null);
+
   return (
     <>
       {!credentials ? (
@@ -21,12 +30,12 @@ export function App() {
       ) : (
         <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
-          <PartEntitiesProvider>
-            <WebSocketProvider>
-              <SpeedProvider>
-          <KeyboardHandler />
-          <AppLayout />
-              </SpeedProvider>
+            <PartEntitiesProvider>
+              <WebSocketProvider>
+                <SpeedProvider>
+                  <KeyboardHandler />
+                  <AppLayout />
+                </SpeedProvider>
               </WebSocketProvider>
             </PartEntitiesProvider>
           </EntityProvider>
@@ -94,27 +103,22 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
   );
 }
 
-export default StartupModal;
-
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
 
-  const rootEntityId = cameraEntity?.id ?? undefined;
-
   const cameraControllerRef = useRef<DefaultCameraController>(null);
-  const [cameraControllerPreset, setCameraControllerPreset] = useState<CameraControllerPreset>(
+  const [cameraControllerPreset, setCameraControllerPreset] = useState(
     CameraControllerPresets.orbital
   );
+
   const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
   const moveCamera = () => {
     const targetPosition = [-30, 250, 150] as const;
     const lookAtPosition = [-280, -100, -120] as const;
     cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
   };
-
-  const { instance } = useContext(LivelinkContext);
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -162,22 +166,4 @@ function AppLayout() {
   );
 }
 
-const modalStyle = {
-  position: "fixed",
-  top: "30%",
-  left: "30%",
-  backgroundColor: "#fff",
-  padding: "50px",
-  borderRadius: "10px",
-  boxShadow: "0px 0px 20px rgba(0, 0, 0, 0.3)",
-  zIndex: 9999,
-};
-
 export default App;
-
-//  const function debugEntityTransform : 
-//  {integrate Menu
-//    <Modalstyle>
-//    Ceci est un text cool
-//    </Modalstyle>
-//  }
