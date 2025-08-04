@@ -109,7 +109,7 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
         setEntities(enriched);
         setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
 
-        console.log(`✅ Chargé ${enriched.length} entités dans entitiesMap`);
+        console.log(`Chargé ${enriched.length} entités dans entitiesMap`);
       } catch (err) {
         console.error("❌ Erreur chargement des entités part_x :", err);
       }

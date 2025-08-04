@@ -47,7 +47,6 @@ export function App() {
 
 function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ sceneId });
@@ -69,7 +68,6 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
     required
   />
 </label>
-
 
           <div className="space-y-2">
             {[
@@ -155,10 +153,7 @@ function AppLayout() {
               <button
                 key={index}
                 className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
-                onClick={() => setCameraControllerPreset(preset)}
-              >
-                {name}
-              </button>
+                onClick={() => setCameraControllerPreset(preset)}>{name}</button>
             );
           })}
         </div>
