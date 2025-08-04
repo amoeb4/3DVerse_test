@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef, ReactNode } from 'react'
-import { motion, HTMLMotionProps } from 'framer-motion'
+import { useEffect, useState, useRef } from 'react'
+import { motion } from 'framer-motion'
+import type { HTMLMotionProps } from 'framer-motion'
 
 const styles = {
     wrapper: {
@@ -16,6 +17,27 @@ const styles = {
         clip: 'rect(0,0,0,0)',
         border: 0,
     },
+    jitterStyle: {
+        animation: 'jitter 0.3s infinite',
+    },
+}
+
+// Inject the keyframes directly in a <style> tag (you could also use styled-components or global CSS)
+if (typeof window !== 'undefined') {
+    const styleId = 'jitter-keyframes'
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement('style')
+        style.id = styleId
+        style.innerHTML = `
+        @keyframes jitter {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-1px, 1px); }
+            40% { transform: translate(1px, -1px); }
+            60% { transform: translate(-1px, -1px); }
+            80% { transform: translate(1px, 1px); }
+        }`
+        document.head.appendChild(style)
+    }
 }
 
 interface DecryptedTextProps extends HTMLMotionProps<'span'> {
@@ -39,7 +61,7 @@ export default function DecryptedText({
     sequential = false,
     revealDirection = 'start',
     useOriginalCharsOnly = false,
-    characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+',
+    characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^& *()_+',
     className = '',
     parentClassName = '',
     encryptedClassName = '',
@@ -54,7 +76,7 @@ export default function DecryptedText({
     const containerRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: NodeJS.Timeout
         let currentIteration = 0
 
         const getNextIndex = (revealedSet: Set<number>): number => {
@@ -210,13 +232,19 @@ export default function DecryptedText({
     const hoverProps =
         animateOn === 'hover'
             ? {
-                onMouseEnter: () => setIsHovering(true),
-                onMouseLeave: () => setIsHovering(false),
-            }
+                  onMouseEnter: () => setIsHovering(true),
+                  onMouseLeave: () => setIsHovering(false),
+              }
             : {}
 
     return (
-        <motion.span className={parentClassName} ref={containerRef} style={styles.wrapper} {...hoverProps} {...props}>
+        <motion.span
+            className={parentClassName}
+            ref={containerRef}
+            style={styles.wrapper}
+            {...hoverProps}
+            {...props}
+        >
             <span style={styles.srOnly}>{displayText}</span>
 
             <span aria-hidden="true">
@@ -228,6 +256,7 @@ export default function DecryptedText({
                         <span
                             key={index}
                             className={isRevealedOrDone ? className : encryptedClassName}
+                            style={isRevealedOrDone ? undefined : styles.jitterStyle}
                         >
                             {char}
                         </span>

@@ -164,8 +164,6 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
 
 
 
-
-
 export function rotateHierarchy(
   rootName: string,
   deltaDeg: [number, number, number],
@@ -196,7 +194,6 @@ export function rotateHierarchy(
 }
 
 
-
 export function applyRotationToEntity(entity: Entity, matrix: mat4) {
   const rotation = quat.create();
   mat4.getRotation(rotation, matrix);
@@ -223,9 +220,7 @@ function propagate(
     .invert()
     .multiply(originalChildMatrix);
 
-  const updateMatrixfromChildren = new THREE.Matrix4().fromArray([...PartEntitiesContext.parents.ls_to_ws]);
   const updatedParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
-
   const newGlobalMatrix = new THREE.Matrix4().multiplyMatrices(updatedParentMatrix, relativeMatrix);
 
   const pos = new THREE.Vector3();
@@ -239,6 +234,6 @@ function propagate(
   };
 
   console.log(
-    `✅ ${child.name} mis à jour → pos: (${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)})`
+    `${child.name} mis à jour → pos: (${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)})`
   );
 }

@@ -1,8 +1,9 @@
 body {
-  background-color: rgb(6, 6, 51);
+  background: linear-gradient(160deg, #100069, #6c08af);
   margin: 0;
   display: flex;
   place-items: center;
   width: 100vw;
   height: 100vh;
+  font-family: 'Inter', sans-serif;
 }

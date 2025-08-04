@@ -54,21 +54,22 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="bg-white text-gray-800 rounded-2xl shadow-2xl p-10 max-w-lg w-full border border-gray-200">
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="bg-white/80 backdrop-blur-md text-gray-800 rounded-2xl shadow-2xl p-10 max-w-md w-full border border-gray-200">
         <Dtext />
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block">
-            <span className="block text-sm font-medium mb-1">Scene ID :</span>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={sceneId}
-              onChange={(e) => setSceneId(e.target.value)}
-              required
-            />
-          </label>
+<label className="block flex flex-col">
+  <span className="block text-sm font-medium mb-1">Scene ID :</span>
+  <input
+    type="text"
+    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    value={sceneId}
+    onChange={(e) => setSceneId(e.target.value)}
+    required
+  />
+</label>
+
 
           <div className="space-y-2">
             {[
@@ -81,7 +82,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
                 <button
                   type="button"
                   onClick={() => setSceneId(id)}
-                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-400 text-gray-800 px-4 py-2 rounded transition"
+                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-4 py-2 rounded-md transition"
                 >
                   Load {label}
                 </button>
@@ -92,7 +93,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-md font-semibold transition"
             >
               Submit
             </button>
@@ -134,7 +135,7 @@ function AppLayout() {
             </div>
           )}
           <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
-          <Canvas className="bottom-10 right-4 w-1/3 aspect-video border border-tertiary rounded-xl shadow-xl">
+          <Canvas className="bottom-10 right-4 w-3/11 aspect-video border border-tertiary rounded-xl shadow-xl">
             <Viewport cameraEntity={pipCamera} className="w-full h-full">
               <CameraController />
             </Viewport>
