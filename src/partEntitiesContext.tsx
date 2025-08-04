@@ -210,7 +210,7 @@ function propagate(
 ) {
   const parentIndex = allEntities.findIndex((e) => e.name === parent.name);
   const child = allEntities[parentIndex + 1];
-  if (!child) return console.log(`🛑 Aucun enfant trouvé pour ${parent.name}`);
+  if (!child) return console.log(`Aucun enfant trouvé pour ${parent.name}`);
 
   const originalParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
   const originalChildMatrix = new THREE.Matrix4().fromArray([...child.ls_to_ws]);
