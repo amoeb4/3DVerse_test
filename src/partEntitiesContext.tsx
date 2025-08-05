@@ -238,10 +238,9 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
 //  );
 //}
 
-
 export function rotateHierarchy(
   entityName: string,
-  deltaQuatDeg: [number, number, number, number], // rotation en degrés exprimée dans un quaternion (même si conceptuellement c'est inhabituel)
+  deltaQuatDeg: [number, number, number, number], // [xDeg, yDeg, zDeg, unused]
   entitiesMap: Map<string, EntityWithParentId>
 ) {
   const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
@@ -250,26 +249,22 @@ export function rotateHierarchy(
     return;
   }
 
-  const [dx, dy, dz, dw] = deltaQuatDeg;
-
-  // Convertir le delta en quaternion à partir d'un angle de rotation en degrés → radians
-  const deltaEulerRad = new THREE.Euler(
+  const [dx, dy, dz] = deltaQuatDeg;
+  const eulerRad = new THREE.Euler(
     (dx * Math.PI) / 180,
     (dy * Math.PI) / 180,
     (dz * Math.PI) / 180,
-    (dw * Math.PI) / 180,
-    "ZYXW"
+    "ZYX"
   );
-  const deltaQuat = new THREE.Quaternion().setFromEuler(deltaEulerRad);
 
-  // Quaternion actuel de l'entité
+  const deltaQuat = new THREE.Quaternion().setFromEuler(eulerRad);
   const [qx, qy, qz, qw] = entity.local_transform.orientation ?? [0, 0, 0, 1];
   const currentQuat = new THREE.Quaternion(qx, qy, qz, qw);
 
-  // Appliquer la rotation relative
-  const newQuat = currentQuat.multiply(deltaQuat).normalize();
+  // Appliquer la rotation relative (delta * current)
+  const newQuat = deltaQuat.multiply(currentQuat).normalize();
 
-  // Appliquer la nouvelle orientation à l' entité
+  // Appliquer la nouvelle orientation à l'entité
   entity.local_transform.orientation = [
     newQuat.x,
     newQuat.y,
@@ -277,7 +272,6 @@ export function rotateHierarchy(
     newQuat.w,
   ];
 
-  // Debug
   console.log(
     `${entityName} → orientation mise à jour : (${newQuat.x.toFixed(4)}, ${newQuat.y.toFixed(4)}, ${newQuat.z.toFixed(4)}, ${newQuat.w.toFixed(4)})`
   );

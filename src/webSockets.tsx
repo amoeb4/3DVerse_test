@@ -61,25 +61,26 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           typeof parsed === "object" &&
           typeof parsed.name === "string" &&
           Array.isArray(parsed.location) &&
-          parsed.location.length === 3
+          (parsed.location.length === 3 || parsed.location.length === 4) &&
+          parsed.location.every((n : number) => typeof n === "number")
         ) {
-          const [x, y, z, w] = parsed.location;
+          const [x, y, z, w = 0] = parsed.location;
+
           if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
-              console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}, ${w}]`);
+              console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}] with rotation ${w}`);
               await rotateHierarchy(parsed.name, [x, y, z, w], entitiesMap);
             } else {
               console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
 
-              // ✅ Empêche les doublons
               const alreadyQueued = messageQueue.current.some(
                 (msg) =>
                   msg.name === parsed.name &&
-                  JSON.stringify(msg.location) === JSON.stringify([x, y, z])
+                  JSON.stringify(msg.location) === JSON.stringify([x, y, z, w])
               );
               if (!alreadyQueued) {
-                messageQueue.current.push(parsed);
-                setFlushTrigger((prev) => prev + 1); // 🔁 Force re-check
+                messageQueue.current.push({ name: parsed.name, location: [x, y, z, w] });
+                setFlushTrigger((prev) => prev + 1);
               }
             }
             return;
@@ -97,33 +98,31 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         console.warn("⚠️ Message is not JSON, falling back to legacy split-based parsing");
 
         const parts = msg.split(" ");
-if ((parts.length === 4 || parts.length === 5) && parts[0].startsWith("part_")) {
-  const [name, xStr, yStr, zStr, wStr] = parts;
-  const x = parseFloat(xStr);
-  const y = parseFloat(yStr);
-  const z = parseFloat(zStr);
-  const w = parseFloat(wStr);
+        if ((parts.length === 4 || parts.length === 5) && parts[0].startsWith("part_")) {
+          const [name, xStr, yStr, zStr, wStr] = parts;
+          const x = parseFloat(xStr);
+          const y = parseFloat(yStr);
+          const z = parseFloat(zStr);
+          const w = wStr !== undefined ? parseFloat(wStr) : 0;
 
-  if (!isNaN(x) && !isNaN(y) && !isNaN(z) && (wStr === undefined || !isNaN(w))) {
-    const rotation = w ?? 0;
-
-    if (instance && entitiesMap.size > 0) {
-      console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}] with rotation ${rotation}`);
-      await rotateHierarchy(name, [x, y, z, rotation], entitiesMap);
-    } else {
-      const alreadyQueued = messageQueue.current.some(
-        (msg) =>
-          msg.name === name &&
-          JSON.stringify(msg.location) === JSON.stringify([x, y, z, rotation])
-      );
-      if (!alreadyQueued) {
-        messageQueue.current.push({ name, location: [x, y, z, rotation] });
-        setFlushTrigger((prev) => prev + 1);
-      }
-    }
-    return;
-  }
-}
+          if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
+            if (instance && entitiesMap.size > 0) {
+              console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}] with rotation ${w}`);
+              await rotateHierarchy(name, [x, y, z, w], entitiesMap);
+            } else {
+              const alreadyQueued = messageQueue.current.some(
+                (msg) =>
+                  msg.name === name &&
+                  JSON.stringify(msg.location) === JSON.stringify([x, y, z, w])
+              );
+              if (!alreadyQueued) {
+                messageQueue.current.push({ name, location: [x, y, z, w] });
+                setFlushTrigger((prev) => prev + 1);
+              }
+            }
+            return;
+          }
+        }
 
         if (parts.length === 2 && parts[0] === "select") {
           const name = parts[1];
@@ -160,8 +159,8 @@ if ((parts.length === 4 || parts.length === 5) && parts[0].startsWith("part_")) 
       const toProcess = messageQueue.current.splice(0, messageQueue.current.length);
 
       toProcess.forEach(async (parsed) => {
-        const [x, y, z, w] = parsed.location.map(Number);
-        console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
+        const [x, y, z, w = 0] = parsed.location.map(Number);
+        console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}] with rotation ${w}`);
         await rotateHierarchy(parsed.name, [x, y, z, w], entitiesMap);
       });
     }
