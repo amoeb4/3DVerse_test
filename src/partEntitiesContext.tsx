@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { mat4, quat, vec3 } from 'gl-matrix';
 import { WrenchScrewdriverIcon } from "@heroicons/react/20/solid";
 import { eulerToQuat } from "./Interface";
+import { useSpeed } from "./Interface";
 
 export type EntityWithParentId = Entity & {
   __parentId: string | null;
@@ -41,7 +42,6 @@ function getRotationMatrix(matrix: mat4): mat4 {
   rot[14] = 0;
   return rot;
 }
-
 
 export async function getDescendants(
   root: EntityWithParentId,
@@ -125,76 +125,6 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
   );
 }
 
-
-/// >>> Add mod movehierarchy : command = [name], [mod], [x], [y], [z];
-
-
-//export async function moveHierarchy(
-//  rootName: string,
-//  delta: [number, number, number],
-//  entitiesMap: Map<string, EntityWithParentId>
-//) {
-//  const entities = [...entitiesMap.values()];
-//  const rootEntity = entities.find((e) => e.name === rootName);
-//
-//  if (!rootEntity) {
-//    console.warn(`❌ Entité ${rootName} non trouvée`);
-//    return;}
-//
-//  const deltaLocalVec = vec3.fromValues(...delta);
-//  const rootRotationMatrix = getRotationMatrix(mat4.clone(rootEntity.ls_to_ws as mat4));
-//  const deltaGlobal = vec3.transformMat4(vec3.create(), deltaLocalVec, rootRotationMatrix);
-//
-//  for (const entity of entities)
-//  {
-//    // Adapter ce delta à l’orientation locale de l’entité pour conserver sa direction propre
-//    const entityRotationMatrix = getRotationMatrix(mat4.clone(entity.ws_to_ls as mat4));
-//    const adjustedDelta = vec3.transformMat4(vec3.create(), deltaGlobal, entityRotationMatrix);
-//
-//    const newGlobalMatrix = mat4.clone(entity.ls_to_ws as mat4);
-//    mat4.translate(newGlobalMatrix, newGlobalMatrix, adjustedDelta);
-//
-//    const parent_ws_to_ls = entity.parent?.ws_to_ls ? mat4.clone(entity.parent.ws_to_ls as mat4) : mat4.create();
-//    const newLocalMatrix = mat4.multiply(mat4.create(), parent_ws_to_ls, newGlobalMatrix);
-//    applyMatrixToEntity(entity, newLocalMatrix);
-//    console.log(`➡️ Déplacé ${entity.name} avec delta ajusté ${adjustedDelta}`);
-//  }
-//  console.log(`✅ Déplacement hiérarchique terminé depuis ${rootName}`);
-//}
-//
-
-
-
-//export function rotateHierarchy(
-//  rootName: string,
-//  deltaDeg: [number, number, number],
-//  entitiesMap: Map<string, EntityWithParentId>
-//) {
-//  const entities = [...entitiesMap.values()];
-//  const root = entities.find((e) => e.name === rootName);
-//  if (!root) return console.warn(`${rootName} introuvable`);
-//
-//  const deltaRad = deltaDeg.map((d) => (d * Math.PI) / 180);
-//
-//  const rootMatrix = new THREE.Matrix4().fromArray([...root.ls_to_ws]);
-//  const obj = new THREE.Object3D();
-//  obj.applyMatrix4(rootMatrix);
-//  obj.updateMatrixWorld(true);
-//
-//  obj.rotateX(deltaRad[0]);
-//  obj.rotateY(deltaRad[1]);
-//  obj.rotateZ(deltaRad[2]);
-//
-//  obj.updateMatrixWorld(true);
-//  const newMatrix = obj.matrixWorld.clone();
-//
-//  applyRotationToEntity(root, [...newMatrix.elements]);
-//  console.log(`🔁 Rotation appliquée à ${root.name}`);
-//
-//  propagate(root, entities);
-//}
-
-
 export function applyRotationToEntity(entity: Entity, matrix: mat4) {
   const rotation = quat.create();
   mat4.getRotation(rotation, matrix);
@@ -203,41 +133,6 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
     orientation,
   };
 }
-
-
-//function propagate(
-//  parent: EntityWithParentId,
-//  allEntities: EntityWithParentId[]
-//) {
-//  const parentIndex = allEntities.findIndex((e) => e.name === parent.name);
-//  const child = allEntities[parentIndex + 1];
-//  if (!child) return console.log(`Aucun enfant trouvé pour ${parent.name}`);
-//
-//  const originalParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
-//  const originalChildMatrix = new THREE.Matrix4().fromArray([...child.ls_to_ws]);
-//
-//  const relativeMatrix = new THREE.Matrix4()
-//    .copy(originalParentMatrix)
-//    .invert()
-//    .multiply(originalChildMatrix);
-//
-//  const updatedParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
-//  const newGlobalMatrix = new THREE.Matrix4().multiplyMatrices(updatedParentMatrix, relativeMatrix);
-//
-//  const pos = new THREE.Vector3();
-//  const rot = new THREE.Quaternion();
-//  const scale = new THREE.Vector3();
-//  newGlobalMatrix.decompose(pos, rot, scale);
-//
-//  child.local_transform = {
-//    position: [pos.x, pos.y, pos.z],
-//    orientation: [rot.x, rot.y, rot.z, rot.w],
-//  };
-//
-//  console.log(
-//    `${child.name} mis à jour → pos: (${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)})`
-//  );
-//}
 
 export function rotateHierarchy(
   entityName: string,
@@ -271,14 +166,12 @@ export function rotateHierarchy(
   ];
 }
 
-
-
 export async function rotateHierarchyProgressive(
   entityName: string,
   deltaQuatDeg: [number, number, number],
   entitiesMap: Map<string, EntityWithParentId>,
-  stepDeg: number = 1,
-  delayMs: number = 50
+  delayMs: number,
+  stepDeg: number = 1
 ) {
   const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
   if (!entity) {
@@ -286,7 +179,16 @@ export async function rotateHierarchyProgressive(
     return;
   }
 
-  const [totalDx, totalDy, totalDz] = deltaQuatDeg;
+  // Filtrage selon l'axe autorisé
+  const allowedAxis = getAllowedAxis(entity.name);
+  const [dx, dy, dz] = deltaQuatDeg;
+  const filteredDeltaQuatDeg: [number, number, number] = [
+    allowedAxis.includes("x") ? dx : 0,
+    allowedAxis.includes("y") ? dy : 0,
+    allowedAxis.includes("z") ? dz : 0,
+  ];
+
+  const [totalDx, totalDy, totalDz] = filteredDeltaQuatDeg;
   const steps = Math.max(
     Math.ceil(Math.abs(totalDx) / stepDeg),
     Math.ceil(Math.abs(totalDy) / stepDeg),
@@ -307,6 +209,21 @@ export async function rotateHierarchyProgressive(
     totalDy - stepDy * steps,
     totalDz - stepDz * steps,
   ]);
+}
+
+function getAllowedAxis(entityName: string): string[] {
+  switch (entityName) {
+    case "part_1":
+    case "part_3":
+    case "part_4":
+    case "part_5":
+      return ["z"];
+    case "part_2":
+    case "part_6":
+      return ["x"];
+    default:
+      return ["x", "y", "z"]; // Si jamais l'entité n'est pas listée, autorise tout par défaut
+  }
 }
 
 function applyStepRotation(

@@ -23,7 +23,6 @@ export async function moveEntityAndChildren(
   const entityList = entitiesToMove.map(e => ({ id: e.id }));
 
   try {
-   // await posKey(instance, entityList, ...delta);
    console.log(`${delta[0]}, ${delta[1]}, ${delta[2]}`);
     await oriKey(instance, entityList, delta[0], delta[1], delta[2], eulerToQuat);
     console.log(`✅ Déplacement + orientation appliqués à ${entityList.length} entités à partir de l'index ${rootIndex}`);

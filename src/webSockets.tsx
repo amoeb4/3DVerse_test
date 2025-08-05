@@ -1,3 +1,4 @@
+// webSockets.tsx
 import {
   useContext,
   useRef,
@@ -7,7 +8,8 @@ import {
   useState,
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
-import { rotateHierarchy, PartEntitiesContext } from "./partEntitiesContext";
+import { rotateHierarchy, PartEntitiesContext, rotateHierarchyProgressive } from "./partEntitiesContext";
+import { useSpeed } from "./Interface"; // 👈 importe le hook correctement
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},
@@ -19,6 +21,9 @@ export function useWebSocket() {
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
+  const { speed } = useSpeed(); // ✅ appel du hook dans un composant React
+  const delayMs = Math.max(10, 1000 / speed); // ✅ calcul du délai à passer en paramètre
+
   const { entity: selectedEntity } = useEntity(
     selectedEntityName ? { name: selectedEntityName } : { name: "" }
   );
@@ -62,17 +67,15 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           typeof parsed.name === "string" &&
           Array.isArray(parsed.location) &&
           (parsed.location.length === 3 || parsed.location.length === 4) &&
-          parsed.location.every((n : number) => typeof n === "number")
+          parsed.location.every((n: number) => typeof n === "number")
         ) {
           const [x, y, z, w = 0] = parsed.location;
 
           if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}] with rotation ${w}`);
-              await rotateHierarchy(parsed.name, [x, y, z, w], entitiesMap);
+              await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
             } else {
-              console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
-
               const alreadyQueued = messageQueue.current.some(
                 (msg) =>
                   msg.name === parsed.name &&
@@ -108,7 +111,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
               console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}] with rotation ${w}`);
-              await rotateHierarchy(name, [x, y, z, w], entitiesMap);
+              await rotateHierarchyProgressive(name, [x, y, z], entitiesMap, delayMs);
             } else {
               const alreadyQueued = messageQueue.current.some(
                 (msg) =>
@@ -150,7 +153,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       }, timeout);
       console.log(`🔄 Reconnecting in ${timeout}ms...`);
     };
-  }, [instance, entitiesMap]);
+  }, [instance, entitiesMap, delayMs]); // <-- attention à bien inclure delayMs
 
   useEffect(() => {
     console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
@@ -161,10 +164,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       toProcess.forEach(async (parsed) => {
         const [x, y, z, w = 0] = parsed.location.map(Number);
         console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}] with rotation ${w}`);
-        await rotateHierarchy(parsed.name, [x, y, z, w], entitiesMap);
+        await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
       });
     }
-  }, [flushTrigger, instance, entitiesMap]);
+  }, [flushTrigger, instance, entitiesMap, delayMs]);
 
   useEffect(() => {
     connectWebSocket();

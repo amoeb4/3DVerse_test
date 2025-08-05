@@ -6,7 +6,7 @@ import {
   ReactNode,
   ChangeEvent,
 } from "react";
-import * as THREE from 'three';
+import * as THREE from "three";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import {
   Menu,
@@ -15,6 +15,7 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { setOrientation } from "./movements";
 
 type SpeedContextType = {
   speed: number;
@@ -53,7 +54,6 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// --- Utilitaires ---
 export function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
   const rad = (deg: number) => (deg * Math.PI) / 180;
   const c1 = Math.cos(rad(y) / 2), s1 = Math.sin(rad(y) / 2);
@@ -67,29 +67,13 @@ export function eulerToQuat(x: number, y: number, z: number): [number, number, n
   ];
 }
 
-const controlInterfaceStyle = {
-  position: "fixed" as const,
-  left: "5%",
-  right: "5%",
-  top: "3%",
-  backgroundColor: "#263238",
-  color: "white",
-  padding: "2rem",
-  borderRadius: "12px",
-  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
-  zIndex: 1000,
-  display: "flex",
-  flexWrap: "wrap" as const,
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: "1rem",
-};
-
 export default function ControlPanel() {
   const { speed, setSpeed } = useSpeed();
   const { selectedEntity } = useEntity();
   const { instance } = useContext(LivelinkContext);
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { speed: delayMs, setSpeed: setDelayMs } = useSpeed();
 
   const handleSliderChange = (axis: 'x' | 'y' | 'z') => (e: ChangeEvent<HTMLInputElement>) => {
     const newAngle = parseFloat(e.target.value);
@@ -100,88 +84,122 @@ export default function ControlPanel() {
     }
   };
 
-  async function setOrientation(
-    instance: any,
-    entityId: string,
-    axis: 'x' | 'y' | 'z',
-    deltaDeg: number
-  ) {
-    const [fullEntity] = await instance.scene.findEntities({ entity_uuid: entityId });
-    if (!fullEntity) return console.warn(`Entité avec UUID ${entityId} introuvable`);
-
-    const currentQuat = new THREE.Quaternion(...(fullEntity.local_transform.orientation ?? [0, 0, 0, 1]));
-    const deltaEuler =
-      axis === 'x'
-        ? new THREE.Euler(THREE.MathUtils.degToRad(deltaDeg), 0, 0, 'XYZ')
-        : axis === 'y'
-        ? new THREE.Euler(0, THREE.MathUtils.degToRad(deltaDeg), 0, 'XYZ')
-        : new THREE.Euler(0, 0, THREE.MathUtils.degToRad(deltaDeg), 'XYZ');
-
-    const deltaQuat = new THREE.Quaternion().setFromEuler(deltaEuler);
-    const newQuat = deltaQuat.multiply(currentQuat).normalize();
-
-    fullEntity.local_transform.orientation = [newQuat.x, newQuat.y, newQuat.z, newQuat.w];
-    console.log(`Orientation mise à jour pour ${entityId} : (${newQuat.x.toFixed(4)}, ${newQuat.y.toFixed(4)}, ${newQuat.z.toFixed(4)}, ${newQuat.w.toFixed(4)})`);
+  if (!isExpanded) {
+    return (
+      <button
+        className="fixed top-[3%] right-[3%] z-50 bg-white/10 text-white border border-white/20 backdrop-blur px-3 py-2 rounded-full shadow hover:bg-white/20 transition"
+        onClick={() => setIsExpanded(true)}
+      >
+      Control Panel
+      </button>
+    );
   }
 
   return (
-    <div style={controlInterfaceStyle}>
-      <h1 className="text-xl font-semibold mb-2 w-full">Control Panel</h1>
-      <EntityDropdown />
-      <button onClick={() => console.log("Entité sélectionnée :", selectedEntity)} className="border border-white px-4 py-2 rounded-md hover:bg-white hover:text-black transition">Apply changes</button>
-      <button className="border border-white px-4 py-2 rounded-md hover:bg-white hover:text-black transition">Focus on entity</button>
-      <button className="border border-white px-4 py-2 rounded-md hover:bg-white hover:text-black transition">Back to start</button>
-
-      <div className="flex flex-col items-center">
-        <span className="mb-1 text-sm">{speed.toFixed(1)}x</span>
-        <input
-          type="range"
-          min="0.1"
-          max="50"
-          value={speed * 10}
-          onChange={(e) => setSpeed(parseFloat(e.target.value) / 10)}
-          className="w-64 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-        />
+    <div className="fixed top-[3%] right-[3%] z-50 p-6 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-6 w-[90vw] max-w-[600px]">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Control Panel</h1>
+        <button
+          className="text-sm bg-white/10 border border-white/30 rounded-md px-2 py-1 hover:bg-white/20 transition"
+          onClick={() => setIsExpanded(false)}
+        >
+        Minimize
+        </button>
       </div>
 
-      <div className="flex flex-col items-center">
-        <span className="mb-1 text-sm">Rotation X : {rotation.x}°</span>
-        <input
-          type="range"
-          min={-180}
-          max={180}
-          step={1}
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        <EntityDropdown />
+
+        <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+          Apply changes
+        </button>
+
+        <button className="bg-green-600 hover:bg-green-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+          Focus on entity
+        </button>
+
+        <button className="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+          Back to start
+        </button>
+      </div>
+
+      <div className="space-y-4">
+
+
+<Slider
+  label={`Speed: ${delayMs} ms`}
+  value={delayMs}
+  min={5}
+  max={200}
+  step={1}
+  onChange={(e) => setDelayMs(parseInt(e.target.value, 10))}
+  color="purple"
+/>
+        <Slider
+          label={`Rotation X: ${rotation.x}°`}
           value={rotation.x}
-          onChange={handleSliderChange('x')}
-          className="w-64 h-2 bg-green-300 rounded-lg appearance-none cursor-pointer accent-green-600"
-        />
-      </div>
-
-      <div className="flex flex-col items-center">
-        <span className="mb-1 text-sm">Rotation Y : {rotation.y}°</span>
-        <input
-          type="range"
           min={-180}
           max={180}
-          step={1}
+          onChange={handleSliderChange("x")}
+          color="red"
+        />
+        <Slider
+          label={`Rotation Y: ${rotation.y}°`}
           value={rotation.y}
-          onChange={handleSliderChange('y')}
-          className="w-64 h-2 bg-blue-300 rounded-lg appearance-none cursor-pointer accent-green-600"
-        />
-      </div>
-
-      <div className="flex flex-col items-center">
-        <span className="mb-1 text-sm">Rotation Z : {rotation.z}°</span>
-        <input
-          type="range"
           min={-180}
           max={180}
-          step={1}
+          onChange={handleSliderChange("y")}
+          color="blue"
+        />
+        <Slider
+          label={`Rotation Z: ${rotation.z}°`}
           value={rotation.z}
-          onChange={handleSliderChange('z')}
-          className="w-64 h-2 bg-red-300 rounded-lg appearance-none cursor-pointer accent-green-600"
+          min={-180}
+          max={180}
+          onChange={handleSliderChange("z")}
+          color="green"
         />
       </div>
+    </div>
+  );
+}
+
+function Slider({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  onChange,
+  color,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  onChange: (e: any) => void;
+  color: "green" | "blue" | "purple" | "red";
+}) {
+  const colorClasses: Record<string, string> = {
+    green: "accent-green-500",
+    blue: "accent-blue-500",
+    purple: "accent-purple-500",
+    red: "accent-red-500",
+  };
+
+  return (
+    <div className="flex flex-col w-full max-w-xl">
+      <label className="mb-1 font-medium text-sm">{label}</label>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={onChange}
+        className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${colorClasses[color]} bg-gray-200`}
+      />
     </div>
   );
 }
@@ -213,7 +231,7 @@ export function EntityDropdown() {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50">
+        <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white/90 px-3 py-2 text-sm font-semibold text-gray-900 shadow ring-1 ring-gray-300 hover:bg-gray-100">
           {selectedEntity?.name || "Entités"}
           <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
         </MenuButton>

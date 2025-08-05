@@ -228,8 +228,6 @@ function handleAnimatedSkeleton(
     return intervalId;
 }
 
-------------------------------------------------------------------------------
-
 function setUpThreeJsSkeleton(canvas: HTMLCanvasElement) {
     const width = canvas.offsetWidth;
     const height = canvas.offsetHeight;
@@ -239,7 +237,6 @@ function setUpThreeJsSkeleton(canvas: HTMLCanvasElement) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
     renderer.setSize(width, height);
 
-    // Camera and orbital camera controller
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.setRotationFromQuaternion(
         new THREE.Quaternion(-0.2716, -0.2716, -0.1473, -0.0421),

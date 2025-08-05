@@ -10,7 +10,6 @@ import {
 } from "@3dverse/livelink-react";
 import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
-
 import KeyboardHandler from "./keyBindings.tsx";
 import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
@@ -31,12 +30,12 @@ export function App() {
         <Livelink isTransient={false} sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
             <PartEntitiesProvider>
-              <WebSocketProvider>
-                <SpeedProvider>
+              <SpeedProvider>
+                <WebSocketProvider>
                   <KeyboardHandler />
                   <AppLayout />
-                </SpeedProvider>
               </WebSocketProvider>
+              </SpeedProvider>
             </PartEntitiesProvider>
           </EntityProvider>
         </Livelink>
@@ -59,7 +58,6 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
 <label className="block flex flex-col">
-  <span className="block text-sm font-medium mb-1">Scene ID :</span>
   <input
     type="text"
     className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -133,7 +131,7 @@ function AppLayout() {
             </div>
           )}
           <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
-          <Canvas className="bottom-10 right-4 w-3/11 aspect-video border border-tertiary rounded-xl shadow-xl">
+          <Canvas className="bottom-10 right-4 w-1/3 aspect-video border border-tertiary rounded-xl shadow-xl">
             <Viewport cameraEntity={pipCamera} className="w-full h-full">
               <CameraController />
             </Viewport>
@@ -142,9 +140,6 @@ function AppLayout() {
       </Canvas>
       <div className="absolute top-14 left-1 flex flex-col">
         <div className="flex flex-row">
-          <button className="button button-overlay mr-2" onClick={moveCamera}>
-            Move Camera
-          </button>
           {presetKeys.map((presetKey, index) => {
             const preset = CameraControllerPresets[presetKey];
             const name = presetKey.replace("_", " ");

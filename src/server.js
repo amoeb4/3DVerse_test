@@ -24,7 +24,6 @@ wss.on('connection', (ws) => {
         wss.clients.forEach(client => {
           if (client.readyState === client.OPEN) {
             client.send(JSON.stringify(data));
-            console.log("📤 Broadcast:", text);
           }
         });
       } else if (typeof data.select === "string") {
