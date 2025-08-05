@@ -63,11 +63,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           Array.isArray(parsed.location) &&
           parsed.location.length === 3
         ) {
-          const [x, y, z] = parsed.location;
-          if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
+          const [x, y, z, w] = parsed.location;
+          if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
-              console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}]`);
-              await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
+              console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}, ${w}]`);
+              await rotateHierarchy(parsed.name, [x, y, z, w], entitiesMap);
             } else {
               console.warn("⏳ instance or entitiesMap not ready yet, queuing message");
 
@@ -97,29 +97,33 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         console.warn("⚠️ Message is not JSON, falling back to legacy split-based parsing");
 
         const parts = msg.split(" ");
-        if (parts.length === 4) {
-          const [name, xStr, yStr, zStr] = parts;
-          const x = parseFloat(xStr);
-          const y = parseFloat(yStr);
-          const z = parseFloat(zStr);
-          if (name.startsWith("part_") && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
-            if (instance && entitiesMap.size > 0) {
-              console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}]`);
-              await rotateHierarchy(name, [x, y, z], entitiesMap);
-            } else {
-              const alreadyQueued = messageQueue.current.some(
-                (msg) =>
-                  msg.name === name &&
-                  JSON.stringify(msg.location) === JSON.stringify([x, y, z])
-              );
-              if (!alreadyQueued) {
-                messageQueue.current.push({ name, location: [x, y, z] });
-                setFlushTrigger((prev) => prev + 1);
-              }
-            }
-            return;
-          }
-        }
+if ((parts.length === 4 || parts.length === 5) && parts[0].startsWith("part_")) {
+  const [name, xStr, yStr, zStr, wStr] = parts;
+  const x = parseFloat(xStr);
+  const y = parseFloat(yStr);
+  const z = parseFloat(zStr);
+  const w = parseFloat(wStr);
+
+  if (!isNaN(x) && !isNaN(y) && !isNaN(z) && (wStr === undefined || !isNaN(w))) {
+    const rotation = w ?? 0;
+
+    if (instance && entitiesMap.size > 0) {
+      console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}] with rotation ${rotation}`);
+      await rotateHierarchy(name, [x, y, z, rotation], entitiesMap);
+    } else {
+      const alreadyQueued = messageQueue.current.some(
+        (msg) =>
+          msg.name === name &&
+          JSON.stringify(msg.location) === JSON.stringify([x, y, z, rotation])
+      );
+      if (!alreadyQueued) {
+        messageQueue.current.push({ name, location: [x, y, z, rotation] });
+        setFlushTrigger((prev) => prev + 1);
+      }
+    }
+    return;
+  }
+}
 
         if (parts.length === 2 && parts[0] === "select") {
           const name = parts[1];
@@ -156,9 +160,9 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       const toProcess = messageQueue.current.splice(0, messageQueue.current.length);
 
       toProcess.forEach(async (parsed) => {
-        const [x, y, z] = parsed.location.map(Number);
+        const [x, y, z, w] = parsed.location.map(Number);
         console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}]`);
-        await rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
+        await rotateHierarchy(parsed.name, [x, y, z, w], entitiesMap);
       });
     }
   }, [flushTrigger, instance, entitiesMap]);

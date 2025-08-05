@@ -240,67 +240,45 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
 
 
 export function rotateHierarchy(
-  rootName: string,
-  deltaDeg: [number, number, number],
+  entityName: string,
+  deltaQuatDeg: [number, number, number, number], // rotation en degrés exprimée dans un quaternion (même si conceptuellement c'est inhabituel)
   entitiesMap: Map<string, EntityWithParentId>
 ) {
-  const entities = [...entitiesMap.values()];
-  const rootIndex = entities.findIndex((e) => e.name === rootName);
-  if (rootIndex === -1) return console.warn(`${rootName} introuvable`);
-
-  const deltaRad = deltaDeg.map((d) => (d * Math.PI) / 180);
-  const T0i: THREE.Matrix4[] = [];
-  for (const entity of entities) {
-    T0i.push(new THREE.Matrix4().fromArray([...entity.ls_to_ws]));
+  const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
+  if (!entity) {
+    console.warn(`Entité ${entityName} introuvable`);
+    return;
   }
 
-  const Tij: THREE.Matrix4[] = [];
-  for (let i = 0; i < T0i.length - 1; i++) {
-    const inv = new THREE.Matrix4().copy(T0i[i]).invert();
-    const rel = new THREE.Matrix4().multiplyMatrices(inv, T0i[i + 1]);
-    Tij.push(rel);
-  }
+  const [dx, dy, dz, dw] = deltaQuatDeg;
 
-  const isZeroRotation = deltaDeg.every((angle) => angle === 0);
+  // Convertir le delta en quaternion à partir d'un angle de rotation en degrés → radians
+  const deltaEulerRad = new THREE.Euler(
+    (dx * Math.PI) / 180,
+    (dy * Math.PI) / 180,
+    (dz * Math.PI) / 180,
+    (dw * Math.PI) / 180,
+    "ZYXW"
+  );
+  const deltaQuat = new THREE.Quaternion().setFromEuler(deltaEulerRad);
 
-  if (!isZeroRotation) {
-    const existingMat = Tij[rootIndex];
-    const pos = new THREE.Vector3();
-    const quat = new THREE.Quaternion();
-    const scale = new THREE.Vector3();
-    existingMat.decompose(pos, quat, scale);
+  // Quaternion actuel de l'entité
+  const [qx, qy, qz, qw] = entity.local_transform.orientation ?? [0, 0, 0, 1];
+  const currentQuat = new THREE.Quaternion(qx, qy, qz, qw);
 
-    const existingEuler = new THREE.Euler().setFromQuaternion(quat, "ZYX");
-    const newEuler = new THREE.Euler(
-      existingEuler.x + deltaRad[0],
-      existingEuler.y + deltaRad[1],
-      existingEuler.z + deltaRad[2],
-      "ZYX"
-    );
+  // Appliquer la rotation relative
+  const newQuat = currentQuat.multiply(deltaQuat).normalize();
 
-    const newR = new THREE.Matrix4().makeRotationFromEuler(newEuler);
-    newR.setPosition(pos);
-    newR.scale(scale);
+  // Appliquer la nouvelle orientation à l' entité
+  entity.local_transform.orientation = [
+    newQuat.x,
+    newQuat.y,
+    newQuat.z,
+    newQuat.w,
+  ];
 
-    Tij[rootIndex] = newR;
-  }
-
-  const T0i_new: THREE.Matrix4[] = [T0i[0].clone()];
-  for (let i = 0; i < Tij.length; i++) {
-    const next = new THREE.Matrix4().multiplyMatrices(T0i_new[i], Tij[i]);
-    T0i_new.push(next);
-  }
-
-  for (let i = 0; i < entities.length; i++) {
-    const mat = T0i_new[i];
-    const pos = new THREE.Vector3();
-    const quat = new THREE.Quaternion();
-    const scale = new THREE.Vector3();
-    mat.decompose(pos, quat, scale);
-
-    entities[i].local_transform = {
-      position: [pos.x, pos.y, pos.z],
-      orientation: [quat.x, quat.y, quat.z, quat.w],
-    };
-  }
+  // Debug
+  console.log(
+    `${entityName} → orientation mise à jour : (${newQuat.x.toFixed(4)}, ${newQuat.y.toFixed(4)}, ${newQuat.z.toFixed(4)}, ${newQuat.w.toFixed(4)})`
+  );
 }
