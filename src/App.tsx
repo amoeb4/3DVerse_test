@@ -28,7 +28,7 @@ export function App() {
       {!credentials ? (
         <StartupModal onSubmit={setCredentials} />
       ) : (
-        <Livelink sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
+        <Livelink isTransient={true} sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
           <EntityProvider>
             <PartEntitiesProvider>
               <WebSocketProvider>

@@ -164,34 +164,34 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
 
 
 
-export function rotateHierarchy(
-  rootName: string,
-  deltaDeg: [number, number, number],
-  entitiesMap: Map<string, EntityWithParentId>
-) {
-  const entities = [...entitiesMap.values()];
-  const root = entities.find((e) => e.name === rootName);
-  if (!root) return console.warn(`${rootName} introuvable`);
-
-  const deltaRad = deltaDeg.map((d) => (d * Math.PI) / 180);
-
-  const rootMatrix = new THREE.Matrix4().fromArray([...root.ls_to_ws]);
-  const obj = new THREE.Object3D();
-  obj.applyMatrix4(rootMatrix);
-  obj.updateMatrixWorld(true);
-
-  obj.rotateX(deltaRad[0]);
-  obj.rotateY(deltaRad[1]);
-  obj.rotateZ(deltaRad[2]);
-
-  obj.updateMatrixWorld(true);
-  const newMatrix = obj.matrixWorld.clone();
-
-  applyRotationToEntity(root, [...newMatrix.elements]);
-  console.log(`🔁 Rotation appliquée à ${root.name}`);
-
-  propagate(root, entities);
-}
+//export function rotateHierarchy(
+//  rootName: string,
+//  deltaDeg: [number, number, number],
+//  entitiesMap: Map<string, EntityWithParentId>
+//) {
+//  const entities = [...entitiesMap.values()];
+//  const root = entities.find((e) => e.name === rootName);
+//  if (!root) return console.warn(`${rootName} introuvable`);
+//
+//  const deltaRad = deltaDeg.map((d) => (d * Math.PI) / 180);
+//
+//  const rootMatrix = new THREE.Matrix4().fromArray([...root.ls_to_ws]);
+//  const obj = new THREE.Object3D();
+//  obj.applyMatrix4(rootMatrix);
+//  obj.updateMatrixWorld(true);
+//
+//  obj.rotateX(deltaRad[0]);
+//  obj.rotateY(deltaRad[1]);
+//  obj.rotateZ(deltaRad[2]);
+//
+//  obj.updateMatrixWorld(true);
+//  const newMatrix = obj.matrixWorld.clone();
+//
+//  applyRotationToEntity(root, [...newMatrix.elements]);
+//  console.log(`🔁 Rotation appliquée à ${root.name}`);
+//
+//  propagate(root, entities);
+//}
 
 
 export function applyRotationToEntity(entity: Entity, matrix: mat4) {
@@ -204,36 +204,103 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
 }
 
 
-function propagate(
-  parent: EntityWithParentId,
-  allEntities: EntityWithParentId[]
+//function propagate(
+//  parent: EntityWithParentId,
+//  allEntities: EntityWithParentId[]
+//) {
+//  const parentIndex = allEntities.findIndex((e) => e.name === parent.name);
+//  const child = allEntities[parentIndex + 1];
+//  if (!child) return console.log(`Aucun enfant trouvé pour ${parent.name}`);
+//
+//  const originalParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
+//  const originalChildMatrix = new THREE.Matrix4().fromArray([...child.ls_to_ws]);
+//
+//  const relativeMatrix = new THREE.Matrix4()
+//    .copy(originalParentMatrix)
+//    .invert()
+//    .multiply(originalChildMatrix);
+//
+//  const updatedParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
+//  const newGlobalMatrix = new THREE.Matrix4().multiplyMatrices(updatedParentMatrix, relativeMatrix);
+//
+//  const pos = new THREE.Vector3();
+//  const rot = new THREE.Quaternion();
+//  const scale = new THREE.Vector3();
+//  newGlobalMatrix.decompose(pos, rot, scale);
+//
+//  child.local_transform = {
+//    position: [pos.x, pos.y, pos.z],
+//    orientation: [rot.x, rot.y, rot.z, rot.w],
+//  };
+//
+//  console.log(
+//    `${child.name} mis à jour → pos: (${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)})`
+//  );
+//}
+
+
+export function rotateHierarchy(
+  rootName: string,
+  deltaDeg: [number, number, number],
+  entitiesMap: Map<string, EntityWithParentId>
 ) {
-  const parentIndex = allEntities.findIndex((e) => e.name === parent.name);
-  const child = allEntities[parentIndex + 1];
-  if (!child) return console.log(`Aucun enfant trouvé pour ${parent.name}`);
+  const entities = [...entitiesMap.values()];
+  const rootIndex = entities.findIndex((e) => e.name === rootName);
+  if (rootIndex === -1) return console.warn(`${rootName} introuvable`);
 
-  const originalParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
-  const originalChildMatrix = new THREE.Matrix4().fromArray([...child.ls_to_ws]);
+  const deltaRad = deltaDeg.map((d) => (d * Math.PI) / 180);
+  const T0i: THREE.Matrix4[] = [];
+  for (const entity of entities) {
+    T0i.push(new THREE.Matrix4().fromArray([...entity.ls_to_ws]));
+  }
 
-  const relativeMatrix = new THREE.Matrix4()
-    .copy(originalParentMatrix)
-    .invert()
-    .multiply(originalChildMatrix);
+  const Tij: THREE.Matrix4[] = [];
+  for (let i = 0; i < T0i.length - 1; i++) {
+    const inv = new THREE.Matrix4().copy(T0i[i]).invert();
+    const rel = new THREE.Matrix4().multiplyMatrices(inv, T0i[i + 1]);
+    Tij.push(rel);
+  }
 
-  const updatedParentMatrix = new THREE.Matrix4().fromArray([...parent.ls_to_ws]);
-  const newGlobalMatrix = new THREE.Matrix4().multiplyMatrices(updatedParentMatrix, relativeMatrix);
+  const isZeroRotation = deltaDeg.every((angle) => angle === 0);
 
-  const pos = new THREE.Vector3();
-  const rot = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
-  newGlobalMatrix.decompose(pos, rot, scale);
+  if (!isZeroRotation) {
+    const existingMat = Tij[rootIndex];
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    existingMat.decompose(pos, quat, scale);
 
-  child.local_transform = {
-    position: [pos.x, pos.y, pos.z],
-    orientation: [rot.x, rot.y, rot.z, rot.w],
-  };
+    const existingEuler = new THREE.Euler().setFromQuaternion(quat, "ZYX");
+    const newEuler = new THREE.Euler(
+      existingEuler.x + deltaRad[0],
+      existingEuler.y + deltaRad[1],
+      existingEuler.z + deltaRad[2],
+      "ZYX"
+    );
 
-  console.log(
-    `${child.name} mis à jour → pos: (${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)})`
-  );
+    const newR = new THREE.Matrix4().makeRotationFromEuler(newEuler);
+    newR.setPosition(pos);
+    newR.scale(scale);
+
+    Tij[rootIndex] = newR;
+  }
+
+  const T0i_new: THREE.Matrix4[] = [T0i[0].clone()];
+  for (let i = 0; i < Tij.length; i++) {
+    const next = new THREE.Matrix4().multiplyMatrices(T0i_new[i], Tij[i]);
+    T0i_new.push(next);
+  }
+
+  for (let i = 0; i < entities.length; i++) {
+    const mat = T0i_new[i];
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    mat.decompose(pos, quat, scale);
+
+    entities[i].local_transform = {
+      position: [pos.x, pos.y, pos.z],
+      orientation: [quat.x, quat.y, quat.z, quat.w],
+    };
+  }
 }
