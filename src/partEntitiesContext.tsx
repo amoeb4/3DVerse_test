@@ -42,6 +42,7 @@ function getRotationMatrix(matrix: mat4): mat4 {
   return rot;
 }
 
+
 export async function getDescendants(
   root: EntityWithParentId,
   entitiesMap: Map<string, EntityWithParentId>
@@ -240,7 +241,7 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
 
 export function rotateHierarchy(
   entityName: string,
-  deltaQuatDeg: [number, number, number, number], // [xDeg, yDeg, zDeg, unused]
+  deltaQuatDeg: [number, number, number, number],
   entitiesMap: Map<string, EntityWithParentId>
 ) {
   const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
@@ -260,19 +261,79 @@ export function rotateHierarchy(
   const deltaQuat = new THREE.Quaternion().setFromEuler(eulerRad);
   const [qx, qy, qz, qw] = entity.local_transform.orientation ?? [0, 0, 0, 1];
   const currentQuat = new THREE.Quaternion(qx, qy, qz, qw);
-
-  // Appliquer la rotation relative (delta * current)
   const newQuat = deltaQuat.multiply(currentQuat).normalize();
 
-  // Appliquer la nouvelle orientation à l'entité
   entity.local_transform.orientation = [
     newQuat.x,
     newQuat.y,
     newQuat.z,
     newQuat.w,
   ];
+}
 
-  console.log(
-    `${entityName} → orientation mise à jour : (${newQuat.x.toFixed(4)}, ${newQuat.y.toFixed(4)}, ${newQuat.z.toFixed(4)}, ${newQuat.w.toFixed(4)})`
+
+
+export async function rotateHierarchyProgressive(
+  entityName: string,
+  deltaQuatDeg: [number, number, number],
+  entitiesMap: Map<string, EntityWithParentId>,
+  stepDeg: number = 1,
+  delayMs: number = 50
+) {
+  const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
+  if (!entity) {
+    console.warn(`Entité ${entityName} introuvable`);
+    return;
+  }
+
+  const [totalDx, totalDy, totalDz] = deltaQuatDeg;
+  const steps = Math.max(
+    Math.ceil(Math.abs(totalDx) / stepDeg),
+    Math.ceil(Math.abs(totalDy) / stepDeg),
+    Math.ceil(Math.abs(totalDz) / stepDeg)
   );
+
+  const stepDx = totalDx / steps;
+  const stepDy = totalDy / steps;
+  const stepDz = totalDz / steps;
+
+  for (let i = 0; i < steps; i++) {
+    applyStepRotation(entity, [stepDx, stepDy, stepDz]);
+    await sleep(delayMs);
+  }
+
+  applyStepRotation(entity, [
+    totalDx - stepDx * steps,
+    totalDy - stepDy * steps,
+    totalDz - stepDz * steps,
+  ]);
+}
+
+function applyStepRotation(
+  entity: EntityWithParentId,
+  deltaDeg: [number, number, number]
+) {
+  const [dx, dy, dz] = deltaDeg;
+  const eulerRad = new THREE.Euler(
+    (dx * Math.PI) / 180,
+    (dy * Math.PI) / 180,
+    (dz * Math.PI) / 180,
+    "ZYX"
+  );
+
+  const deltaQuat = new THREE.Quaternion().setFromEuler(eulerRad);
+  const [qx, qy, qz, qw] = entity.local_transform.orientation ?? [0, 0, 0, 1];
+  const currentQuat = new THREE.Quaternion(qx, qy, qz, qw);
+  const newQuat = deltaQuat.multiply(currentQuat).normalize();
+
+  entity.local_transform.orientation = [
+    newQuat.x,
+    newQuat.y,
+    newQuat.z,
+    newQuat.w,
+  ];
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
