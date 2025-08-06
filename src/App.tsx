@@ -89,7 +89,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-md font-semibold transition"
+              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition"
             >
               Submit
             </button>
@@ -110,6 +110,8 @@ function AppLayout() {
     CameraControllerPresets.orbital
   );
 
+  const [showPipCamera, setShowPipCamera] = useState(true); // <-- état de visibilité
+
   const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
   const moveCamera = () => {
     const targetPosition = [-30, 250, 150] as const;
@@ -123,6 +125,14 @@ function AppLayout() {
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
+
+
+<div className="absolute bottom-[3%] right-[3%] z-50">
+  <button
+    className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]" onClick={() => setShowPipCamera(prev => !prev)}>
+    {showPipCamera ? "Minimize" : "Display alt. camera"}
+  </button>
+</div>
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
@@ -131,14 +141,16 @@ function AppLayout() {
             </div>
           )}
           <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
-          <Canvas className="bottom-10 right-4 w-1/3 aspect-video border border-tertiary rounded-xl shadow-xl">
-            <Viewport cameraEntity={pipCamera} className="w-full h-full">
-              <CameraController />
-            </Viewport>
-          </Canvas>
+          {showPipCamera && (
+            <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl absolute">
+              <Viewport cameraEntity={pipCamera} className="w-full h-full">
+                <CameraController />
+              </Viewport>
+            </Canvas>
+          )}
         </Viewport>
       </Canvas>
-      <div className="absolute top-14 left-1 flex flex-col">
+      <div className="absolute top-14 left-1 flex flex-col z-50">
         <div className="flex flex-row">
           {presetKeys.map((presetKey, index) => {
             const preset = CameraControllerPresets[presetKey];
@@ -148,7 +160,10 @@ function AppLayout() {
               <button
                 key={index}
                 className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
-                onClick={() => setCameraControllerPreset(preset)}>{name}</button>
+                onClick={() => setCameraControllerPreset(preset)}
+              >
+                {name}
+              </button>
             );
           })}
         </div>
