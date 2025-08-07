@@ -6,7 +6,7 @@ export default function Dtext() {
   return (
     <div className="flex justify-center">
       <DecryptedText
-        text="Welcome to VLM Universe"
+        text="Welcome to VLM Dimensions"
         speed={50}
         maxIterations={60}
         characters="ABCD1234!?XMPLSZQK"

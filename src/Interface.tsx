@@ -16,23 +16,31 @@ import {
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { setOrientation } from "./movements";
-
+import { useEntity as useEntityByEuid } from "@3dverse/livelink-react";
 type SpeedContextType = {
+  delayMs: number;
+  setDelayMs: (value: number) => void;
   speed: number;
-  setSpeed: (value: number) => void;
 };
+
 export const SpeedContext = createContext<SpeedContextType | undefined>(undefined);
 
-export const useSpeed = () => {
+export const SpeedProvider = ({ children }: { children: ReactNode }) => {
+  const [delayMs, setDelayMs] = useState(100);
+  const speed = 1000 / delayMs;
+
+  return (
+    <SpeedContext.Provider value={{ delayMs, setDelayMs, speed }}>
+      {children}
+    </SpeedContext.Provider>
+  );
+};
+
+export function useSpeed() {
   const context = useContext(SpeedContext);
   if (!context) throw new Error("useSpeed must be used within a SpeedProvider");
   return context;
-};
-
-export const SpeedProvider = ({ children }: { children: ReactNode }) => {
-  const [speed, setSpeed] = useState(1);
-  return <SpeedContext.Provider value={{ speed, setSpeed }}>{children}</SpeedContext.Provider>;
-};
+}
 
 type Entity = { id: string; name?: string };
 type EntityContextType = {
@@ -68,13 +76,29 @@ export function eulerToQuat(x: number, y: number, z: number): [number, number, n
 }
 
 export default function ControlPanel() {
-  const { speed, setSpeed } = useSpeed();
   const { selectedEntity } = useEntity();
   const { instance } = useContext(LivelinkContext);
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
   const [isExpanded, setIsExpanded] = useState(false);
-  const { speed: delayMs, setSpeed: setDelayMs } = useSpeed();
+  const { speed: delayMs, setDelayMs } = useSpeed();
 
+//  const shader = useEntityByEuid({
+//  euid: "33cdb8f6-cd51-4a82-997d-429551bde53b",
+//  });
+//
+//const [threshold, setThreshold] = useState(0);
+//
+//const handleThresholdChange = (e: ChangeEvent<HTMLInputElement>) => {
+//  const value = parseFloat(e.target.value);
+//  setThreshold(value);
+//
+//  if (shader && instance) {
+//    instance.treshold(shader.id, "ShaderComponent", {
+//      threshold: value,
+//    });
+//  }
+//};
+//
   const handleSliderChange = (axis: 'x' | 'y' | 'z') => (e: ChangeEvent<HTMLInputElement>) => {
     const newAngle = parseFloat(e.target.value);
     const delta = newAngle - rotation[axis];
@@ -127,7 +151,7 @@ export default function ControlPanel() {
 
 
 <Slider
-  label={`Speed: ${delayMs} ms`}
+  label={`Delay: ${delayMs} ms`} // ou `Speed: ${(1000 / delayMs).toFixed(1)}x`
   value={delayMs}
   min={5}
   max={200}

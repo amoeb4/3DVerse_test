@@ -7,6 +7,7 @@ import {
   useCameraEntity,
   LivelinkContext,
   DefaultCameraController,
+  useEntity
 } from "@3dverse/livelink-react";
 import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
@@ -109,7 +110,9 @@ function AppLayout() {
   const [cameraControllerPreset, setCameraControllerPreset] = useState(
     CameraControllerPresets.orbital
   );
-
+    const { entity: shader } = useEntity({
+        euid: "33cdb8f6-cd51-4a82-997d-429551bde53b",
+    });
   const [showPipCamera, setShowPipCamera] = useState(true); // <-- état de visibilité
 
   const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
@@ -125,7 +128,6 @@ function AppLayout() {
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
-
 
 <div className="absolute bottom-[3%] right-[3%] z-50">
   <button
