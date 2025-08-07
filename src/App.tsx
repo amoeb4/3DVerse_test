@@ -56,8 +56,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white/80 backdrop-blur-md text-gray-800 rounded-2xl shadow-2xl p-10 max-w-md w-full border border-gray-200">
         <Dtext />
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+<form onSubmit={handleSubmit} className="mt-6 space-y-4 w-full max-w-2xl">
 <label className="block flex flex-col">
   <input
     type="text"
@@ -66,8 +65,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
     onChange={(e) => setSceneId(e.target.value)}
     required
   />
-</label>
-
+      </label>
           <div className="space-y-2">
             {[
               ["NJ40 2.5", "c8dc2ac0-4601-4279-a01f-9c57a924f725"],
@@ -79,19 +77,16 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
                 <button
                   type="button"
                   onClick={() => setSceneId(id)}
-                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-4 py-2 rounded-md transition"
-                >
+                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-5 py-2 rounded-md transition">
                   Load {label}
                 </button>
               </div>
             ))}
           </div>
-
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition"
-            >
+              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition">
               Submit
             </button>
           </div>
@@ -110,11 +105,8 @@ function AppLayout() {
   const [cameraControllerPreset, setCameraControllerPreset] = useState(
     CameraControllerPresets.orbital
   );
-    const { entity: shader } = useEntity({
-        euid: "33cdb8f6-cd51-4a82-997d-429551bde53b",
-    });
-  const [showPipCamera, setShowPipCamera] = useState(true); // <-- état de visibilité
 
+  const [showPipCamera, setShowPipCamera] = useState(true); // <-- état de visibilité
   const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
   const moveCamera = () => {
     const targetPosition = [-30, 250, 150] as const;

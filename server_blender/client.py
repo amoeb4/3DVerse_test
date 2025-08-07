@@ -2,6 +2,11 @@ import asyncio
 import json
 import websockets
 
+# Initialiser les positions à 0 pour les parts 1 à 6
+positions = {
+    f"part_{i}": [0.0, 0.0, 0.0] for i in range(1, 7)
+}
+
 async def send_command(uri):
     try:
         async with websockets.connect(uri) as websocket:
@@ -14,23 +19,62 @@ async def send_command(uri):
                     print("Fermeture du client...")
                     break
 
-                parts = line.split()
-                if len(parts) not in (4, 5):
-                    print("Format invalide. Exemple : Cube 1.0 2.0 3.0 [45.0]")
-                    continue
+                # Séparer par virgule, trim chaque sous-commande
+                raw_commands = [cmd.strip() for cmd in line.split(",") if cmd.strip()]
 
-                name = parts[0]
-                try:
-                    coords = [float(parts[1]), float(parts[2]), float(parts[3])]
-                    if len(parts) == 5:
-                        coords.append(float(parts[4]))
-                except ValueError:
-                    print("Coordonnées invalides. Utilisez des nombres.")
-                    continue
+                for raw_cmd in raw_commands:
+                    # --- PAUSE ---
+                    if raw_cmd.lower().startswith("pause "):
+                        try:
+                            ms = float(raw_cmd.split()[1])
+                            print(f"Pause de {ms} ms...")
+                            await asyncio.sleep(ms / 1000)
+                        except (IndexError, ValueError):
+                            print(f"Commande 'pause' invalide : '{raw_cmd}'")
+                        continue
 
-                message = json.dumps({"name": name, "location": coords})
-                await websocket.send(message)
-                print(f"Commande envoyée : {message}")
+                    # --- RESET ---
+                    if raw_cmd.lower() == "reset":
+                        print("Reset en cours...")
+                        for name, pos in positions.items():
+                            if any(c != 0.0 for c in pos):
+                                inverse = [-v for v in pos]
+                                message = json.dumps({"name": name, "location": inverse})
+                                await websocket.send(message)
+                                print(f"Commande RESET envoyée : {message}")
+                                await asyncio.sleep(0.01)
+                                positions[name] = [0.0, 0.0, 0.0]
+                        continue
+
+                    # --- COMMANDE DE POSITION ---
+                    parts = raw_cmd.split()
+                    if len(parts) not in (4, 5):
+                        print(f"Format invalide pour la commande : '{raw_cmd}'")
+                        print("Exemple attendu : part_1 1.0 2.0 3.0")
+                        continue
+
+                    name = parts[0]
+                    try:
+                        delta = [float(parts[1]), float(parts[2]), float(parts[3])]
+                    except ValueError:
+                        print(f"Coordonnées invalides dans la commande : '{raw_cmd}'")
+                        continue
+
+                    # Initialiser si nouvelle part
+                    if name not in positions:
+                        positions[name] = [0.0, 0.0, 0.0]
+
+                    # Ajouter les delta à la position existante
+                    current = positions[name]
+                    updated = [current[i] + delta[i] for i in range(3)]
+                    positions[name] = updated
+
+                    message = json.dumps({"name": name, "location": updated})
+                    await websocket.send(message)
+                    print(f"Commande envoyée : {message}")
+
+                    # Pause 10ms avant la suivante
+                    await asyncio.sleep(0.01)
 
     except KeyboardInterrupt:
         print("\nInterruption clavier détectée, fermeture du client.")
