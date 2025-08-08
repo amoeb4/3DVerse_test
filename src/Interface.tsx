@@ -6,7 +6,7 @@ import {
   ReactNode,
   ChangeEvent,
 } from "react";
-
+import type { EntityCore } from "@3dverse/livelink";
 import * as THREE from "three";
 import { LivelinkContext } from "@3dverse/livelink-react";
 import {
@@ -88,45 +88,25 @@ export function eulerToQuat(
     c1 * c2 * c3 + s1 * s2 * s3,
   ];
 }
-import { Entity } from "@3dverse/livelink";
-export async function updateMaterialInput(
-  value: number,
-  object: Entity
-) {
-  if (!object) {
-    console.warn("Entité non trouvée");
-    return;
-  }
-  if (!object.material) {
-    console.warn("L'entité ne contient pas de composant 'material'");
-    return;
-  }
-
-  const prevVal = object.material.dataJSON?.threshold;
-  console.log(`Avant update, threshold = ${prevVal}`);
-
-  object.material.dataJSON.threshold = value;
-
-  const postVal = object.material.dataJSON.threshold;
-  console.log(`Après update, threshold = ${postVal}`);
-}
 
 export default function ControlPanel() {
-  const obj = useEntity({ euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" });
+  const { entity: obj } = useEntity(
+    { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
+    ["material"]
+  );
   const { selectedEntity } = useEntitySimple();
   const { instance } = useContext(LivelinkContext);
+
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
-  const [threshold, setThreshold] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const { speed: delayMs, setDelayMs } = useSpeed();
 
-const handleThresholdChange = async (e: ChangeEvent<HTMLInputElement>) => {
-  const value = parseFloat(e.target.value);
-  setThreshold(value);
-  if (instance) {
-    await updateMaterialInput(value, obj);
-  }
-};
+  const handleThresholdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (obj?.material) {
+      (obj.material.dataJSON.threshold as number) = value;
+    }
+  };
 
   const handleSliderChange =
     (axis: "x" | "y" | "z") => (e: ChangeEvent<HTMLInputElement>) => {
@@ -185,15 +165,19 @@ const handleThresholdChange = async (e: ChangeEvent<HTMLInputElement>) => {
           color="purple"
         />
 
-        <Slider
-          label={`Threshold: ${threshold}`}
-          value={threshold}
-          min={-1.8}
-          max={10}
-          step={0.1}
-          onChange={handleThresholdChange}
-          color="white"
-        />
+        {obj?.material && (
+          <Slider
+            label={`Threshold: ${(
+              (obj.material.dataJSON.threshold as number) ?? 0
+            ).toFixed(2)}`}
+            value={(obj.material.dataJSON.threshold as number) ?? 0}
+            min={-1.8}
+            max={10}
+            step={0.1}
+            onChange={handleThresholdChange}
+            color="white"
+          />
+        )}
 
         <Slider
           label={`Rotation X: ${rotation.x}°`}
