@@ -6,6 +6,7 @@ export default function Dtext() {
   const [showSecondLine, setShowSecondLine] = useState(false)
 
   useEffect(() => {
+
     const timeout = setTimeout(() => {
       setShowSecondLine(true)
     }, 800)

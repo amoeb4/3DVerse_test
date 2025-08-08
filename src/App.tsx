@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import {
   Livelink,
   Canvas,
@@ -44,6 +44,7 @@ export function App() {
     </>
   );
 }
+
 
 function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");
@@ -106,13 +107,21 @@ function AppLayout() {
     CameraControllerPresets.orbital
   );
 
-  const [showPipCamera, setShowPipCamera] = useState(true); // <-- état de visibilité
+  const [showPipCamera, setShowPipCamera] = useState(true);
   const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
+
   const moveCamera = () => {
-    const targetPosition = [-30, 250, 150] as const;
-    const lookAtPosition = [-280, -100, -120] as const;
-    cameraControllerRef.current?.setLookAt(...targetPosition, ...lookAtPosition, true);
+    if (!cameraControllerRef.current) return;
+    const targetPosition = [-1.280, 1.465, 0] as const;
+    const lookAtPosition = [-22.4, 90, 22.4] as const;
+    cameraControllerRef.current.setLookAt(...targetPosition, ...lookAtPosition, true);
   };
+
+  useEffect(() => {
+    if (cameraEntity && cameraControllerRef.current) {
+      moveCamera();
+    }
+  }, [cameraEntity]);
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -121,12 +130,15 @@ function AppLayout() {
       </EntityProvider>
       <CameraEventListener />
 
-<div className="absolute bottom-[3%] right-[3%] z-50">
-  <button
-    className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]" onClick={() => setShowPipCamera(prev => !prev)}>
-    {showPipCamera ? "Minimize" : "Display alt. camera"}
-  </button>
-</div>
+      <div className="absolute bottom-[3%] right-[3%] z-50">
+        <button
+          className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]"
+          onClick={() => setShowPipCamera(prev => !prev)}
+        >
+          {showPipCamera ? "Minimize" : "Display alt. camera"}
+        </button>
+      </div>
+
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
@@ -144,6 +156,7 @@ function AppLayout() {
           )}
         </Viewport>
       </Canvas>
+
       <div className="absolute top-14 left-1 flex flex-col z-50">
         <div className="flex flex-row">
           {presetKeys.map((presetKey, index) => {
@@ -165,5 +178,6 @@ function AppLayout() {
     </CameraEntityContext.Provider>
   );
 }
+
 
 export default App;
