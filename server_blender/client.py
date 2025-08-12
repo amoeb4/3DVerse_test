@@ -2,10 +2,10 @@ import asyncio
 import json
 import websockets
 
-# Initialiser les positions à 0 pour les parts 1 à 6
-positions = {
-    f"part_{i}": [0.0, 0.0, 0.0] for i in range(1, 7)
-}
+# Positions actuelles des pièces
+positions = {f"part_{i}": [0.0, 0.0, 0.0] for i in range(1, 7)}
+# Historique des positions précédentes (nouvelle commande en tête)
+command_buffer = []
 
 async def send_command(uri):
     try:
@@ -19,7 +19,6 @@ async def send_command(uri):
                     print("Fermeture du client...")
                     break
 
-                # Séparer par virgule, trim chaque sous-commande
                 raw_commands = [cmd.strip() for cmd in line.split(",") if cmd.strip()]
 
                 for raw_cmd in raw_commands:
@@ -36,44 +35,66 @@ async def send_command(uri):
                     # --- RESET ---
                     if raw_cmd.lower() == "reset":
                         print("Reset en cours...")
-                        for name, pos in positions.items():
-                            if any(c != 0.0 for c in pos):
-                                inverse = [-v for v in pos]
-                                message = json.dumps({"name": name, "location": inverse})
-                                await websocket.send(message)
-                                print(f"Commande RESET envoyée : {message}")
-                                await asyncio.sleep(0.01)
-                                positions[name] = [0.0, 0.0, 0.0]
+                        total_cmds = len(command_buffer)
+                        for idx, (name, previous_pos) in enumerate(command_buffer, start=1):
+                            positions[name] = previous_pos
+                            message = json.dumps({"name": name, "location": positions[name]})
+                            await websocket.send(message)
+                            print(f"[{idx}/{total_cmds}] Position restaurée : {message}")
+                            await asyncio.sleep(1)  # Pause entre chaque reset
+                        command_buffer.clear()
                         continue
 
-                    # --- COMMANDE DE POSITION ---
+                    # --- LIST ---
+                    if raw_cmd.lower() == "list":
+                        print("📜 Command buffer :")
+                        if not command_buffer:
+                            print("  (vide)")
+                        else:
+                            for idx, (name, pos) in enumerate(command_buffer, start=1):
+                                print(f"  {idx}. {name} -> {pos}")
+                        continue
+
+                    # --- PARSE COMMANDE ---
                     parts = raw_cmd.split()
-                    if len(parts) not in (4, 5):
+                    if len(parts) != 4:
                         print(f"Format invalide pour la commande : '{raw_cmd}'")
-                        print("Exemple attendu : part_1 1.0 2.0 3.0")
+                        print("Exemple attendu : part_1 1.0 2.0 3.0 ou part_1+= 1.0 2.0 3.0")
                         continue
 
                     name = parts[0]
+                    is_increment = False
+
+                    if name.endswith("+="):
+                        is_increment = True
+                        name = name[:-2]
+
                     try:
-                        delta = [float(parts[1]), float(parts[2]), float(parts[3])]
+                        values = [float(parts[1]), float(parts[2]), float(parts[3])]
                     except ValueError:
                         print(f"Coordonnées invalides dans la commande : '{raw_cmd}'")
                         continue
 
-                    # Initialiser si nouvelle part
                     if name not in positions:
                         positions[name] = [0.0, 0.0, 0.0]
 
-                    # Ajouter les delta à la position existante
-                    current = positions[name]
-                    updated = [current[i] + delta[i] for i in range(3)]
+                    old_pos = positions[name].copy()
+                    print(f"Avant modification, {name} = {old_pos}")
+                    if is_increment:
+                        updated = [old_pos[i] + values[i] for i in range(3)]
+                    else:
+                        updated = values
+                    print(f"Après modification, {name} = {updated}")
+
                     positions[name] = updated
 
+                    command_buffer.insert(0, (name, old_pos))
+                    print(f"Buffer mis à jour : {[(n,p) for n,p in command_buffer]}")
+
+                    # Envoi au serveur
                     message = json.dumps({"name": name, "location": updated})
                     await websocket.send(message)
                     print(f"Commande envoyée : {message}")
-
-                    # Pause 10ms avant la suivante
                     await asyncio.sleep(0.01)
 
     except KeyboardInterrupt:

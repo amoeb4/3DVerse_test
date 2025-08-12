@@ -179,16 +179,9 @@ export async function rotateHierarchyProgressive(
     return;
   }
 
-  // Filtrage selon l'axe autorisé
-  const allowedAxis = getAllowedAxis(entity.name);
-  const [dx, dy, dz] = deltaQuatDeg;
-  const filteredDeltaQuatDeg: [number, number, number] = [
-    allowedAxis.includes("x") ? dx : 0,
-    allowedAxis.includes("y") ? dy : 0,
-    allowedAxis.includes("z") ? dz : 0,
-  ];
+  // Plus de filtrage d'axes : on prend directement les valeurs fournies
+  const [totalDx, totalDy, totalDz] = deltaQuatDeg;
 
-  const [totalDx, totalDy, totalDz] = filteredDeltaQuatDeg;
   const steps = Math.max(
     Math.ceil(Math.abs(totalDx) / stepDeg),
     Math.ceil(Math.abs(totalDy) / stepDeg),
@@ -204,26 +197,12 @@ export async function rotateHierarchyProgressive(
     await sleep(delayMs);
   }
 
+  // Application du reliquat de rotation
   applyStepRotation(entity, [
     totalDx - stepDx * steps,
     totalDy - stepDy * steps,
     totalDz - stepDz * steps,
   ]);
-}
-
-function getAllowedAxis(entityName: string): string[] {
-  switch (entityName) {
-    case "part_1":
-    case "part_3":
-    case "part_4":
-    case "part_5":
-      return ["z"];
-    case "part_2":
-    case "part_6":
-      return ["x"];
-    default:
-      return ["x", "y", "z"]; // Si jamais l'entité n'est pas listée, autorise tout par défaut
-  }
 }
 
 function applyStepRotation(

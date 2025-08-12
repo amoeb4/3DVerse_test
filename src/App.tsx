@@ -1,19 +1,6 @@
-<<<<<<< HEAD
 import { useState, useContext, useRef } from "react";
 import { Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController } from "@3dverse/livelink-react";
-=======
-import { useState, useContext, useRef, useEffect } from "react";
-import {
-  Livelink,
-  Canvas,
-  Viewport,
-  CameraController,
-  useCameraEntity,
-  LivelinkContext,
-  DefaultCameraController,
-  useEntity
-} from "@3dverse/livelink-react";
->>>>>>> brensh
+import { useEffect } from "react";
 import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import KeyboardHandler from "./keyBindings.tsx";
@@ -23,6 +10,7 @@ import { CameraEntityContext } from "./cameraControl.tsx";
 import { WebSocketProvider } from "./webSockets.tsx";
 import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
 import Dtext from "../frontend/text_display.tsx";
+import type { CSSProperties } from "react";
 import "./App.css";
 
 export function App() {
@@ -49,7 +37,6 @@ export function App() {
     </>
   );
 }
-
 
 function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");
@@ -104,6 +91,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
 
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
+  const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
 
   const cameraControllerRef = useRef<DefaultCameraController>(null);
@@ -120,32 +108,25 @@ function AppLayout() {
     const lookAtPosition = [-22.4, 90, 22.4] as const;
     cameraControllerRef.current.setLookAt(...targetPosition, ...lookAtPosition, true);
   };
-
-<<<<<<< HEAD
-=======
   useEffect(() => {
     if (cameraEntity && cameraControllerRef.current) {
       moveCamera();
     }
   }, [cameraEntity]);
 
->>>>>>> brensh
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
       <EntityProvider>
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
-
       <div className="absolute bottom-[3%] right-[3%] z-50">
         <button
           className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]"
-          onClick={() => setShowPipCamera(prev => !prev)}
-        >
+          onClick={() => setShowPipCamera(prev => !prev)}>
           {showPipCamera ? "Minimize" : "Display alt. camera"}
         </button>
       </div>
-
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
@@ -154,24 +135,14 @@ function AppLayout() {
             </div>
           )}
           <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
-<<<<<<< HEAD
-          {/*<Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
-            <Viewport cameraEntity={pipCamera} className="w-full h-full">
-              <CameraController />
-            </Viewport>
-          </Canvas>*/}
-=======
           {showPipCamera && (
             <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl absolute">
-              <Viewport cameraEntity={pipCamera} className="w-full h-full">
+              <Viewport cameraEntity={ pipCamera } className="w-full h-full">
                 <CameraController />
               </Viewport>
-            </Canvas>
-          )}
->>>>>>> brensh
+            </Canvas>)}
         </Viewport>
       </Canvas>
-
       <div className="absolute top-14 left-1 flex flex-col z-50">
         <div className="flex flex-row">
           {presetKeys.map((presetKey, index) => {
@@ -190,10 +161,8 @@ function AppLayout() {
     </CameraEntityContext.Provider>
   );
 }
- 
-import type { CSSProperties } from "react";
 
-<<<<<<< HEAD
+
 const modalStyle: CSSProperties = {
   position: "absolute",
   top: "50%",
@@ -204,7 +173,5 @@ const modalStyle: CSSProperties = {
   boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
   zIndex: 1000,
 };
-=======
->>>>>>> brensh
 
 export default App;

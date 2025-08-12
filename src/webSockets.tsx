@@ -21,8 +21,8 @@ export function useWebSocket() {
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
-  const { speed } = useSpeed(); // ✅ appel du hook dans un composant React
-  const delayMs = Math.max(10, 1000 / speed); // ✅ calcul du délai à passer en paramètre
+  const { speed } = useSpeed();
+  const delayMs = Math.max(10, 1000 / speed);
 
   const { entity: selectedEntity } = useEntity(
     selectedEntityName ? { name: selectedEntityName } : { name: "" }

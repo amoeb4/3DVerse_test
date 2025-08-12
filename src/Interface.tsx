@@ -2,18 +2,12 @@ import {
   createContext,
   useContext,
   useState,
-<<<<<<< HEAD
-  useEffect } from "react";
-
-import type { ReactNode, ChangeEvent } from "react";
-=======
   useEffect,
   ReactNode,
   ChangeEvent,
 } from "react";
 import type { EntityCore } from "@3dverse/livelink";
 import * as THREE from "three";
->>>>>>> brensh
 import { LivelinkContext } from "@3dverse/livelink-react";
 import {
   Menu,
