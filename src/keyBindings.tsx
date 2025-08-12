@@ -62,9 +62,6 @@ export default function KeyboardHandler() {
 
 export async function posKey( instance: any, entities: { id: string }[], param1: number, param2: number,  param3: number)
 {
-  entities.forEach(e => {
-    console.log(`🆔 Entity ID: ${e.id}`);
-  });
   for (const entity of entities) {
     const [fullEntity] = await instance.scene.findEntities({
       entity_uuid: entity.id,

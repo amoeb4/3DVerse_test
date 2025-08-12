@@ -2,9 +2,18 @@ import {
   createContext,
   useContext,
   useState,
+<<<<<<< HEAD
   useEffect } from "react";
 
 import type { ReactNode, ChangeEvent } from "react";
+=======
+  useEffect,
+  ReactNode,
+  ChangeEvent,
+} from "react";
+import type { EntityCore } from "@3dverse/livelink";
+import * as THREE from "three";
+>>>>>>> brensh
 import { LivelinkContext } from "@3dverse/livelink-react";
 import {
   Menu,
@@ -13,50 +22,51 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-
+import { setOrientation } from "./movements";
+import { useEntity } from "@3dverse/livelink-react";
+// ---------- Contexte Speed ----------
 type SpeedContextType = {
+  delayMs: number;
+  setDelayMs: (value: number) => void;
   speed: number;
-  setSpeed: (value: number) => void;
 };
 
 export const SpeedContext = createContext<SpeedContextType | undefined>(undefined);
 
-export const useSpeed = () => {
-  const context = useContext(SpeedContext);
-  if (!context) {
-    throw new Error("useSpeed must be used within a SpeedProvider");
-  }
-  return context;
-};
-
 export const SpeedProvider = ({ children }: { children: ReactNode }) => {
-  const [speed, setSpeed] = useState(1);
+  const [delayMs, setDelayMs] = useState(100);
+  const speed = 1000 / delayMs;
   return (
-    <SpeedContext.Provider value={{ speed, setSpeed }}>
+    <SpeedContext.Provider value={{ delayMs, setDelayMs, speed }}>
       {children}
     </SpeedContext.Provider>
   );
 };
 
-type Entity = { id: string; name?: string };
+export function useSpeed() {
+  const context = useContext(SpeedContext);
+  if (!context) throw new Error("useSpeed must be used within a SpeedProvider");
+  return context;
+}
+
+// ---------- Contexte Entity ----------
+type EntityX = { id: string; name?: string };
 
 type EntityContextType = {
-  selectedEntity: Entity | null;
-  setSelectedEntity: (entity: Entity) => void;
+  selectedEntity: EntityX | null;
+  setSelectedEntity: (entity: EntityX) => void;
 };
 
 const EntityContext = createContext<EntityContextType | undefined>(undefined);
 
-export const useEntity = () => {
+export const useEntitySimple = () => {
   const context = useContext(EntityContext);
-  if (!context) {
-    throw new Error("useEntity must be used within an EntityProvider");
-  }
+  if (!context) throw new Error("useEntity must be used within an EntityProvider");
   return context;
 };
 
 export const EntityProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState<EntityX | null>(null);
   return (
     <EntityContext.Provider value={{ selectedEntity, setSelectedEntity }}>
       {children}
@@ -64,134 +74,193 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export function eulerToQuat(x: number, y: number, z: number): [number, number, number, number] {
-  const rad = (deg: number) => (deg * Math.PI) / 180;
-  const c1 = Math.cos(rad(y) / 2);
-  const s1 = Math.sin(rad(y) / 2);
-  const c2 = Math.cos(rad(z) / 2);
-  const s2 = Math.sin(rad(z) / 2);
-  const c3 = Math.cos(rad(x) / 2);
-  const s3 = Math.sin(rad(x) / 2);
-
-  const qw = c1 * c2 * c3 + s1 * s2 * s3;
-  const qx = c1 * c2 * s3 - s1 * s2 * c3;
-  const qy = c1 * s2 * c3 + s1 * c2 * s3;
-  const qz = s1 * c2 * c3 - c1 * s2 * s3;
-
-  return [qx, qy, qz, qw];
-}
-
-async function setOrientation(
-  instance: any,
-  entityId: string,
+// ---------- Utilitaires ----------
+export function eulerToQuat(
   x: number,
   y: number,
   z: number
-) {
-  const [fullEntity] = await instance.scene.findEntities({
-    entity_uuid: entityId,
-  });
-
-  if (fullEntity) {
-    fullEntity.local_transform = {
-      orientation: eulerToQuat(x, y, z),
-    };
-  }
+): [number, number, number, number] {
+  const rad = (deg: number) => (deg * Math.PI) / 180;
+  const c1 = Math.cos(rad(y) / 2),
+    s1 = Math.sin(rad(y) / 2);
+  const c2 = Math.cos(rad(z) / 2),
+    s2 = Math.sin(rad(z) / 2);
+  const c3 = Math.cos(rad(x) / 2),
+    s3 = Math.sin(rad(x) / 2);
+  return [
+    c1 * c2 * s3 - s1 * s2 * c3,
+    c1 * s2 * c3 + s1 * c2 * s3,
+    s1 * c2 * c3 - c1 * s2 * s3,
+    c1 * c2 * c3 + s1 * s2 * s3,
+  ];
 }
 
-const controlInterfaceStyle = {
-  position: "fixed" as const,
-  left: "5%",
-  right: "5%",
-  top: "3%",
-  backgroundColor: "#455a64",
-  color: "white",
-  padding: "2rem",
-  borderRadius: "7px",
-  boxShadow: "0px 0px 20px rgba(88, 87, 87, 0.81)",
-  zIndex: 1000,
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-};
-
 export default function ControlPanel() {
-  const { speed, setSpeed } = useSpeed();
-  const { selectedEntity } = useEntity();
+  const { entity: obj } = useEntity(
+    { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
+    ["material"]
+  );
+  const { selectedEntity } = useEntitySimple();
   const { instance } = useContext(LivelinkContext);
 
-  const [rotationY, setRotationY] = useState(0);
+  const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { speed: delayMs, setDelayMs } = useSpeed();
 
-  const handleSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const angle = parseFloat(e.target.value);
-    setRotationY(angle);
-    if (instance && selectedEntity?.id) {
-      setOrientation(instance, selectedEntity.id, 0, angle, 0);
+  const handleThresholdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (obj?.material) {
+      (obj.material.dataJSON.threshold as number) = value;
     }
   };
 
-  const handleSpeedChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newSpeed = parseFloat(e.target.value) / 10;
-    setSpeed(newSpeed);
-  };
+  const handleSliderChange =
+    (axis: "x" | "y" | "z") => (e: ChangeEvent<HTMLInputElement>) => {
+      const newAngle = parseFloat(e.target.value);
+      const delta = newAngle - rotation[axis];
+      setRotation((prev) => ({ ...prev, [axis]: newAngle }));
+      if (instance && selectedEntity?.id) {
+        setOrientation(instance, selectedEntity.id, axis, delta);
+      }
+    };
 
-  const handleApply = () => {
-    console.log("Entité sélectionnée :", selectedEntity);
-  };
+  if (!isExpanded) {
+    return (
+      <button
+        className="fixed top-[3%] right-[3%] z-50 bg-white/10 text-white border border-white/20 backdrop-blur px-3 py-2 rounded-full shadow hover:bg-white/20 transition"
+        onClick={() => setIsExpanded(true)}
+      >
+        Control Panel
+      </button>
+    );
+  }
 
   return (
-    <div style={controlInterfaceStyle}>
-      <h1>Control Panel</h1>
-      <EntityDropdown />
-
-      <button
-        onClick={handleApply}
-        className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100"
-      >
-        Apply changes
-      </button>
-
-      <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">
-        Focus on entity
-      </button>
-
-      <button className="border cursor-pointer border-white px-4 py-2 rounded hover:bg-gray-100">
-        Back to start
-      </button>
-
-      <div className="flex flex-col items-center">
-        <span className="mb-1 text-sm">{speed.toFixed(1)}x</span>
-        <input
-          type="range"
-          min="0.1"
-          max="50"
-          value={speed * 10}
-          onChange={handleSpeedChange}
-          className="w-64 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-500"
-        />
+    <div className="fixed top-[3%] right-[3%] z-50 p-6 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-6 w-[90vw] max-w-[600px]">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Control Panel</h1>
+        <button
+          className="text-sm bg-white/10 border border-white/30 rounded-md px-2 py-1 hover:bg-white/20 transition"
+          onClick={() => setIsExpanded(false)}
+        >
+          Minimize
+        </button>
       </div>
 
-      <div className="flex flex-col items-center ml-8">
-        <span className="mb-1 text-sm">Rotation Y : {rotationY}°</span>
-        <input
-          type="range"
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        <EntityDropdown />
+        <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+          Apply changes
+        </button>
+        <button className="bg-green-600 hover:bg-green-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+          Focus on entity
+        </button>
+        <button className="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+          Back to start
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <Slider
+          label={`Delay: ${delayMs} ms`}
+          value={delayMs}
+          min={5}
+          max={200}
+          step={1}
+          onChange={(e) => setDelayMs(parseInt(e.target.value, 10))}
+          color="purple"
+        />
+
+        {obj?.material && (
+          <Slider
+            label={`Threshold: ${(
+              (obj.material.dataJSON.threshold as number) ?? 0
+            ).toFixed(2)}`}
+            value={(obj.material.dataJSON.threshold as number) ?? 0}
+            min={-1.8}
+            max={10}
+            step={0.1}
+            onChange={handleThresholdChange}
+            color="white"
+          />
+        )}
+
+        <Slider
+          label={`Rotation X: ${rotation.x}°`}
+          value={rotation.x}
           min={-180}
           max={180}
-          step={1}
-          value={rotationY}
-          onChange={handleSliderChange}
-          className="w-64 h-2 bg-blue-300 rounded-lg appearance-none cursor-pointer accent-green-600"
+          onChange={handleSliderChange("x")}
+          color="red"
+        />
+        <Slider
+          label={`Rotation Y: ${rotation.y}°`}
+          value={rotation.y}
+          min={-180}
+          max={180}
+          onChange={handleSliderChange("y")}
+          color="blue"
+        />
+        <Slider
+          label={`Rotation Z: ${rotation.z}°`}
+          value={rotation.z}
+          min={-180}
+          max={180}
+          onChange={handleSliderChange("z")}
+          color="green"
         />
       </div>
     </div>
   );
 }
 
+// ---------- Slider ----------
+function Slider({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  onChange,
+  color,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  onChange: (e: any) => void;
+  color: "green" | "blue" | "purple" | "red" | "white";
+}) {
+  const colorClasses: Record<string, string> = {
+    white: "accent-white-500",
+    green: "accent-green-500",
+    blue: "accent-blue-500",
+    purple: "accent-purple-500",
+    red: "accent-red-500",
+  };
+
+  return (
+    <div className="flex flex-col w-full max-w-xl">
+      <label className="mb-1 font-medium text-sm">{label}</label>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={onChange}
+        className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${colorClasses[color]} bg-gray-200`}
+      />
+    </div>
+  );
+}
+
+// ---------- Dropdown ----------
 export function EntityDropdown() {
   const { instance } = useContext(LivelinkContext);
-  const { selectedEntity, setSelectedEntity } = useEntity();
-  const [entities, setEntities] = useState<{ id: string; name?: string }[]>([]);
-  const [entitiesMap, setEntitiesMap] = useState<Map<string, { id: string; name?: string }>>(new Map());
+  const { selectedEntity, setSelectedEntity } = useEntitySimple();
+  const [entities, setEntities] = useState<EntityX[]>([]);
 
   useEffect(() => {
     const fetchEntities = async () => {
@@ -201,41 +270,33 @@ export function EntityDropdown() {
           mandatory_components: ["local_transform"],
           forbidden_components: [],
         });
-
         const entitiesWithNames = foundEntities
-          .map((entity) => ({
-            id: entity.id,
-            name: entity.name || "(sans nom)",
-          }))
-          .filter((entity) => /^part_\d+$/.test(entity.name ?? ""))
-          .sort((a, b) => {
-            const numA = parseInt(a.name!.split("_")[1], 10);
-            const numB = parseInt(b.name!.split("_")[1], 10);
-            return numA - numB;
-          });
-
-        // Crée une map des entités
-        const map = new Map(entitiesWithNames.map((e) => [e.name!, e]));
-
+          .map((e: any) => ({ id: e.id, name: e.name || "(sans nom)" }))
+          .filter((e: EntityX) => /^part_\d+$/.test(e.name ?? ""))
+          .sort(
+            (a, b) =>
+              parseInt(a.name!.split("_")[1], 10) -
+              parseInt(b.name!.split("_")[1], 10)
+          );
         setEntities(entitiesWithNames);
-        setEntitiesMap(map);
       } catch (err) {
         console.error("Erreur lors de la récupération des entités :", err);
       }
     };
-
     fetchEntities();
   }, [instance]);
 
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50">
+        <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white/90 px-3 py-2 text-sm font-semibold text-gray-900 shadow ring-1 ring-gray-300 hover:bg-gray-100">
           {selectedEntity?.name || "Entités"}
-          <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
+          <ChevronDownIcon
+            aria-hidden="true"
+            className="-mr-1 size-5 text-gray-400"
+          />
         </MenuButton>
       </div>
-
       <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
         <div className="py-1">
           {entities.map((entity) => (
@@ -244,7 +305,9 @@ export function EntityDropdown() {
                 <button
                   onClick={() => setSelectedEntity(entity)}
                   className={`${
-                    active ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                    active
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-700"
                   } block w-full text-left px-4 py-2 text-sm`}
                 >
                   {entity.name}

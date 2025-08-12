@@ -23,8 +23,13 @@ export async function moveEntityAndChildren(
   const entityList = entitiesToMove.map(e => ({ id: e.id }));
 
   try {
+<<<<<<< HEAD
     await posKey(instance, entityList, ...delta);
   //  await oriKey(instance, entityList, delta[0], delta[1], delta[2], eulerToQuat);
+=======
+   console.log(`${delta[0]}, ${delta[1]}, ${delta[2]}`);
+    await oriKey(instance, entityList, delta[0], delta[1], delta[2], eulerToQuat);
+>>>>>>> brensh
     console.log(`✅ Déplacement + orientation appliqués à ${entityList.length} entités à partir de l'index ${rootIndex}`);
   } catch (err) {
     console.error("❌ Erreur lors du déplacement avec posKey / oriKey :", err);
