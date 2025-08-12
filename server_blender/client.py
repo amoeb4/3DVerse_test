@@ -51,7 +51,6 @@ async def send_command(uri):
                         command_buffer.clear()
                         continue
                     
-                    # Stockage brut dans le buffer (en tête)
                     command_buffer.insert(0, raw_cmd)
 
                     # Parse et envoi au serveur
