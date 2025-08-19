@@ -16,3 +16,7 @@
 .logo:hover {
   filter: drop-shadow(0 0 2em #ffc800);
 }
+
+.bg-underground {
+  background-color: rgba(30, 30, 30, 0.85);
+}

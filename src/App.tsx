@@ -98,6 +98,7 @@ function AppLayout() {
   const cameraControllerRef = useRef<DefaultCameraController>(null);
 
   const [showPipCamera, setShowPipCamera] = useState(true);
+  const [showDOM3D, setShowDOM3D] = useState(true); // <-- Nouveau state
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -106,50 +107,51 @@ function AppLayout() {
       </EntityProvider>
       <CameraEventListener />
 
-      {/* Bouton toggle PiP */}
-      <div className="absolute bottom-[3%] right-[3%] z-50">
+      <div className="absolute bottom-[3%] right-[3%] z-50 flex flex-col gap-2">
         <button
-          className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]"
+          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white"
           onClick={() => setShowPipCamera(prev => !prev)}>
-          {showPipCamera ? "Minimize" : "Display alt. camera"}
+          {showPipCamera ? "Minimize PiP" : "Display PiP"}
+        </button>
+        <button
+          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white"
+          onClick={() => setShowDOM3D(prev => !prev)}>
+          {showDOM3D ? "Hide DOM3D" : "Show DOM3D"}
         </button>
       </div>
-
-      {/* --- Canvas principal --- */}
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
-          {!isConnecting && (
-            <div>
-              <a href="https://docs.3dverse.com/livelink.react/" target="_blank" />
-            </div>
+          {!isConnecting && <div><a href="https://docs.3dverse.com/livelink.react/" target="_blank" /></div>}
+          <CameraController ref={cameraControllerRef} />
+          {showDOM3D && (
+            <DOM3DOverlay>
+              <DOM3DElement worldPosition={[-1.7, 0.6, 0]} scaleFactor={0.0016}>
+                <p className="bg-underground p-4 rounded-lg text-white">Base<br/>Axe Z</p>
+              </DOM3DElement>
+              <DOM3DElement worldPosition={[-0.3, 0.8, 0]} scaleFactor={0.0016}>
+                <p className="bg-underground p-4 rounded-lg text-white">Epaule<br/>Axe X</p>
+              </DOM3DElement>
+              <DOM3DElement worldPosition={[-1.1, 1.75, 0]} scaleFactor={0.0016}>
+                <p className="bg-underground p-4 rounded-lg text-white">Coude 1<br/>Axe Z</p>
+              </DOM3DElement>
+              <DOM3DElement worldPosition={[-0.6, 2.25, 0.1]} scaleFactor={0.0016}>
+                <p className="bg-underground p-4 rounded-lg text-white">Bras<br/>Axe Z</p>
+              </DOM3DElement>
+              <DOM3DElement worldPosition={[0.4, 2.25, 0.1]} scaleFactor={0.0016}>
+                <p className="bg-underground p-4 rounded-lg text-white">Coude 2<br/>Axe Z</p>
+              </DOM3DElement>
+              <DOM3DElement worldPosition={[0.6, 1.65, 0.1]} scaleFactor={0.0016}>
+                <p className="bg-underground p-4 rounded-lg text-white">Coude 3<br/>Axe X</p>
+              </DOM3DElement>
+              <DOM3DElement worldPosition={[1.6, 0.7, 0]} scaleFactor={0.0019}>
+                <p className="bg-underground p-4 rounded-lg text-white">Impression pièce<br/>x%</p>
+              </DOM3DElement>
+            </DOM3DOverlay>
           )}
-          <CameraController ref={cameraControllerRef}/>
-
-          {/* DOM Elements dans la scène principale */}
-          <DOM3DOverlay>
-            <DOM3DElement worldPosition={[2, 0, 0]}>
-              <p className="bg-ground p-4 rounded-lg">
-                I'm a DOM 3D Element.<br />
-                Positioned at [2,0,0].
-              </p>
-            </DOM3DElement>
-          </DOM3DOverlay>
-
-          {/* --- Mini viewport (PiP) --- */}
           {showPipCamera && (
             <div className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl absolute">
               <Viewport cameraEntity={pipCamera} className="w-full h-full">
                 <CameraController />
-
-                <DOM3DOverlay>
-                  <DOM3DElement worldPosition={[-2, 1, 0]} scaleFactor={0.0025}>
-                    <p className="bg-underground p-4 rounded-lg">
-                      I'm also a DOM 3D Element. <br />
-                      I'm positioned at [-2,1,0].<br />
-                      My size varies depending on the camera position.
-                    </p>
-                  </DOM3DElement>
-                </DOM3DOverlay>
               </Viewport>
             </div>
           )}
