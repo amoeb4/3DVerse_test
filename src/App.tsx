@@ -95,24 +95,8 @@ function AppLayout() {
   const { isConnecting } = useContext(LivelinkContext);
 
   const cameraControllerRef = useRef<DefaultCameraController>(null);
-  const [cameraControllerPreset, setCameraControllerPreset] = useState(
-    CameraControllerPresets.orbital
-  );
 
   const [showPipCamera, setShowPipCamera] = useState(true);
-  const presetKeys = Object.keys(CameraControllerPresets) as (keyof typeof CameraControllerPresets)[];
-
-  const moveCamera = () => {
-    if (!cameraControllerRef.current) return;
-    const targetPosition = [-1.280, 1.465, 0] as const;
-    const lookAtPosition = [-22.4, 90, 22.4] as const;
-    cameraControllerRef.current.setLookAt(...targetPosition, ...lookAtPosition, true);
-  };
-  useEffect(() => {
-    if (cameraEntity && cameraControllerRef.current) {
-      moveCamera();
-    }
-  }, [cameraEntity]);
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -134,7 +118,7 @@ function AppLayout() {
               <a href="https://docs.3dverse.com/livelink.react/" target="_blank" />
             </div>
           )}
-          <CameraController ref={cameraControllerRef} preset={cameraControllerPreset} />
+          <CameraController ref={cameraControllerRef}/>
           {showPipCamera && (
             <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl absolute">
               <Viewport cameraEntity={ pipCamera } className="w-full h-full">
@@ -145,17 +129,6 @@ function AppLayout() {
       </Canvas>
       <div className="absolute top-14 left-1 flex flex-col z-50">
         <div className="flex flex-row">
-          {presetKeys.map((presetKey, index) => {
-            const preset = CameraControllerPresets[presetKey];
-            const name = presetKey.replace("_", " ");
-            const isCurrentPreset = preset === cameraControllerPreset;
-            return (
-              <button key={index} className={`button button-overlay mr-2 ${isCurrentPreset ? "bg-accent" : ""}`}
-                onClick={() => setCameraControllerPreset(preset)}>
-                {name}
-              </button>
-            );
-          })}
         </div>
       </div>
     </CameraEntityContext.Provider>
