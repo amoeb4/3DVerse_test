@@ -1,5 +1,6 @@
 import { useState, useContext, useRef } from "react";
-import { Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController } from "@3dverse/livelink-react";
+import { Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController,     DOM3DOverlay,
+    DOM3DElement } from "@3dverse/livelink-react";
 import { useEffect } from "react";
 import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
@@ -104,6 +105,8 @@ function AppLayout() {
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
+
+      {/* Bouton toggle PiP */}
       <div className="absolute bottom-[3%] right-[3%] z-50">
         <button
           className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]"
@@ -111,6 +114,8 @@ function AppLayout() {
           {showPipCamera ? "Minimize" : "Display alt. camera"}
         </button>
       </div>
+
+      {/* --- Canvas principal --- */}
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && (
@@ -119,22 +124,40 @@ function AppLayout() {
             </div>
           )}
           <CameraController ref={cameraControllerRef}/>
+
+          {/* DOM Elements dans la scène principale */}
+          <DOM3DOverlay>
+            <DOM3DElement worldPosition={[2, 0, 0]}>
+              <p className="bg-ground p-4 rounded-lg">
+                I'm a DOM 3D Element.<br />
+                Positioned at [2,0,0].
+              </p>
+            </DOM3DElement>
+          </DOM3DOverlay>
+
+          {/* --- Mini viewport (PiP) --- */}
           {showPipCamera && (
-            <Canvas className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl absolute">
-              <Viewport cameraEntity={ pipCamera } className="w-full h-full">
+            <div className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl absolute">
+              <Viewport cameraEntity={pipCamera} className="w-full h-full">
                 <CameraController />
+
+                <DOM3DOverlay>
+                  <DOM3DElement worldPosition={[-2, 1, 0]} scaleFactor={0.0025}>
+                    <p className="bg-underground p-4 rounded-lg">
+                      I'm also a DOM 3D Element. <br />
+                      I'm positioned at [-2,1,0].<br />
+                      My size varies depending on the camera position.
+                    </p>
+                  </DOM3DElement>
+                </DOM3DOverlay>
               </Viewport>
-            </Canvas>)}
+            </div>
+          )}
         </Viewport>
       </Canvas>
-      <div className="absolute top-14 left-1 flex flex-col z-50">
-        <div className="flex flex-row">
-        </div>
-      </div>
     </CameraEntityContext.Provider>
   );
 }
-
 
 const modalStyle: CSSProperties = {
   position: "absolute",

@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
 import { rotateHierarchy, PartEntitiesContext, rotateHierarchyProgressive } from "./partEntitiesContext";
-import { useSpeed } from "./Interface"; // 👈 importe le hook correctement
+import { useSpeed } from "./Interface";
 
 const WSContext = createContext({
   register: (_setTransform: any, _name: string) => () => {},
@@ -54,11 +54,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         socket.send(`select ${selectedEntityRef.current}`);
       }
     };
-
     socket.onmessage = async (event) => {
       const msg = event.data.trim();
       console.log("📨 onmessage triggered:", msg);
       try {
+        console.warn("Object is gonna move now");
+        console.log(`${socket}`);
         const parsed = JSON.parse(msg);
         console.log("✅ Parsed JSON:", parsed);
 
@@ -153,7 +154,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       }, timeout);
       console.log(`🔄 Reconnecting in ${timeout}ms...`);
     };
-  }, [instance, entitiesMap, delayMs]); // <-- attention à bien inclure delayMs
+  }, [instance, entitiesMap, delayMs]);
 
   useEffect(() => {
     console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
@@ -168,7 +169,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       });
     }
   }, [flushTrigger, instance, entitiesMap, delayMs]);
-
+0
   useEffect(() => {
     connectWebSocket();
     return () => {

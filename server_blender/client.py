@@ -47,7 +47,7 @@ async def send_command(uri):
                             message = json.dumps({"name": name, "location": inverse_values})
                             await websocket.send(message)
                             print(f"[{idx}/{total_cmds}] Commande inverse envoyée : {message}")
-                            await asyncio.sleep(1)  # pause entre commandes reset
+                            await asyncio.sleep(1)
                         command_buffer.clear()
                         continue
                     
