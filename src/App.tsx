@@ -12,6 +12,7 @@ import { WebSocketProvider } from "./webSockets.tsx";
 import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
 import Dtext from "../frontend/text_display.tsx";
 import type { CSSProperties } from "react";
+import { Avatars } from "./Avatars.tsx";
 import "./App.css";
 
 export function App() {
@@ -119,6 +120,7 @@ function AppLayout() {
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
           {!isConnecting && <div><a href="https://docs.3dverse.com/livelink.react/" target="_blank" /></div>}
           <CameraController ref={cameraControllerRef} />
+          <Avatars />
           {showDOM3D && (
             <DOM3DOverlay>
               <DOM3DElement worldPosition={[-1.7, 0.6, 0]} scaleFactor={0.0016}>

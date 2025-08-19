@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import BoringAvatar from "boring-avatars";
 
-//------------------------------------------------------------------------------
 import type { Client, Entity} from "@3dverse/livelink";
 import {
     DOM3DOverlay,
@@ -49,7 +48,7 @@ const AvatarList = ({
     setWatchedClient: (client: Client | null) => void;
 }) => {
     return (
-        <div className="absolute right-40 top-4">
+        <div className="absolute left-40 top-4">
             <div className="avatar-group flex gap-1 rtl:space-x-reverse">
                 {clients.map(client => (
                     <button
@@ -99,8 +98,7 @@ const Avatar3D = ({ client }: { client: Client }) => {
         <DOMEntity
             key={client.id}
             scaleFactor={0.0025}
-            entity={clientCameraEntity}
-        >
+            entity={clientCameraEntity}>
             <Avatar client={client} />
         </DOMEntity>
     );
