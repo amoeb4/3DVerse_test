@@ -98,7 +98,7 @@ function AppLayout() {
   const cameraControllerRef = useRef<DefaultCameraController>(null);
 
   const [showPipCamera, setShowPipCamera] = useState(true);
-  const [showDOM3D, setShowDOM3D] = useState(true); // <-- Nouveau state
+  const [showDOM3D, setShowDOM3D] = useState(true);
 
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
@@ -107,16 +107,12 @@ function AppLayout() {
       </EntityProvider>
       <CameraEventListener />
 
-      <div className="absolute bottom-[3%] right-[3%] z-50 flex flex-col gap-2">
+<div className="absolute bottom-[3%] right-[3%] z-50"> <button className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]" onClick={() => setShowPipCamera(prev => !prev)}> {showPipCamera ? "Minimize" : "Display alt. camera"} </button> </div>
+      <div className="absolute left-[3%]">
         <button
-          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white"
-          onClick={() => setShowPipCamera(prev => !prev)}>
-          {showPipCamera ? "Minimize PiP" : "Display PiP"}
-        </button>
-        <button
-          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white"
+          className="fixed bottom-[5.4%] left-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]"
           onClick={() => setShowDOM3D(prev => !prev)}>
-          {showDOM3D ? "Hide DOM3D" : "Show DOM3D"}
+          {showDOM3D ? "Hide infos" : "Show infos"}
         </button>
       </div>
       <Canvas className="w-full h-screen">
@@ -131,10 +127,10 @@ function AppLayout() {
               <DOM3DElement worldPosition={[-0.3, 0.8, 0]} scaleFactor={0.0016}>
                 <p className="bg-underground p-4 rounded-lg text-white">Epaule<br/>Axe X</p>
               </DOM3DElement>
-              <DOM3DElement worldPosition={[-1.1, 1.75, 0]} scaleFactor={0.0016}>
+              <DOM3DElement worldPosition={[-1.20, 1.69, 0]} scaleFactor={0.0016}>
                 <p className="bg-underground p-4 rounded-lg text-white">Coude 1<br/>Axe Z</p>
               </DOM3DElement>
-              <DOM3DElement worldPosition={[-0.6, 2.25, 0.1]} scaleFactor={0.0016}>
+              <DOM3DElement worldPosition={[-0.6, 2.28, 0.1]} scaleFactor={0.0016}>
                 <p className="bg-underground p-4 rounded-lg text-white">Bras<br/>Axe Z</p>
               </DOM3DElement>
               <DOM3DElement worldPosition={[0.4, 2.25, 0.1]} scaleFactor={0.0016}>
