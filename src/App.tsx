@@ -13,6 +13,7 @@ import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
 import Dtext from "../frontend/text_display.tsx";
 import type { CSSProperties } from "react";
 import { Avatars } from "./Avatars.tsx";
+import Dom3DInfos from "./DOM3Dinfos.tsx";
 import "./App.css";
 
 export function App() {
@@ -107,47 +108,35 @@ function AppLayout() {
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
-
-<div className="absolute bottom-[3%] right-[3%] z-50"> <button className="fixed bottom-[5.4%] right-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]" onClick={() => setShowPipCamera(prev => !prev)}> {showPipCamera ? "Minimize" : "Display alt. camera"} </button> </div>
-      <div className="absolute left-[3%]">
+      <div className="absolute bottom-[3%] right-[3%] z-50">
         <button
-          className="fixed bottom-[5.4%] left-[1.5%] z-50 p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white space-y-5 w-[90vw] max-w-[100px]"
+          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
+          onClick={() => setShowPipCamera(prev => !prev)}>
+          {showPipCamera ? "Minimize" : "Alt. Camera"}
+        </button>
+      </div>
+      <div className="absolute bottom-[3%] left-[3%] z-50">
+        <button
+          className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
           onClick={() => setShowDOM3D(prev => !prev)}>
           {showDOM3D ? "Hide infos" : "Show infos"}
         </button>
       </div>
       <Canvas className="w-full h-screen">
         <Viewport cameraEntity={cameraEntity} className="w-full h-full">
-          {!isConnecting && <div><a href="https://docs.3dverse.com/livelink.react/" target="_blank" /></div>}
+          {!isConnecting && (
+            <a
+              href="https://docs.3dverse.com/livelink.react/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden"
+            />
+          )}
           <CameraController ref={cameraControllerRef} />
           <Avatars />
-          {showDOM3D && (
-            <DOM3DOverlay>
-              <DOM3DElement worldPosition={[-1.7, 0.6, 0]} scaleFactor={0.0016}>
-                <p className="bg-underground p-4 rounded-lg text-white">Base<br/>Axe Z</p>
-              </DOM3DElement>
-              <DOM3DElement worldPosition={[-0.3, 0.8, 0]} scaleFactor={0.0016}>
-                <p className="bg-underground p-4 rounded-lg text-white">Epaule<br/>Axe X</p>
-              </DOM3DElement>
-              <DOM3DElement worldPosition={[-1.20, 1.69, 0]} scaleFactor={0.0016}>
-                <p className="bg-underground p-4 rounded-lg text-white">Coude 1<br/>Axe Z</p>
-              </DOM3DElement>
-              <DOM3DElement worldPosition={[-0.6, 2.28, 0.1]} scaleFactor={0.0016}>
-                <p className="bg-underground p-4 rounded-lg text-white">Bras<br/>Axe Z</p>
-              </DOM3DElement>
-              <DOM3DElement worldPosition={[0.4, 2.25, 0.1]} scaleFactor={0.0016}>
-                <p className="bg-underground p-4 rounded-lg text-white">Coude 2<br/>Axe Z</p>
-              </DOM3DElement>
-              <DOM3DElement worldPosition={[0.6, 1.65, 0.1]} scaleFactor={0.0016}>
-                <p className="bg-underground p-4 rounded-lg text-white">Coude 3<br/>Axe X</p>
-              </DOM3DElement>
-              <DOM3DElement worldPosition={[1.6, 0.7, 0]} scaleFactor={0.0019}>
-                <p className="bg-underground p-4 rounded-lg text-white">Impression pièce<br/>x%</p>
-              </DOM3DElement>
-            </DOM3DOverlay>
-          )}
+          {showDOM3D && <Dom3DInfos />}
           {showPipCamera && (
-            <div className="bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl absolute">
+            <div className="absolute bottom-10 right-4 w-1/4 aspect-video border border-tertiary rounded-xl shadow-xl">
               <Viewport cameraEntity={pipCamera} className="w-full h-full">
                 <CameraController />
               </Viewport>
