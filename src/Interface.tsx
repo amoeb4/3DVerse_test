@@ -29,7 +29,7 @@ export const SpeedContext = createContext<SpeedContextType | undefined>(undefine
 
 export const SpeedProvider = ({ children }: { children: ReactNode }) => {
   const [delayMs, setDelayMs] = useState(100);
-  const speed = 1000 / delayMs;
+  const speed = 10000 / delayMs;
   return (
     <SpeedContext.Provider value={{ delayMs, setDelayMs, speed }}>
       {children}
