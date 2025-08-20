@@ -7,6 +7,8 @@
 ## Commandes disponibles
 
 ```bash
+
+make              # Lancer toute les dépendances successivement
 npm run dev       # Lancer le site en mode développement
 npm run build     # Construire l'exécutable à déployer
 npm run preview   # Lancer le site avec l’intégration Vite
@@ -16,7 +18,7 @@ npm run full      # Lancer le WSComm pour 3Dverse, voir doc ci dessous
 
 ---
 
-## Accès à l'application
+## Accès à l'application (sans make)
 
 1. Lancer le site (`npm run dev`).
 2. Ouvrir **Google Chrome** (de préférence).
@@ -29,10 +31,12 @@ npm run full      # Lancer le WSComm pour 3Dverse, voir doc ci dessous
 
 ### Souris
 
-- **Click gauche** : Travelling
+- **Click gauche** : Travelling 
 - **Molette** : Zoom in/out
 - **Click droit** : Drag fluide
 - **Click molette** : Drag fixe
+
+(upcoming) : - **Double Click gauche** : AutoTravel
 
 ### Clavier
 
