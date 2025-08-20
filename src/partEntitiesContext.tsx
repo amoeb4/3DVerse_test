@@ -195,7 +195,6 @@ export async function rotateHierarchyProgressive(
     await sleep(delayMs);
   }
 
-  // Application du reliquat de rotation
   applyStepRotation(entity, [
     totalDx - stepDx * steps,
     totalDy - stepDy * steps,
@@ -214,7 +213,7 @@ function applyStepRotation(
     (dz * Math.PI) / 180,
     "ZYX"
   );
-
+  
   const deltaQuat = new THREE.Quaternion().setFromEuler(eulerRad);
   const [qx, qy, qz, qw] = entity.local_transform.orientation ?? [0, 0, 0, 1];
   const currentQuat = new THREE.Quaternion(qx, qy, qz, qw);

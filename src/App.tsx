@@ -59,8 +59,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
     className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
     value={sceneId}
     onChange={(e) => setSceneId(e.target.value)}
-    required
-  />
+    required/>
       </label>
           <div className="space-y-2">
             {[
@@ -108,7 +107,7 @@ function AppLayout() {
         <ControlPanel />
       </EntityProvider>
       <CameraEventListener />
-      <div className="absolute bottom-[3%] right-[3%] z-50">
+      <div className="absolute bottom-[5%] right-[1.15%] z-50">
         <button
           className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
           onClick={() => setShowPipCamera(prev => !prev)}>
