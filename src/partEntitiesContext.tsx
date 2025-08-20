@@ -178,8 +178,6 @@ export async function rotateHierarchyProgressive(
     console.warn(`Entité ${entityName} introuvable`);
     return;
   }
-
-  // Plus de filtrage d'axes : on prend directement les valeurs fournies
   const [totalDx, totalDy, totalDz] = deltaQuatDeg;
 
   const steps = Math.max(
