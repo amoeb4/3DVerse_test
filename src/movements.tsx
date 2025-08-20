@@ -21,5 +21,4 @@ export  async function setOrientation(
     const newQuat = deltaQuat.multiply(currentQuat).normalize();
 
     fullEntity.local_transform.orientation = [newQuat.x, newQuat.y, newQuat.z, newQuat.w];
-    console.log(`Orientation mise à jour pour ${entityId} : (${newQuat.x.toFixed(4)}, ${newQuat.y.toFixed(4)}, ${newQuat.z.toFixed(4)}, ${newQuat.w.toFixed(4)})`);
 }

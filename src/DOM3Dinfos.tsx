@@ -21,7 +21,6 @@ export default function Dom3DInfos({ entitiesMap }: Dom3DInfosProps) {
     if (!entitiesMap || entitiesMap.size === 0) return;
 
     const newPositions: Record<string, [number, number, number]> = { ...positions };
-
     for (let i = 1; i <= 6; i++) {
       const entity = [...entitiesMap.values()].find((e) => e.name === `part_${i}`);
       if (!entity) continue;
