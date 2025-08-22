@@ -42,6 +42,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     selectedEntityRef.current = selectedEntity?.name ?? null;
   }, [selectedEntity]);
 
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
   const connectWebSocket = useCallback(() => {
     const socket = new WebSocket("ws://localhost:8767");
     socketRef.current = socket;
@@ -156,6 +158,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [instance, entitiesMap, delayMs]);
 
+
   useEffect(() => {
     console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
     if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
@@ -166,6 +169,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         const [x, y, z, w = 0] = parsed.location.map(Number);
         console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}] with rotation ${w}`);
         await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
+        await sleep(100);
       });
     }
   }, [flushTrigger, instance, entitiesMap, delayMs]);
