@@ -1,1 +1,1 @@
-pause 3000, part_2 16 0 0, pause 1000, part_4 0 0 30, pause 1000, part_5 0 0 90, pause 1000, part_4 0 0 30, pause 1000, part_4 0 0 30, pause 1000, part_4 0 0 30, pause 1000, part_4 0 0 10, pause 1000, part_1 0 0 10, pause 1000, part_1 0 0 -25, pause 1000, part_5 0 0 -10, pause 1000, part_4 0 0 30
+part_2 16 0 0, part_4 0 0 30, part_5 0 0 20, part_4 0 0 30, part_4 0 0 -30, part_4 0 0 -10, part_1 0 0 10, part_1 0 0 -25, part_5 0 0 -10, part_1 0 0 20, part_1 0 0 -20, part_1 0 0 10, part_1 0 0 -15, part_1 0 0 40

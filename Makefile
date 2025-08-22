@@ -25,7 +25,7 @@ opcua:
 	gnome-terminal --tab -- bash -c "npm run dev; exec bash"
 	#gnome-terminal --tab -- bash -c "cd src && node server.js; exec bash"
 	sleep 0.1
-	@echo "🚀 Launching WebSocket server..."
+	gnome-terminal --tab -- bash -c "npx tsx OPC-UA/opcua-proxy.ts"
 	gnome-terminal --tab -- bash -c "npx tsx OPC-UA/server-opcua.ts; exec bash"
 	sleep 1
 	@echo "🚀 Launching OPC-UA client..."
