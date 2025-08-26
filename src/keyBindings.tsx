@@ -59,7 +59,6 @@ export default function KeyboardHandler() {
 
   return null;
 }
-
 export async function posKey( instance: any, entities: { id: string }[], param1: number, param2: number,  param3: number)
 {
   for (const entity of entities) {
