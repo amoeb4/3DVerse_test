@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { CameraControllerPresets } from "@3dverse/livelink";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
 import KeyboardHandler from "./keyBindings.tsx";
+import { WebXR } from "@3dverse/livelink-webxr";
 import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
@@ -18,20 +19,41 @@ import "./App.css";
 
 export function App() {
   const [credentials, setCredentials] = useState<{ sceneId: string } | null>(null);
+  const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
   return (
     <>
       {!credentials ? (
         <StartupModal onSubmit={setCredentials} />
       ) : (
-        <Livelink isTransient={false} sceneId={credentials.sceneId} token="public_ml59vXKlgs9fTJlx" LoadingPanel={LoadingOverlay}>
+        <Livelink
+          isTransient={false}
+          sceneId={credentials.sceneId}
+          token="public_ml59vXKlgs9fTJlx"
+          LoadingPanel={LoadingOverlay}
+        >
           <EntityProvider>
             <PartEntitiesProvider>
               <SpeedProvider>
                 <WebSocketProvider>
                   <KeyboardHandler />
-                  <AppLayout />
-              </WebSocketProvider>
+                  {xrMode ? (
+                    <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
+                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4">
+                        <button
+                          className="button button-primary"
+                          onClick={() => setXRMode(null)}
+                        >
+                          Exit XR
+                        </button>
+                      </div>
+                    </WebXR>
+                  ) : (
+                    <>
+                      <AppLayout />
+                    </>
+                  )}
+                </WebSocketProvider>
               </SpeedProvider>
             </PartEntitiesProvider>
           </EntityProvider>
@@ -52,15 +74,16 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white/80 backdrop-blur-md text-gray-800 rounded-2xl shadow-2xl p-10 max-w-md w-full border border-gray-200">
         <Dtext />
-<form onSubmit={handleSubmit} className="mt-6 space-y-4 w-full max-w-2xl">
-<label className="block flex flex-col">
-  <input
-    type="text"
-    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-    value={sceneId}
-    onChange={(e) => setSceneId(e.target.value)}
-    required/>
-      </label>
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4 w-full max-w-2xl">
+          <label className="block flex flex-col">
+            <input
+              type="text"
+              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={sceneId}
+              onChange={(e) => setSceneId(e.target.value)}
+              required
+            />
+          </label>
           <div className="space-y-2">
             {[
               ["NJ40 2.5", "c8dc2ac0-4601-4279-a01f-9c57a924f725"],
@@ -72,7 +95,8 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
                 <button
                   type="button"
                   onClick={() => setSceneId(id)}
-                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-5 py-2 rounded-md transition">
+                  className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-800 px-5 py-2 rounded-md transition"
+                >
                   Load {label}
                 </button>
               </div>
@@ -81,7 +105,8 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition">
+              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition"
+            >
               Submit
             </button>
           </div>
