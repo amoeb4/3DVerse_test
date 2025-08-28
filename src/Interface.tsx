@@ -10,10 +10,10 @@ import type { EntityCore } from "@3dverse/livelink";
 import * as THREE from "three";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "./movements";
-import { WebXR } from "@3dverse/livelink-webxr";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
+// ---------------------- Speed Context ----------------------
 type SpeedContextType = {
   delayMs: number;
   setDelayMs: (value: number) => void;
@@ -38,8 +38,8 @@ export function useSpeed() {
   return context;
 }
 
+// ---------------------- Entity Context ----------------------
 type EntityX = { id: string; name?: string };
-
 type EntityContextType = {
   selectedEntity: EntityX | null;
   setSelectedEntity: (entity: EntityX) => void;
@@ -62,6 +62,7 @@ export const EntityProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// ---------------------- Utils ----------------------
 export function eulerToQuat(
   x: number,
   y: number,
@@ -82,6 +83,7 @@ export function eulerToQuat(
   ];
 }
 
+// ---------------------- Control Panel ----------------------
 export default function ControlPanel() {
   const { entity: obj } = useEntity(
     { euid: "7ee8e052-e8bd-4ed4-ba90-6b31b9072d5b" },
@@ -92,9 +94,8 @@ export default function ControlPanel() {
 
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 });
   const [isExpanded, setIsExpanded] = useState(false);
-  const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
 
-  const { speed: delayMs, setDelayMs } = useSpeed();
+  const { delayMs, setDelayMs } = useSpeed();
 
   const handleThresholdChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
@@ -136,61 +137,6 @@ export default function ControlPanel() {
         </button>
       </div>
 
-{/* --- Boutons WebXR --- */}
-<div className="flex flex-wrap gap-4 mt-4">
-  <button
-    className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition"
-    onClick={async () => {
-      if (navigator.xr) {
-        const isSupported = await navigator.xr.isSessionSupported?.("immersive-ar");
-        if (isSupported) {
-          setXRMode("immersive-ar");
-        } else {
-          alert("AR non supporté sur ce device ou navigateur.");
-          console.warn("AR non supporté:", navigator.userAgent);
-        }
-      } else {
-        alert("WebXR non disponible sur ce navigateur.");
-        console.warn("WebXR non disponible:", navigator.userAgent);
-      }
-    }}
-  >
-    AR
-  </button>
-
-  <button
-    className="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition"
-    onClick={async () => {
-      if (navigator.xr) {
-        const isSupported = await navigator.xr.isSessionSupported?.("immersive-vr");
-        if (isSupported) {
-          setXRMode("immersive-vr");
-        } else {
-          alert("VR non supporté sur ce device ou navigateur.");
-          console.warn("VR non supporté:", navigator.userAgent);
-        }
-      } else {
-        alert("WebXR non disponible sur ce navigateur.");
-        console.warn("WebXR non disponible:", navigator.userAgent);
-      }
-    }}
-  >
-    VR
-  </button>
-</div>
-
-{xrMode && (
-  <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
-    <div className="flex gap-2 mt-2">
-      <button
-        className="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition"
-        onClick={() => setXRMode(null)}
-      >
-        Exit XR
-      </button>
-    </div>
-  </WebXR>
-)}
       {/* --- Entity / Sliders --- */}
       <div className="flex flex-wrap gap-4 items-center justify-between mt-4">
         <EntityDropdown />
@@ -259,7 +205,7 @@ export default function ControlPanel() {
   );
 }
 
-// ---------- Slider ----------
+// ---------------------- Slider ----------------------
 function Slider({
   label,
   value,
@@ -301,7 +247,7 @@ function Slider({
   );
 }
 
-// ---------- Dropdown ----------
+// ---------------------- Entity Dropdown ----------------------
 export function EntityDropdown() {
   const { instance } = useContext(LivelinkContext);
   const { selectedEntity, setSelectedEntity } = useEntitySimple();

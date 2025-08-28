@@ -1,22 +1,30 @@
-import { useState, useContext, useRef } from "react";
-import { Livelink, Canvas, Viewport, CameraController, useCameraEntity, LivelinkContext, DefaultCameraController,     DOM3DOverlay,
-    DOM3DElement } from "@3dverse/livelink-react";
-import { useEffect } from "react";
-import { CameraControllerPresets } from "@3dverse/livelink";
+//------------------------------------------------------------------------------
+import { useState, useContext, useRef, useEffect } from "react";
+
+//------------------------------------------------------------------------------
+import {
+  Livelink,
+  Canvas,
+  Viewport,
+  CameraController,
+  useCameraEntity,
+  LivelinkContext,
+  DefaultCameraController,
+} from "@3dverse/livelink-react";
 import { LoadingOverlay } from "@3dverse/livelink-react-ui";
+import { WebXRHelper, WebXR } from "@3dverse/livelink-webxr";
 import KeyboardHandler from "./keyBindings.tsx";
-import { WebXR } from "@3dverse/livelink-webxr";
 import CameraEventListener from "./CameraEventListener.jsx";
 import ControlPanel, { SpeedProvider, EntityProvider } from "./Interface.jsx";
 import { CameraEntityContext } from "./cameraControl.tsx";
 import { WebSocketProvider } from "./webSockets.tsx";
 import { PartEntitiesProvider } from "./partEntitiesContext.tsx";
 import Dtext from "../frontend/text_display.tsx";
-import type { CSSProperties } from "react";
 import { Avatars } from "./Avatars.tsx";
 import Dom3DInfos from "./DOM3Dinfos.tsx";
 import "./App.css";
 
+//------------------------------------------------------------------------------
 export function App() {
   const [credentials, setCredentials] = useState<{ sceneId: string } | null>(null);
   const [xrMode, setXRMode] = useState<XRSessionMode | null>(null);
@@ -30,8 +38,7 @@ export function App() {
           isTransient={false}
           sceneId={credentials.sceneId}
           token="public_ml59vXKlgs9fTJlx"
-          LoadingPanel={LoadingOverlay}
-        >
+          LoadingPanel={LoadingOverlay}>
           <EntityProvider>
             <PartEntitiesProvider>
               <SpeedProvider>
@@ -39,18 +46,35 @@ export function App() {
                   <KeyboardHandler />
                   {xrMode ? (
                     <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
+                      <AppLayout />
                       <div className="fixed top-4 left-4 flex items-center justify-center gap-4">
-                        <button
-                          className="button button-primary"
-                          onClick={() => setXRMode(null)}
-                        >
+                        <button className="button button-primary"
+                          onClick={() => setXRMode(null)}>
                           Exit XR
                         </button>
+                        {xrMode !== "immersive-ar" && (
+                          <XRButton
+                            mode="immersive-ar"
+                            text="Switch to"
+                            setXRMode={setXRMode}
+                          />
+                        )}
+                        {xrMode !== "immersive-vr" && (
+                          <XRButton
+                            mode="immersive-vr"
+                            text="Switch to"
+                            setXRMode={setXRMode}
+                          />
+                        )}
                       </div>
                     </WebXR>
                   ) : (
                     <>
                       <AppLayout />
+                      <div className="absolute bottom-[5vh] left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
+                        <XRButton mode="immersive-ar" setXRMode={setXRMode} />
+                        <XRButton mode="immersive-vr" setXRMode={setXRMode} />
+                      </div>
                     </>
                   )}
                 </WebSocketProvider>
@@ -63,6 +87,7 @@ export function App() {
   );
 }
 
+//------------------------------------------------------------------------------
 function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");
   const handleSubmit = (e: React.FormEvent) => {
@@ -116,6 +141,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
   );
 }
 
+//------------------------------------------------------------------------------
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
@@ -135,14 +161,16 @@ function AppLayout() {
       <div className="absolute bottom-[5%] right-[1.15%] z-50">
         <button
           className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
-          onClick={() => setShowPipCamera(prev => !prev)}>
+          onClick={() => setShowPipCamera(prev => !prev)}
+        >
           {showPipCamera ? "Minimize" : "Alt. Camera"}
         </button>
       </div>
       <div className="absolute bottom-[3%] left-[3%] z-50">
         <button
           className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
-          onClick={() => setShowDOM3D(prev => !prev)}>
+          onClick={() => setShowDOM3D(prev => !prev)}
+        >
           {showDOM3D ? "Hide infos" : "Show infos"}
         </button>
       </div>
@@ -172,15 +200,48 @@ function AppLayout() {
   );
 }
 
-const modalStyle: CSSProperties = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  backgroundColor: "white",
-  padding: "2rem",
-  borderRadius: "0.5rem",
-  boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
-  zIndex: 1000,
-};
+function XRButton({
+    mode,
+    setXRMode,
+    text = "Enter",
+}: {
+    mode: XRSessionMode;
+    text?: string;
+    setXRMode: (mode: XRSessionMode) => void;
+}) {
+    const [isSessionSupported, setIsSessionSupported] = useState(false);
+    const [message, setMessage] = useState("");
+    const xrModeTitle = mode.endsWith("ar") ? "AR" : "VR";
+
+    useEffect(() => {
+        if (!window.isSecureContext) {
+            setMessage("WebXR requires a secure context (https).");
+            return;
+        }
+
+        WebXRHelper.isSessionSupported(mode).then(supported => {
+            if (!supported) {
+                setMessage(`WebXR '${mode}' is not supported on this device.`);
+            } else {
+                setIsSessionSupported(true);
+            }
+        });
+    }, [mode]);
+
+    return (
+        <button
+            className={
+                "button button-primary" +
+                (!isSessionSupported ? " opacity-50" : "")
+            }
+            onClick={() => setXRMode(mode)}
+            disabled={!isSessionSupported}
+            style={isSessionSupported ? {} : { cursor: "not-allowed" }}
+            title={message}
+        >
+            {text} {xrModeTitle}
+        </button>
+    );
+}
 
 export default App;
