@@ -23,6 +23,7 @@ import Dtext from "../frontend/text_display.tsx";
 import { Avatars } from "./Avatars.tsx";
 import Dom3DInfos from "./DOM3Dinfos.tsx";
 import "./App.css";
+import { number } from "framer-motion";
 
 //------------------------------------------------------------------------------
 export function App() {
@@ -47,7 +48,7 @@ export function App() {
                   {xrMode ? (
                     <WebXR mode={xrMode} onSessionEnd={() => setXRMode(null)}>
                       <AppLayout />
-                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4">
+                      <div className="fixed top-4 left-4 flex items-center justify-center gap-4 z-[99999]">
                         <button className="button button-primary"
                           onClick={() => setXRMode(null)}>
                           Exit XR
@@ -71,7 +72,7 @@ export function App() {
                   ) : (
                     <>
                       <AppLayout />
-                      <div className="absolute bottom-[5vh] left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
+                      <div className="absolute bottom-[5vh] left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 z-[99999]">
                         <XRButton mode="immersive-ar" setXRMode={setXRMode} />
                         <XRButton mode="immersive-vr" setXRMode={setXRMode} />
                       </div>
