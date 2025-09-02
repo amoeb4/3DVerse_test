@@ -1,7 +1,6 @@
 "use client";
 import { useContext } from "react";
 import { LivelinkContext } from "@3dverse/livelink-react";
-import { callConditionRefresh } from "node-opcua";
 
 export function EntityCreator() {
     const { instance } = useContext(LivelinkContext);
@@ -21,7 +20,7 @@ export function EntityCreator() {
 
     const SPAWN_SURFACE_SIZE = 3 as const;
 
-    const createEntity = () => {
+   const createEntity = () => {
         instance.scene.newEntity({
             name: "My Entity",
             components: {
@@ -47,7 +46,6 @@ export function EntityCreator() {
             },
         });
     };
-
 
 
     return (
