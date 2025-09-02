@@ -48,17 +48,6 @@ export function EntityCreator() {
         });
     };
 
-const useCallback(
-  () => {
-    const follower = number
-    const twicer ) coerceDouble,
-    callConditionRefre$
-
-    callConditionRefresh
-    [first callback]
-  },
-  [second, follower],
-)
 
 
     return (
