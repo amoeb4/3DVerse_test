@@ -30,6 +30,3 @@ function parseMessage(message)
 	else
 		console.log('Message received:', msg);
 }
-
-
-aze

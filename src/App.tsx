@@ -1,6 +1,5 @@
 //------------------------------------------------------------------------------
 import { useState, useContext, useRef, useEffect } from "react";
-
 //------------------------------------------------------------------------------
 import {
   Livelink,
@@ -23,6 +22,7 @@ import Dtext from "../frontend/text_display.tsx";
 import { Avatars } from "./Avatars.tsx";
 import Dom3DInfos from "./DOM3Dinfos.tsx";
 import "./App.css";
+import { EntityCreator } from "./weldBead.tsx";
 import { number } from "framer-motion";
 
 //------------------------------------------------------------------------------
@@ -196,6 +196,7 @@ function AppLayout() {
             </div>
           )}
         </Viewport>
+        <EntityCreator />
       </Canvas>
     </CameraEntityContext.Provider>
   );
