@@ -20,7 +20,7 @@ export function EntityCreator() {
 
     const SPAWN_SURFACE_SIZE = 3 as const;
 
-   const createEntity = () => {
+    const createEntity = () => {
         instance.scene.newEntity({
             name: "My Entity",
             components: {
@@ -37,16 +37,16 @@ export function EntityCreator() {
                         0.1 + Math.random(),
                     ],
                 },
-                mesh_ref: { value: "0577814f-4677-420b-89e8-1e5a4dd56914" },
+                mesh_ref: { value: "5974a86c-a55e-4f3f-94fb-6cc3317181ab" },
                 material_ref: {
                     value: MATERIAL_REFS[
                         Math.floor(Math.random() * MATERIAL_REFS.length)
+                        
                     ],
                 },
             },
         });
     };
-
 
     return (
         <button
