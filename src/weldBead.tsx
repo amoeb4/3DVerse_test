@@ -1,58 +1,57 @@
 "use client";
-import { useContext } from "react";
-import { LivelinkContext } from "@3dverse/livelink-react";
+import { useContext, useState } from "react";
+import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 
 export function EntityCreator() {
     const { instance } = useContext(LivelinkContext);
-    if (!instance) {
-        return null;
-    }
+    const [temperature, setTemperature] = useState(50);
+    const { entity: torch } = useEntity({
+        euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02",
+    });
 
-    const MATERIAL_REFS = [
-        "5bd5d2c565d3-4cdb-adb1-c85ae1502840", // Light
-        "afbcef75-7c52-4a90-b6e6-d19dcc04c3ad", // Green
-        "9b848934-e592-41a9-895f-11ab01892b1d", // Wood
-        "c9650d73-0f0b-4064-843f-ff0bb8d506e7", // Dark
-        "438bca58-a9e8-41db-910e-4174ac93437f", // Dark Green
-        "78b48c3a-9988-433a-9237-9ea5dc7a57e5", // Orange
-        "6f39abc9-9147-498e-9530-b41a6f8c2e2a", // Purple
-    ] as const;
-
-    const SPAWN_SURFACE_SIZE = 3 as const;
-
-    const createEntity = () => {
-        instance.scene.newEntity({
+    const createEntity = async () => {
+        const POS_TORCH: [number, number, number] | undefined =
+        torch?.ls_to_ws
+            ? [
+                  torch.ls_to_ws[12],
+                  torch.ls_to_ws[13],
+                  torch.ls_to_ws[14],
+              ]
+            : undefined;
+        console.log(`entity created at : ${POS_TORCH}`);
+        instance?.scene.newEntity({
             name: "My Entity",
             components: {
                 local_transform: {
-                    position: [
-                        Math.random() * SPAWN_SURFACE_SIZE * 2 -
-                            SPAWN_SURFACE_SIZE,
-                        0,
-                        Math.random() * (SPAWN_SURFACE_SIZE - 1) * 2 - 2,
-                    ],
-                    scale: [
-                        0.1 + Math.random(),
-                        0.1 + Math.random(),
-                        0.1 + Math.random(),
-                    ],
+                    position: POS_TORCH,
+                    scale: [0.01, 0.01, 0.01],
                 },
-                mesh_ref: { value: "5974a86c-a55e-4f3f-94fb-6cc3317181ab" },
+                mesh_ref: { value: "53daef4f-eef0-4b09-9815-50733891ed10" },
                 material_ref: {
-                    value: MATERIAL_REFS[
-                        Math.floor(Math.random() * MATERIAL_REFS.length)
-                        
-                    ],
+                    value: "f2a549e5-4f72-4cef-a5ab-48873c209e0c",
                 },
+
             },
-        });
+        });        
     };
 
     return (
-        <button
-            className="button button-overlay absolute top-4 left-4"
-            onClick={createEntity}>
-            Create Entity
-        </button>
+        <div className="absolute text-white top-4 left-4 flex flex-col gap-2 bg-black/30 p-3 rounded-xl">
+            <button
+                className="button button-overlay"
+                onClick={createEntity}
+                disabled={!instance}>
+                Create Entity
+            </button>
+            <label className="flex flex-col text-white text-sm">
+                Température: {temperature}
+                <input type="range"
+                    min={0}
+                    max={100}
+                    value={temperature}
+                    onChange={(e) => setTemperature(Number(e.target.value))}
+                    className="w-40"/>
+            </label>
+        </div>
     );
 }

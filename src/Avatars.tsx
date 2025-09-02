@@ -9,6 +9,9 @@ import {
     useClients,
 } from "@3dverse/livelink-react";
 
+//const temperatureInfo = number;
+//const thermometer = number;&
+
 export function Avatars() {
     const { instance } = useContext(LivelinkContext);
     const { clients } = useClients();
