@@ -9,6 +9,16 @@ export function EntityCreator() {
         euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02",
     });
 
+    const MATERIAL_REFS = [
+        "", // Light
+        "", // Green
+        "", // Wood
+        "", // Dark
+        "", // Dark Green
+        "", // Orange
+        "", // Purple
+    ] as const;
+
     const createEntity = async () => {
         const POS_TORCH: [number, number, number] | undefined =
         torch?.ls_to_ws

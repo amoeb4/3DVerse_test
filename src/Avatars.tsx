@@ -10,7 +10,7 @@ import {
 } from "@3dverse/livelink-react";
 
 //const temperatureInfo = number;
-//const thermometer = number;&
+//const thermometer = number;
 
 export function Avatars() {
     const { instance } = useContext(LivelinkContext);
