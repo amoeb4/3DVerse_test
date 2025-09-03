@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DOM3DOverlay, DOM3DElement } from "@3dverse/livelink-react";
+import { DOM3DOverlay, DOM3DElement, useEntity } from "@3dverse/livelink-react";
 import { vec3, mat4 } from "gl-matrix";
 import type { EntityWithParentId } from "./partEntitiesContext";
 
@@ -8,6 +8,14 @@ interface Dom3DInfosProps {
 }
 
 export default function Dom3DInfos({ entitiesMap }: Dom3DInfosProps) {
+
+  const { entity: part_1 } = useEntity({ euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02" });
+  const { entity: part_2 } = useEntity({ euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02" });
+  const { entity: part_3 } = useEntity({ euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02" });
+  const { entity: part_4 } = useEntity({ euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02" });
+  const { entity: part_5 } = useEntity({ euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02" });
+  const { entity: part_6 } = useEntity({ euid: "10d1462b-2d11-4b9d-b8da-dd4ecbaa6c02" });
+
   const [positions, setPositions] = useState<Record<string, [number, number, number]>>({
     part_1: [-1.7, 0.6, 0],
     part_2: [-0.3, 0.8, 0],

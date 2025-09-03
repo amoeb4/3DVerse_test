@@ -22,14 +22,14 @@ export function EntityCreator() {
     const createEntity = async () => {
         const POS_TORCH: [number, number, number] | undefined =
         torch?.ls_to_ws
-            ? [torch.ls_to_ws[12], torch.ls_to_ws[13], torch.ls_to_ws[14]]
+            ? [torch.ls_to_ws[12]+0.035, torch.ls_to_ws[13], torch.ls_to_ws[14]]
             : undefined;
         instance?.scene.newEntity({
             name: "My Entity",
             components: {
                 local_transform: {
                     position: POS_TORCH,
-                    scale: [0.01, 0.01, 0.01],
+                    scale: [0.004, 0.004, 0.006],
                 },
                 mesh_ref: { value: "53daef4f-eef0-4b09-9815-50733891ed10" },
                 material_ref: {
