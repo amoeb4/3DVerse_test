@@ -49,7 +49,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     socketRef.current = socket;
 
     socket.onopen = () => {
-      console.log("✅ WebSocket connected");
+
       reconnectAttempts.current = 0;
 
       if (selectedEntityRef.current) {
@@ -58,12 +58,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
     socket.onmessage = async (event) => {
       const msg = event.data.trim();
-      console.log("📨 onmessage triggered:", msg);
+
       try {
         console.warn("Object is gonna move now");
-        console.log(`${socket}`);
+
         const parsed = JSON.parse(msg);
-        console.log("✅ Parsed JSON:", parsed);
+
 
         if (
           typeof parsed === "object" &&
@@ -76,7 +76,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
           if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
-              console.log(`🔄 Moving entity ${parsed.name} and children to [${x}, ${y}, ${z}] with rotation ${w}`);
+
               await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
             } else {
               const alreadyQueued = messageQueue.current.some(
