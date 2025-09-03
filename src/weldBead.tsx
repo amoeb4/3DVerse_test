@@ -10,25 +10,20 @@ export function EntityCreator() {
     });
 
     const MATERIAL_REFS = [
-        "", // Light
-        "", // Green
-        "", // Wood
-        "", // Dark
-        "", // Dark Green
-        "", // Orange
-        "", // Purple
+        "", //  cold
+        "", // 
+        "", //
+        "", //  average
+        "", //
+        "", // 
+        "", //  hot
     ] as const;
 
     const createEntity = async () => {
         const POS_TORCH: [number, number, number] | undefined =
         torch?.ls_to_ws
-            ? [
-                  torch.ls_to_ws[12],
-                  torch.ls_to_ws[13],
-                  torch.ls_to_ws[14],
-              ]
+            ? [torch.ls_to_ws[12], torch.ls_to_ws[13], torch.ls_to_ws[14]]
             : undefined;
-        console.log(`entity created at : ${POS_TORCH}`);
         instance?.scene.newEntity({
             name: "My Entity",
             components: {
