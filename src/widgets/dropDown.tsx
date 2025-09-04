@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface Scene {
   scene_id: string;
   name: string;
