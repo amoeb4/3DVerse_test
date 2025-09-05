@@ -36,7 +36,7 @@ async connectOpcUa(endpoint: string, username?: string, password?: string) {
         userName: username,
         password: password, // ✅ obligatoire, pas undefined
       };
-    }
+  }
 
     this.session = await this.client.createSession(userIdentity);
     console.log("✅ OPC-UA session established");
@@ -92,7 +92,7 @@ async connectOpcUa(endpoint: string, username?: string, password?: string) {
 
       updates.forEach((update) => this.sendUpdate(update));
     }, this.pollingInterval);
-  }
+}
 
 async disconnect() {
   await this.session?.close();
