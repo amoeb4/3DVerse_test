@@ -18,37 +18,37 @@ export default function Dom3DInfos({ entitiesMap }: Dom3DInfosProps) {
   return (
     <DOM3DOverlay>
       {(
-        <DOMEntity entity={part_1} scaleFactor={0.0016}>
+        <DOMEntity entity={part_1} anchor="right-bottom" scaleFactor={0.0014}>
           <p className="bg-underground p-4 rounded-lg text-white">Base<br />Axe Z</p>
         </DOMEntity>
       )}
-      
+
       {(
-        <DOMEntity entity={part_2} scaleFactor={0.0016}>
+        <DOMEntity entity={part_2} anchor="left-bottom"scaleFactor={0.0014}>
           <p className="bg-underground p-4 rounded-lg text-white">Epaule<br />Axe X</p>
         </DOMEntity>
       )}
-      
+
       {(
-        <DOMEntity entity={part_3} scaleFactor={0.0016}>
+        <DOMEntity entity={part_3} anchor="right-bottom" scaleFactor={0.0014}>
           <p className="bg-underground p-4 rounded-lg text-white">Coude 1<br />Axe Z</p>
         </DOMEntity>
       )}
-      
+
       {(
-        <DOMEntity entity={part_4} scaleFactor={0.0016}>
-          <p className="bg-underground p-4 rounded-lg text-white">Base<br />Axe Z</p>
+        <DOMEntity entity={part_4} anchor="left-bottom" scaleFactor={0.0014}>
+          <p className="bg-underground p-4 rounded-lg text-white">Bras<br />Axe Z</p>
         </DOMEntity>
       )}
-      
+
       {(
-        <DOMEntity entity={part_5} scaleFactor={0.0016}>
+        <DOMEntity entity={part_5} anchor="right-bottom" scaleFactor={0.0014}>
           <p className="bg-underground p-4 rounded-lg text-white">Coude 2<br />Axe Z</p>
         </DOMEntity>
       )}
-      
+
       {(
-        <DOMEntity entity={part_6} scaleFactor={0.0016}>
+        <DOMEntity entity={part_6} anchor="right-top" scaleFactor={0.0014}>
           <p className="bg-underground p-4 rounded-lg text-white">Coude 3<br />Axe X</p>
         </DOMEntity>
       )}

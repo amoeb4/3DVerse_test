@@ -95,7 +95,6 @@ async connectOpcUa(endpoint: string, username?: string, password?: string) {
   }
 
 async disconnect() {
-  //if (this.pollingTimer) clearInterval(this.pollingTimer);
   await this.session?.close();
   await this.client.disconnect();
   if (this.ws?.readyState === WebSocket.OPEN) this.ws.close();
