@@ -6,7 +6,6 @@ import {
 } from "node-opcua";
 
 async function startServer() {
-    // 1️⃣ Création du serveur OPC-UA
     const server = new OPCUAServer({
         port: 4840, // port local
         resourcePath: "/UA/Robot6Axes",
@@ -16,26 +15,22 @@ async function startServer() {
             buildDate: new Date()
         }
     });
-
     await server.initialize();
-
     const addressSpace = server.engine.addressSpace!;
     const namespace = addressSpace.getOwnNamespace();
     const robotFolder = namespace.addObject({
         organizedBy: addressSpace.rootFolder.objects,
         browseName: "Robot6Axes"
     });
-
     const jointNames = ["A1", "A2", "A3", "A4", "A5", "A6"];
     const variables: Record<string, { value: number }> = {};
-
     jointNames.forEach(joint => {
         variables[joint] = { value: 0 };
 
         namespace.addVariable({
             componentOf: robotFolder,
             browseName: joint,
-            nodeId: `ns=1;s=${joint}`, // identifiant unique
+            nodeId: `ns=1;s=${joint}`,
             dataType: "Double",
             value: {
                 get: () => {
@@ -50,19 +45,16 @@ async function startServer() {
         });
     });
 
-
-    // 🔄 Simulateur : met à jour toutes les secondes
+// Simulation du protocol OPC-UA
     setInterval(() => {
         jointNames.forEach(joint => {
             variables[joint].value = Math.random() * 180 - 90;
         });
     }, 1000);
 
-    // 4️⃣ Démarrage du serveur
+
     await server.start();
     console.log("✅ OPC-UA Server is running at opc.tcp://localhost:4840/UA/Robot6Axes");
-
-    // 5️⃣ Gestion des signaux pour arrêt propre
     process.on("SIGINT", async () => {
         console.log("\n🛑 Stopping OPC-UA Server...");
         await server.shutdown(1000);
