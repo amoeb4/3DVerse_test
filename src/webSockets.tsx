@@ -58,12 +58,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
     socket.onmessage = async (event) => {
       const msg = event.data.trim();
-
+      console.log(`message reçu : ${msg}`);
       try {
         console.warn("Object is gonna move now");
 
         const parsed = JSON.parse(msg);
-
 
         if (
           typeof parsed === "object" &&

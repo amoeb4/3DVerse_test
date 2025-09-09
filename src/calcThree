@@ -3,12 +3,10 @@ import * as THREE from 'three';
 const entityMap = new Map<string, Entity>(); // Tes entités 3Dverse
 const object3DMap = new Map<string, THREE.Object3D>();
 
-// Étape 1 - Créer un Object3D pour chaque entité
 for (const [id, entity] of entityMap) {
   const obj = new THREE.Object3D();
   obj.name = entity.name;
 
-  // Appliquer la transformation actuelle
   const t = entity.local_transform;
   if (t?.matrix) {
     obj.matrix.fromArray(t.matrix);

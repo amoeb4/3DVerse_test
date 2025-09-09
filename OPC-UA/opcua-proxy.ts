@@ -17,7 +17,7 @@ export class OpcUa6AxisBridge {
   private pollingInterval: number;
   private pollingTimer: NodeJS.Timer | null = null;
   private reconnectDelay = 2000;
-
+         
   constructor(joints: OpcUaJoint[], wsUrl: string, pollingInterval = 16) {
     this.client = OPCUANodeClient.create({ endpointMustExist: false });
     this.joints = joints;
@@ -34,7 +34,7 @@ async connectOpcUa(endpoint: string, username?: string, password?: string) {
       userIdentity = {
         type: UserTokenType.UserName,
         userName: username,
-        password: password, // ✅ obligatoire, pas undefined
+        password: password,
       };
   }
 

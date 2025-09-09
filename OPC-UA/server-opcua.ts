@@ -53,12 +53,13 @@ async function startServer() {
         });
     });
 
+
     // 🔄 Simulateur : met à jour toutes les secondes
     setInterval(() => {
         jointNames.forEach(joint => {
             variables[joint].value = Math.random() * 180 - 90;
         });
-    }, 1000);
+    }, 10000);
 
     // 4️⃣ Démarrage du serveur
     await server.start();

@@ -74,7 +74,7 @@ async function main() {
             JSON.stringify({
               entity,
               rotation: {
-                axis: "z", // ou "x"/"y" selon ton modèle
+                axis: "z",
                 angleDeg,
               },
             })
