@@ -7,6 +7,7 @@ import {
   TimestampsToReturn,
   ReadValueIdOptions,
 } from "node-opcua";
+import { useState } from "react";
 import WebSocket from "ws";
 
 // 1️⃣ Mapping OPC-UA joint → entité 3Dverse
