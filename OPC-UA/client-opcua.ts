@@ -10,7 +10,6 @@ import {
 import { useState } from "react";
 import WebSocket from "ws";
 
-// 1️⃣ Mapping OPC-UA joint → entité 3Dverse
 const jointToPartMap: Record<string, string> = {
   A1: "part_1",
   A2: "part_2",
@@ -69,11 +68,9 @@ function convertAngleToLocation(angleDeg: number, joint: string): [number, numbe
 
 async function main() {
   try {
-    // 3️⃣ Connexion WebSocket vers ton bridge/jumeau numérique
     const ws = new WebSocket("ws://localhost:8767");
     ws.on("open", () => console.log("✅ Connected to WebSocket bridge"));
 
-    // 4️⃣ Création du client OPC-UA
     const client = OPCUAClient.create({
       endpointMustExist: false,
       securityMode: MessageSecurityMode.None,
@@ -87,7 +84,6 @@ async function main() {
     const session = await client.createSession();
     console.log("✅ Session created");
 
-    // 5️⃣ Subscription globale
     const subscription = await session.createSubscription2({
       requestedPublishingInterval: 500,
       requestedLifetimeCount: 100,
@@ -97,7 +93,6 @@ async function main() {
       priority: 10,
     });
 
-    // 6️⃣ Surveiller chaque joint
     for (const joint of Object.keys(jointToPartMap)) {
       const nodeId = `ns=1;s=${joint}`;
       const itemToMonitor: ReadValueIdOptions = {
@@ -116,15 +111,12 @@ async function main() {
         const partName = jointToPartMap[joint];
 
         console.log(`🔄 ${joint} -> ${partName} = ${angleDeg.toFixed(2)}°`);
-
         const location = convertAngleToLocation(angleDeg, joint);
-        
         positions[partName] = location;
-
         if (ws.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({
-            name: partName,        // ← Même clé que Python
-            location: location     // ← Même clé que Python
+            name: partName,
+            location: location
           });
           ws.send(message);
           console.log(`Commande envoyée : ${message}`);

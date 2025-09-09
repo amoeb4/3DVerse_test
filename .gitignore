@@ -48,3 +48,4 @@ Thumbs.db
 .parcel-cache/
 
 compile_commands.json
+.vercel
