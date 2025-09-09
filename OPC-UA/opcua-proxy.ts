@@ -5,7 +5,7 @@ import WebSocket from "ws";
 type OpcUaJoint = {
   namespace: number;
   nodeId: string;
-  axisName: string; // correspond au name de l'entité 3D
+  axisName: string;
 };
 
 export class OpcUa6AxisBridge {

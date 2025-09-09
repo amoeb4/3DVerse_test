@@ -59,7 +59,7 @@ async function startServer() {
         jointNames.forEach(joint => {
             variables[joint].value = Math.random() * 180 - 90;
         });
-    }, 10000);
+    }, 5000);
 
     // 4️⃣ Démarrage du serveur
     await server.start();

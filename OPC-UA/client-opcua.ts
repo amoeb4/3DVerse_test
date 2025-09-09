@@ -106,19 +106,15 @@ async function main() {
 
         console.log(`🔄 ${joint} -> ${partName} = ${angleDeg.toFixed(2)}°`);
 
-        // Convertir l'angle en position 3D
         const location = convertAngleToLocation(angleDeg, joint);
         
-        // Mettre à jour la position stockée
         positions[partName] = location;
 
-        // 7️⃣ Envoyer le message avec la MÊME structure que le client Python
         if (ws.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({
             name: partName,        // ← Même clé que Python
             location: location     // ← Même clé que Python
           });
-          
           ws.send(message);
           console.log(`Commande envoyée : ${message}`);
         }
