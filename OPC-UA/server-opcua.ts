@@ -7,7 +7,7 @@ import {
 
 async function startServer() {
     const server = new OPCUAServer({
-        port: 4840, // port local
+        port: 4840,
         resourcePath: "/UA/Robot6Axes",
         buildInfo: {
             productName: "Robot6AxesSimulator",
@@ -15,6 +15,7 @@ async function startServer() {
             buildDate: new Date()
         }
     });
+
     await server.initialize();
     const addressSpace = server.engine.addressSpace!;
     const namespace = addressSpace.getOwnNamespace();
@@ -22,7 +23,7 @@ async function startServer() {
         organizedBy: addressSpace.rootFolder.objects,
         browseName: "Robot6Axes"
     });
-    const jointNames = ["A1", "A2", "A3", "A4", "A5", "A6"];
+    const jointNames = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"];
     const variables: Record<string, { value: number }> = {};
     jointNames.forEach(joint => {
         variables[joint] = { value: 0 };

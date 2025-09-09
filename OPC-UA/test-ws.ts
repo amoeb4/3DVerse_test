@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 
-const ws = new WebSocket("ws://localhost:8767"); // mettre l'URL de ton WebSocket réel
+const ws = new WebSocket("ws://localhost:8767"); // URL du websocket
 
 ws.on("open", () => {
   console.log("Connected to bridge");

@@ -9,6 +9,8 @@ async function main() {
     { namespace: 1, nodeId: "A4", axisName: "part_4" },
     { namespace: 1, nodeId: "A5", axisName: "part_5" },
     { namespace: 1, nodeId: "A6", axisName: "part_6" },
+    { namespace: 1, nodeId: "A7", axisName: "part_7" },
+    { namespace: 1, nodeId: "A8", axisName: "part_8" },
   ];
 
   const bridge = new OpcUa6AxisBridge(joints, "ws://localhost:8767");

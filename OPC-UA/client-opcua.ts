@@ -17,6 +17,8 @@ const jointToPartMap: Record<string, string> = {
   A4: "part_4",
   A5: "part_5",
   A6: "part_6",
+  A7: "part_7",
+  A8: "part_8",
 };
 
 const positions: Record<string, [number, number, number]> = {
@@ -26,6 +28,8 @@ const positions: Record<string, [number, number, number]> = {
   part_4: [0.0, 0.0, 0.0],
   part_5: [0.0, 0.0, 0.0],
   part_6: [0.0, 0.0, 0.0],
+  part_7: [0.0, 0.0, 0.0],
+  part_8: [0.0, 0.0, 0.0],
 };
 
 function convertAngleToLocation(angleDeg: number, joint: string): [number, number, number] {
@@ -49,6 +53,12 @@ function convertAngleToLocation(angleDeg: number, joint: string): [number, numbe
       return [0, 0, Math.cos(angleDeg * Math.PI / 180)];
     
     case "A6": // Poignet 3 (axe X)
+      return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
+
+    case "A7": // Poignet 3 (axe X)
+      return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
+
+    case "A8": // Poignet 3 (axe X)
       return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
     
     default:
