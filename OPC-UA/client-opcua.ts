@@ -19,13 +19,50 @@ const jointToPartMap: Record<string, string> = {
   A6: "part_6",
 };
 
+const positions: Record<string, [number, number, number]> = {
+  part_1: [0.0, 0.0, 0.0],
+  part_2: [0.0, 0.0, 0.0],
+  part_3: [0.0, 0.0, 0.0],
+  part_4: [0.0, 0.0, 0.0],
+  part_5: [0.0, 0.0, 0.0],
+  part_6: [0.0, 0.0, 0.0],
+};
+
+function convertAngleToLocation(angleDeg: number, joint: string): [number, number, number] {
+  // Exemple de conversion angle -> position 3D
+  // Vous pouvez adapter cette logique selon vos besoins
+  
+  switch (joint) {
+    case "A1": // Rotation base (axe Y)
+      return [Math.cos(angleDeg * Math.PI / 180), 0, Math.sin(angleDeg * Math.PI / 180)];
+    
+    case "A2": // Épaule (axe Z)
+      return [0, Math.sin(angleDeg * Math.PI / 180), Math.cos(angleDeg * Math.PI / 180)];
+    
+    case "A3": // Coude (axe Z)
+      return [0, Math.sin(angleDeg * Math.PI / 180) * 0.5, Math.cos(angleDeg * Math.PI / 180) * 0.5];
+    
+    case "A4": // Poignet 1 (axe X)
+      return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
+    
+    case "A5": // Poignet 2 (axe Z)
+      return [0, 0, Math.sin(angleDeg * Math.PI / 180) * 0.3];
+    
+    case "A6": // Poignet 3 (axe X)
+      return [Math.sin(angleDeg * Math.PI / 180) * 0.2, 0, 0];
+    
+    default:
+      return [0, 0, 0];
+  }
+}
+
 async function main() {
   try {
-    // 2️⃣ Connexion WebSocket vers ton bridge/jumeau numérique
+    // 3️⃣ Connexion WebSocket vers ton bridge/jumeau numérique
     const ws = new WebSocket("ws://localhost:8767");
     ws.on("open", () => console.log("✅ Connected to WebSocket bridge"));
 
-    // 3️⃣ Création du client OPC-UA
+    // 4️⃣ Création du client OPC-UA
     const client = OPCUAClient.create({
       endpointMustExist: false,
       securityMode: MessageSecurityMode.None,
@@ -39,7 +76,7 @@ async function main() {
     const session = await client.createSession();
     console.log("✅ Session created");
 
-    // 4️⃣ Subscription globale
+    // 5️⃣ Subscription globale
     const subscription = await session.createSubscription2({
       requestedPublishingInterval: 500,
       requestedLifetimeCount: 100,
@@ -49,7 +86,7 @@ async function main() {
       priority: 10,
     });
 
-    // 5️⃣ Surveiller chaque joint
+    // 6️⃣ Surveiller chaque joint
     for (const joint of Object.keys(jointToPartMap)) {
       const nodeId = `ns=1;s=${joint}`;
       const itemToMonitor: ReadValueIdOptions = {
@@ -65,20 +102,25 @@ async function main() {
 
       monitoredItem.on("changed", (value) => {
         const angleDeg = value.value.value;
-        const entity = jointToPartMap[joint];
+        const partName = jointToPartMap[joint];
 
-        console.log(`🔄 ${joint} -> ${entity} = ${angleDeg.toFixed(2)}°`);
+        console.log(`🔄 ${joint} -> ${partName} = ${angleDeg.toFixed(2)}°`);
 
+        // Convertir l'angle en position 3D
+        const location = convertAngleToLocation(angleDeg, joint);
+        
+        // Mettre à jour la position stockée
+        positions[partName] = location;
+
+        // 7️⃣ Envoyer le message avec la MÊME structure que le client Python
         if (ws.readyState === WebSocket.OPEN) {
-          ws.send(
-            JSON.stringify({
-              entity,
-              rotation: {
-                axis: "z",
-                angleDeg,
-              },
-            })
-          );
+          const message = JSON.stringify({
+            name: partName,        // ← Même clé que Python
+            location: location     // ← Même clé que Python
+          });
+          
+          ws.send(message);
+          console.log(`Commande envoyée : ${message}`);
         }
       });
     }
