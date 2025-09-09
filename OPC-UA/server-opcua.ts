@@ -19,11 +19,8 @@ async function startServer() {
 
     await server.initialize();
 
-    // 2️⃣ Création de l'espace de noms
     const addressSpace = server.engine.addressSpace!;
     const namespace = addressSpace.getOwnNamespace();
-
-    // 3️⃣ Ajout des joints du robot (A1 → A6)
     const robotFolder = namespace.addObject({
         organizedBy: addressSpace.rootFolder.objects,
         browseName: "Robot6Axes"
@@ -59,7 +56,7 @@ async function startServer() {
         jointNames.forEach(joint => {
             variables[joint].value = Math.random() * 180 - 90;
         });
-    }, 5000);
+    }, 1000);
 
     // 4️⃣ Démarrage du serveur
     await server.start();
