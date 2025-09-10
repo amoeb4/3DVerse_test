@@ -39,28 +39,21 @@ function convertAngleToLocation(angleDeg: number, joint: string): [number, numbe
   switch (joint) {
     case "A1": // Rotation base (axe Z)
       return [0, 0, Math.sin(angleDeg * Math.PI / 180)];
-    
     case "A2": // Épaule (axe Z)
       return [Math.sin(angleDeg * Math.PI / 180),0,0];
-    
     case "A3": // Coude (axe Z)
       return [0, 0, Math.cos(angleDeg * Math.PI / 180)];
-    
     case "A4": // Poignet 1 (axe X)
       return [0, 0, Math.cos(angleDeg * Math.PI / 180)];
-    
     case "A5": // Poignet 2 (axe Z)
       return [0, 0, Math.cos(angleDeg * Math.PI / 180)];
-    
     case "A6": // Poignet 3 (axe X)
       return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
-
-    case "A7": // Poignet 3 (axe X)
+    case "A7": // berceau vireur (axe X)
       return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
+    case "A8": // plateau vireur (axe Y)
+      return [0, Math.sin(angleDeg * Math.PI / 180), 0];
 
-    case "A8": // Poignet 3 (axe X)
-      return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
-    
     default:
       return [0, 0, 0];
   }
