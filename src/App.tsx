@@ -112,7 +112,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
           </label>
           <div className="space-y-2">
             {[
-              ["NJ40 2.5", "c8dc2ac0-4601-4279-a01f-9c57a924f725"],
+              ["NJ130 2.05", "759ed8c4-fb60-432c-a41e-cf0f39f92d6f"],
               ["Genoble CEA cell", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
               ["Test_Kuka", "516d270a-5a6b-44e6-99c6-44df631bf475"],
               ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
