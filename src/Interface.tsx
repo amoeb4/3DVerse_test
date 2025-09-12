@@ -141,10 +141,10 @@ export default function ControlPanel() {
       <div className="flex flex-wrap gap-4 items-center justify-between mt-4">
         <EntityDropdown />
         <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
-          Apply changes
+          Mount Fronius torch
         </button>
         <button className="bg-green-600 hover:bg-green-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
-          Focus on entity
+          Mount Spindle motor
         </button>
         <button className="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
           Back to start

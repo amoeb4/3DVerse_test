@@ -50,10 +50,9 @@ function convertAngleToLocation(angleDeg: number, joint: string): [number, numbe
     case "A6": // Poignet 3 (axe X)
       return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
     case "A7": // berceau vireur (axe X)
-      return [Math.sin(angleDeg * Math.PI / 180), 0, 0];
+      return [0,Math.sin(angleDeg * Math.PI / 180), 0];
     case "A8": // plateau vireur (axe Y)
       return [0, Math.sin(angleDeg * Math.PI / 180), 0];
-
     default:
       return [0, 0, 0];
   }
@@ -113,7 +112,7 @@ async function main() {
           });
           ws.send(message);
           console.log(`Commande envoyée : ${message}`);
-        }
+        }""
       });
     }
 
