@@ -6,6 +6,7 @@ import {
   ReactNode,
   ChangeEvent,
 } from "react";
+import TorchExample from "./torch";
 import type { EntityCore } from "@3dverse/livelink";
 import * as THREE from "three";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
@@ -200,6 +201,7 @@ export default function ControlPanel() {
           onChange={handleSliderChange("z")}
           color="green"
         />
+        <TorchExample/>
       </div>
     </div>
   );
