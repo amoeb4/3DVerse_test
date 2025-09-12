@@ -60,7 +60,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       const msg = event.data.trim();
       console.log(`message reçu : ${msg}`);
       try {
-        console.warn("Object is gonna move now");
 
         const parsed = JSON.parse(msg);
 

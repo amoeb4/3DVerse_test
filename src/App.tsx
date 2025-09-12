@@ -113,9 +113,9 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
           <div className="space-y-2">
             {[
               ["NJ130 2.05", "759ed8c4-fb60-432c-a41e-cf0f39f92d6f"],
-              ["Genoble CEA cell", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
-              ["Test_Kuka", "516d270a-5a6b-44e6-99c6-44df631bf475"],
-              ["Test_primitive", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
+              ["NJ40", "a1d7bb38-1a12-46fb-8485-36b29460cd2c"],
+              ["Test_Kuka [deprecated]", "516d270a-5a6b-44e6-99c6-44df631bf475"],
+              ["Test_primitive [deprecated]", "ec33e19d-da9f-4593-8412-a9c0c32cc5ba"],
             ].map(([label, id]) => (
               <div className="flex justify-center" key={id}>
                 <button
