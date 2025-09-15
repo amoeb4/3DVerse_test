@@ -58,7 +58,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
     socket.onmessage = async (event) => {
       const msg = event.data.trim();
-      console.log(`message reçu : ${msg}`);
       try {
 
         const parsed = JSON.parse(msg);
@@ -158,14 +157,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
 
   useEffect(() => {
-    console.log("🧪 Flush trigger - instance:", instance, "entitiesMap.size:", entitiesMap.size);
     if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
-      console.log("📬 Flushing queued messages...");
       const toProcess = messageQueue.current.splice(0, messageQueue.current.length);
 
       toProcess.forEach(async (parsed) => {
         const [x, y, z, w = 0] = parsed.location.map(Number);
-        console.log(`🔄 Processing queued message for ${parsed.name} -> [${x}, ${y}, ${z}] with rotation ${w}`);
         await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
         await sleep(100);
       });

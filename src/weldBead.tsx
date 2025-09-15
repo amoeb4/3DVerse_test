@@ -21,7 +21,6 @@ export function EntityCreator() {
         "de9844ab-3c9e-4ce7-9e2b-dec91474d11d",
         "58ab98c3-25d3-4187-a407-24158f213996", // hot
     ] as const;
-
     // Fonction pour déterminer le matériau selon la température
     const getMaterialFromTemperature = (temp: number) => {
         const index = Math.min(

@@ -77,7 +77,7 @@ async function main() {
     console.log("✅ Session created");
 
     const subscription = await session.createSubscription2({
-      requestedPublishingInterval: 500,
+      requestedPublishingInterval: 80,
       requestedLifetimeCount: 100,
       requestedMaxKeepAliveCount: 10,
       maxNotificationsPerPublish: 10,
@@ -94,7 +94,7 @@ async function main() {
 
       const monitoredItem = await subscription.monitor(
         itemToMonitor,
-        { samplingInterval: 100, discardOldest: true, queueSize: 10 },
+        { samplingInterval: 33, discardOldest: true, queueSize: 10 },
         TimestampsToReturn.Both
       );
 
