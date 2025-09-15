@@ -2,7 +2,8 @@
 import { 
     OPCUAServer,
     Variant,
-    DataType
+    DataType,
+    StatusCodes
 } from "node-opcua";
 
 async function startServer() {
@@ -19,12 +20,14 @@ async function startServer() {
     await server.initialize();
     const addressSpace = server.engine.addressSpace!;
     const namespace = addressSpace.getOwnNamespace();
+    
     const robotFolder = namespace.addObject({
         organizedBy: addressSpace.rootFolder.objects,
         browseName: "Robot6Axes"
     });
-    const jointNames = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8"];
+    const jointNames = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"];
     const variables: Record<string, { value: number }> = {};
+
     jointNames.forEach(joint => {
         variables[joint] = { value: 0 };
 
@@ -33,6 +36,8 @@ async function startServer() {
             browseName: joint,
             nodeId: `ns=1;s=${joint}`,
             dataType: "Double",
+            accessLevel: "CurrentRead | CurrentWrite",
+            userAccessLevel: "CurrentRead | CurrentWrite",
             value: {
                 get: () => {
                     return new Variant({ dataType: DataType.Double, value: variables[joint].value });
@@ -40,19 +45,11 @@ async function startServer() {
                 set: (variant) => {
                     console.log(`Joint ${joint} set to`, variant.value);
                     variables[joint].value = variant.value;
-                    return true;
+                    return StatusCodes.Good;
                 }
             }
         });
     });
-
-// Simulation du protocol OPC-UA
-    setInterval(() => {
-        jointNames.forEach(joint => {
-            variables[joint].value = Math.random() * 180 - 90;
-        });
-    }, 1000);
-
 
     await server.start();
     console.log("✅ OPC-UA Server is running at opc.tcp://localhost:4840/UA/Robot6Axes");
@@ -62,7 +59,6 @@ async function startServer() {
         console.log("✅ Server stopped.");
         process.exit(0);
     });
-
     process.on("SIGTERM", async () => {
         console.log("\n🛑 Server received SIGTERM");
         await server.shutdown(1000);

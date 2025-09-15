@@ -1,5 +1,5 @@
 import * as THREE from "three";
-  
+
 export  async function setOrientation(
     instance: any,
     entityId: string,

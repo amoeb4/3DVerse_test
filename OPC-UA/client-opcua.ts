@@ -38,7 +38,7 @@ function convertAngleToLocation(angleDeg: number, joint: string): [number, numbe
   
   switch (joint) {
     case "A1": // Rotation base (axe Z)
-      return [0, 0, Math.sin(angleDeg * Math.PI / 180)];
+      return [0, 0, 1];
     case "A2": // Épaule (axe Z)
       return [Math.sin(angleDeg * Math.PI / 180),0,0];
     case "A3": // Coude (axe Z)

@@ -17,11 +17,8 @@ export async function moveEntityAndChildren(
     console.warn(`❌ Entité ${rootName} non trouvée`);
     return;
   }
-
   const entitiesToMove = entitiesArray.slice(rootIndex);
-
   const entityList = entitiesToMove.map(e => ({ id: e.id }));
-
   try {
     await posKey(instance, entityList, ...delta);
   //  await oriKey(instance, entityList, delta[0], delta[1], delta[2], eulerToQuat);
