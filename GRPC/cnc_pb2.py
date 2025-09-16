@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tcnc.proto\"\x1e\n\x0bReadRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\"\x1d\n\x0cReadResponse\x12\r\n\x05value\x18\x01 \x01(\t\".\n\x0cWriteRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\" \n\rWriteResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32i\n\nCNCService\x12+\n\x0cReadVariable\x12\x0c.ReadRequest\x1a\r.ReadResponse\x12.\n\rWriteVariable\x12\r.WriteRequest\x1a\x0e.WriteResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tcnc.proto\"B\n\x0bReadRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x10\n\x08node_id2\x18\x02 \x01(\t\x12\x10\n\x08node_id3\x18\x03 \x01(\t\"\x1d\n\x0cReadResponse\x12\r\n\x05value\x18\x01 \x01(\t\".\n\x0cWriteRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\" \n\rWriteResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32i\n\nCNCService\x12+\n\x0cReadVariable\x12\x0c.ReadRequest\x1a\r.ReadResponse\x12.\n\rWriteVariable\x12\r.WriteRequest\x1a\x0e.WriteResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,13 +32,13 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'cnc_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_READREQUEST']._serialized_start=13
-  _globals['_READREQUEST']._serialized_end=43
-  _globals['_READRESPONSE']._serialized_start=45
-  _globals['_READRESPONSE']._serialized_end=74
-  _globals['_WRITEREQUEST']._serialized_start=76
-  _globals['_WRITEREQUEST']._serialized_end=122
-  _globals['_WRITERESPONSE']._serialized_start=124
-  _globals['_WRITERESPONSE']._serialized_end=156
-  _globals['_CNCSERVICE']._serialized_start=158
-  _globals['_CNCSERVICE']._serialized_end=263
+  _globals['_READREQUEST']._serialized_end=79
+  _globals['_READRESPONSE']._serialized_start=81
+  _globals['_READRESPONSE']._serialized_end=110
+  _globals['_WRITEREQUEST']._serialized_start=112
+  _globals['_WRITEREQUEST']._serialized_end=158
+  _globals['_WRITERESPONSE']._serialized_start=160
+  _globals['_WRITERESPONSE']._serialized_end=192
+  _globals['_CNCSERVICE']._serialized_start=194
+  _globals['_CNCSERVICE']._serialized_end=299
 # @@protoc_insertion_point(module_scope)

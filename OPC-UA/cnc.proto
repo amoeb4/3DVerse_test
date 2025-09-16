@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+service CNCService {
+  rpc ReadVariable(ReadRequest) returns (ReadResponse);
+  rpc WriteVariable(WriteRequest) returns (WriteResponse);
+}
+
+message ReadRequest {
+  string node_id = 1;  // ex: "ns=2;s=Axis1.Position"
+  string node_id2 = 2;  // ex: "ns=2;s=Axis1.Position"
+  string node_id3 = 3;  // ex: "ns=2;s=Axis1.Position"
+}
+
+message ReadResponse {
+  string value = 1;
+}
+
+message WriteRequest {
+  string node_id = 1;
+  string value = 2;
+}
+
+message WriteResponse {
+  bool success = 1;
+}
+

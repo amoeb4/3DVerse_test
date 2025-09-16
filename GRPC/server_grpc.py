@@ -12,19 +12,20 @@ TIMEOUT = 5.0  # secondes
 class CNCServiceServicer(cnc_pb2_grpc.CNCServiceServicer):
 
     def ReadVariable(self, request, context):
-        client = Client(OPC_UA_ENDPOINT)
-        client.set_security_string("None")
-        try:
-            client.connect(timeout=TIMEOUT)
-            node = client.get_node(request.node_id)
-            value = node.get_value()
-            print(f"[READ] {request.node_id} = {value}")
-        except Exception as e:
-            print(f"[ERROR] ReadVariable: {e}")
-            value = "ERROR"
-        finally:
-            client.disconnect()
-        return cnc_pb2.ReadResponse(value=str(value))
+#       client = Client(OPC_UA_ENDPOINT)
+#        client.set_security_string("None")
+#        try:
+#            client.connect(timeout=TIMEOUT)
+#            node = client.get_node(request.node_id)
+#            value = node.get_value()
+#            print(f"[READ] {request.node_id} = {value}")
+#        except Exception as e:
+#            print(f"[ERROR] ReadVariable: {e}")
+#            value = "ERROR"
+#        finally:
+#         client.disconnect()
+#        return cnc_pb2.ReadResponse(value=str(value))
+        return cnc_pb2.ReadResponse(value=str("Hello"))
 
     def WriteVariable(self, request, context):
         client = Client(OPC_UA_ENDPOINT)
