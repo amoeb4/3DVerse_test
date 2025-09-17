@@ -1,6 +1,11 @@
 import grpc from "@grpc/grpc-js"
 import protoloader from "@grpc/proto-loader"
-var PROTO_PATH = "./cnc.proto";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const PROTO_PATH = __dirname + "/cnc.proto";
 
 var packageDefinition = protoloader.loadSync(
     PROTO_PATH,
@@ -12,14 +17,12 @@ var packageDefinition = protoloader.loadSync(
     });
 
 var protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
-// The protoDescriptor object has the full package hierarchy
 
 var CNCService : any = protoDescriptor.CNCService;
+var client = new CNCService('192.168.0.1:50051', grpc.credentials.createInsecure());
 
-var client = new CNCService('localhost:50051', grpc.credentials.createInsecure());
-
-function onResponse(arg1,response){
-    console.log("GRPC request response : ", arg1, response);
+function onResponse(arg1,response, arg2, arg3){
+    console.log("GRPC request response : ", arg1, response, arg2, arg3);
     setTimeout(query_rpc_server, 1000);
 }
 

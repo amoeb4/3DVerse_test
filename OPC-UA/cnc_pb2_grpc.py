@@ -24,7 +24,6 @@ if _version_not_supported:
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
-
 class CNCServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
@@ -45,7 +44,6 @@ class CNCServiceStub(object):
                 response_deserializer=cnc__pb2.WriteResponse.FromString,
                 _registered_method=True)
 
-
 class CNCServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
@@ -60,7 +58,6 @@ class CNCServiceServicer(object):
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
-
 
 def add_CNCServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {

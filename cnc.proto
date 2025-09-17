@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+service CLMService {
+  rpc IsConnected(IsConnectedRequest) returns (IsConnectedReply);
+  rpc ReadHeader(ReadRequest) returns (ReadReply);
+  rpc ReadData(ReadRequest) returns (ReadReply);
+
+  rpc Read(ReadFinal) returns (
+      ReadReply); // Private : This function sould not be called by user
+  rpc Write(WriteRequest) returns (WriteReply);
+
+  rpc sendAquisition(AcquisitionData) returns (AcquisitionReply);
+  rpc readAquisition(ReadRequest) returns (AcquisitionData);
+}
+
+message IsConnectedRequest {}
+
+message IsConnectedReply { bool status = 1; }
+
+message ReadRequest {}
+
+message ReadFinal {
+  ReadRequest request = 1;
+  int32 selector = 2;
+}
+
+message ReadReply { repeated DataValue values = 1; }
+
+message WriteRequest { map<int32, DataValue> values = 1; }
+
+message WriteReply { bool status = 1; }
+
+message AcquisitionReply { bool status = 1; }
+
+message AcquisitionData { repeated SimpleAcqData values = 1; }
+
+message SimpleAcqData {
+  string source_name = 1;
+  string value_name = 2;
+  oneof value {
+    int32 int_value = 3;
+    double float_value = 4;
+  }
+}
+
+message DataValue {
+  oneof kind {
+    int32 int_value = 1;
+    float float_value = 2;
+  }
+}
