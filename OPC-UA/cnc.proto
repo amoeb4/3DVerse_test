@@ -7,8 +7,15 @@ service CNCService {
 
 message ReadRequest {
   string node_id = 1;  // ex: "ns=2;s=Axis1.Position"
-  string node_id2 = 2;  // ex: "ns=2;s=Axis1.Position"
-  string node_id3 = 3;  // ex: "ns=2;s=Axis1.Position"
+  string node_id2 = 2;
+  string node_id3 = 3;
+  string node_id4 = 4;
+  string node_id5 = 5;
+  string node_id6 = 6;
+  string node_id7 = 7;
+  string node_id8 = 8;
+  string node_id9 = 9;
+  string node_id10 = 10;
 }
 
 message ReadResponse {

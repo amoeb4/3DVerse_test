@@ -27,8 +27,14 @@ function query_rpc_server()
 {
     var request = client.ReadVariable({node_id : "ns=2;s=Axis1.Position",
                          node_id2 : "ns=2;s=Axis1.Position",
-                         node_id3 : "ns=2;s=Axis1.Position"}, onResponse);
-    console.log("Desktop");
+                         node_id3 : "ns=2;s=Axis1.Position",
+                         node_id4 : "ns=2;s=Axis1.Position",                        
+                         node_id5 : "ns=2;s=Axis1.Position",                        
+                         node_id6 : "ns=2;s=Axis1.Position",                        
+                         node_id7 : "ns=2;s=Axis1.Position",                        
+                         node_id8 : "ns=2;s=Axis1.Position",                        
+                         node_id9 : "ns=2;s=Axis1.Position",                        
+                         node_id10 : "ns=2;s=Axis1.Position"}, onResponse);
 }
 
 query_rpc_server();
