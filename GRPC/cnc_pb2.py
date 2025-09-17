@@ -21,9 +21,6 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 
 _sym_db = _symbol_database.Default()
 
-
-
-
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tcnc.proto\"B\n\x0bReadRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x10\n\x08node_id2\x18\x02 \x01(\t\x12\x10\n\x08node_id3\x18\x03 \x01(\t\"\x1d\n\x0cReadResponse\x12\r\n\x05value\x18\x01 \x01(\t\".\n\x0cWriteRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\" \n\rWriteResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32i\n\nCNCService\x12+\n\x0cReadVariable\x12\x0c.ReadRequest\x1a\r.ReadResponse\x12.\n\rWriteVariable\x12\r.WriteRequest\x1a\x0e.WriteResponseb\x06proto3')
 
 _globals = globals()
