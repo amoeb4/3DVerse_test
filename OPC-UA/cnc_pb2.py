@@ -39,7 +39,3 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CNCSERVICE']._serialized_start=194
   _globals['_CNCSERVICE']._serialized_end=299
 # @@protoc_insertion_point(module_scope)
-
-const globals,
-builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals);
-builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'cnc_pb2', _globals,);

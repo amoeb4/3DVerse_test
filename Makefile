@@ -34,3 +34,6 @@ opcua:
 	gnome-terminal --tab -- bash -c "npx tsx OPC-UA/client-opcua.ts; exec bash"
 	$(open_browser)
 
+grpc:
+	gnome-terminal --tab -- bash -c "source /home/obedience/latest/GRPC/venv/bin/activate && python OPC-UA/server_grpc.py; exec bash"
+	gnome-terminal --tab -- bash -c ''
