@@ -8,7 +8,11 @@ import {
   useState,
 } from "react";
 import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
-import { rotateHierarchy, PartEntitiesContext, rotateHierarchyProgressive } from "./partEntitiesContext";
+import {
+  rotateHierarchy,
+  PartEntitiesContext,
+  rotateHierarchyProgressive,
+} from "./partEntitiesContext";
 import { useSpeed } from "./Interface";
 
 const WSContext = createContext({
@@ -20,10 +24,11 @@ export function useWebSocket() {
 }
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-  const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
+  const [selectedEntityName, setSelectedEntityName] = useState<string | null>(
+    null
+  );
   const { speed } = useSpeed();
   const delayMs = Math.max(10, 1000 / speed);
-
   const { entity: selectedEntity } = useEntity(
     selectedEntityName ? { name: selectedEntityName } : { name: "" }
   );
@@ -42,24 +47,23 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     selectedEntityRef.current = selectedEntity?.name ?? null;
   }, [selectedEntity]);
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const connectWebSocket = useCallback(() => {
     const socket = new WebSocket("ws://localhost:8767");
     socketRef.current = socket;
 
     socket.onopen = () => {
-
       reconnectAttempts.current = 0;
-
       if (selectedEntityRef.current) {
         socket.send(`select ${selectedEntityRef.current}`);
       }
     };
+
     socket.onmessage = async (event) => {
       const msg = event.data.trim();
-      try {
 
+      try {
         const parsed = JSON.parse(msg);
 
         if (
@@ -73,16 +77,19 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
           if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
-
               await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
             } else {
               const alreadyQueued = messageQueue.current.some(
                 (msg) =>
                   msg.name === parsed.name &&
-                  JSON.stringify(msg.location) === JSON.stringify([x, y, z, w])
+                  JSON.stringify(msg.location) ===
+                    JSON.stringify([x, y, z, w])
               );
               if (!alreadyQueued) {
-                messageQueue.current.push({ name: parsed.name, location: [x, y, z, w] });
+                messageQueue.current.push({
+                  name: parsed.name,
+                  location: [x, y, z, w],
+                });
                 setFlushTrigger((prev) => prev + 1);
               }
             }
@@ -110,13 +117,16 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
           if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
-              console.log(`🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}] with rotation ${w}`);
+              console.log(
+                `🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}] with rotation ${w}`
+              );
               await rotateHierarchyProgressive(name, [x, y, z], entitiesMap, delayMs);
             } else {
               const alreadyQueued = messageQueue.current.some(
                 (msg) =>
                   msg.name === name &&
-                  JSON.stringify(msg.location) === JSON.stringify([x, y, z, w])
+                  JSON.stringify(msg.location) ===
+                    JSON.stringify([x, y, z, w])
               );
               if (!alreadyQueued) {
                 messageQueue.current.push({ name, location: [x, y, z, w] });
@@ -140,6 +150,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
     socket.onclose = () => {
       console.log("❌ WebSocket closed");
+
       const timeout = Math.min(10000, 1000 * 2 ** reconnectAttempts.current);
       reconnectAttempts.current += 1;
 
@@ -151,15 +162,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       reconnectTimeoutRef.current = window.setTimeout(() => {
         connectWebSocket();
       }, timeout);
+
       console.log(`🔄 Reconnecting in ${timeout}ms...`);
     };
   }, [instance, entitiesMap, delayMs]);
 
-
   useEffect(() => {
     if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
       const toProcess = messageQueue.current.splice(0, messageQueue.current.length);
-
       toProcess.forEach(async (parsed) => {
         const [x, y, z, w = 0] = parsed.location.map(Number);
         await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
@@ -167,7 +177,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       });
     }
   }, [flushTrigger, instance, entitiesMap, delayMs]);
-0
+
   useEffect(() => {
     connectWebSocket();
     return () => {

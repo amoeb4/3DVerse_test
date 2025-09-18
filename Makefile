@@ -32,6 +32,7 @@ opcua:
 	gnome-terminal --tab -- bash -c "npx tsx OPC-UA/test-ws.ts; exec bash"
 	sleep 1
 	gnome-terminal --tab -- bash -c "npx tsx OPC-UA/client-opcua.ts; exec bash"
+	gnome-terminal --tab -- bash -c "cd server_blender && python3 client.py; exec bash"
 	$(open_browser)
 
 grpc:
