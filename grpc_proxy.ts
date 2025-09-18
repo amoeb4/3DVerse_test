@@ -1,4 +1,3 @@
-// grpcClient.ts
 import grpc from "@grpc/grpc-js";
 import protoLoader from "@grpc/proto-loader";
 import { fileURLToPath } from "url";
@@ -26,35 +25,27 @@ const client = new CLMService(
   grpc.credentials.createInsecure()
 );
 
-// --- 🔧 Parseur ---
-type ParsedLocation = {
-  name: string;
-  location: [number, number, number, number];
-};
+if (!client) console.error("Ya pas Weshh");
 
-function parseReadDataResponse(
-  response: any,
-  name = "part_1"
-): ParsedLocation | null {
+// --- 🔧 Parse la 6ème valeur pour part_1 ---
+function parsePart1FromResponse(response: any): { name: string; location: number[] } | null {
   if (!response?.values || !Array.isArray(response.values)) return null;
-  const floats = response.values
-    .map((v: any) => v.float_value ?? null)
-    .filter((v: number | null) => v !== null);
-  if (floats.length < 3) return null;
 
-  const [x, y, z, w = 0] = floats;
+  const target = response.values[5]?.float_value ?? null;
+  if (target === null || isNaN(target)) return null;
 
   return {
-    name,
-    location: [x, y, z, w],
+    name: "part_1",
+    location: [0, 0, target],
   };
 }
 
 const ws = new WebSocket("ws://localhost:8767");
+
 ws.on("open", () => {
   console.log("🔗 Connected to WebSocket server");
 });
-// --- 🔄 Boucle de polling ---
+
 function query_rpc_server() {
   client.ReadData({}, (err: any, response: any) => {
     if (err) {
@@ -62,13 +53,18 @@ function query_rpc_server() {
     } else {
       console.log("✅ ReadData response:", response);
 
-      const parsed = parseReadDataResponse(response, "part_1");
-      if (parsed && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(parsed));
-        // 🔄 Alternative "legacy"
-        // ws.send(`${parsed.name} ${parsed.location.join(" ")}`);
+      const msg = parsePart1FromResponse(response);
+      if (msg && ws.readyState === WebSocket.OPEN) {
+        // 🚫 N'envoie rien si location == [0,0,0]
+        if (msg.location.every((v) => v === 0)) {
+          console.log("⏩ Location == [0,0,0], rien envoyé");
+        } else {
+          ws.send(JSON.stringify(msg));
+          console.log("📨 Sent:", msg);
+        }
       }
     }
+    
     setTimeout(query_rpc_server, 1000);
   });
 }
