@@ -16,15 +16,14 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   defaults: true,
   oneofs: true,
 });
+
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const CLMService: any = protoDescriptor.CLMService;
 const client = new CLMService(
-  "localhost:50051",
+  "192.168.100.139:50051",
   grpc.credentials.createInsecure()
 );
 if (!client) console.error("Ya pas Weshh");
-
-// --- 🔧 Parse la 6ème valeur pour part_1 ---
 function parsePart1FromResponse(response: any): { name: string; location: number[] } | null {
   if (!response?.values || !Array.isArray(response.values)) return null;
 
@@ -38,18 +37,15 @@ function parsePart1FromResponse(response: any): { name: string; location: number
 }
 
 const ws = new WebSocket("ws://localhost:8767");
-
 ws.on("open", () => {
   console.log("🔗 Connected to WebSocket server");
 });
-
 function query_rpc_server() {
   client.ReadData({}, (err: any, response: any) => {
     if (err) {
       console.error("❌ gRPC ReadData error:", err);
     } else {
       console.log("✅ ReadData response:", response);
-
       const msg = parsePart1FromResponse(response);
       if (msg && ws.readyState === WebSocket.OPEN) {
        if (msg.location.every((v) => v === 0)) {
@@ -59,8 +55,7 @@ function query_rpc_server() {
           console.log("📨 Sent:", msg);
         }
       }
-    }
-    console.log("Value =", response);
+    }""
     setTimeout(query_rpc_server, 1000);
   });
 }
