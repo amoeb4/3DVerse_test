@@ -47,8 +47,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     selectedEntityRef.current = selectedEntity?.name ?? null;
   }, [selectedEntity]);
 
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
   const connectWebSocket = useCallback(() => {
     const socket = new WebSocket("ws://localhost:8767");
     socketRef.current = socket;
@@ -77,7 +75,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
           if (!isNaN(x) && !isNaN(y) && !isNaN(z) && !isNaN(w)) {
             if (instance && entitiesMap.size > 0) {
-              await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
+              rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
             } else {
               const alreadyQueued = messageQueue.current.some(
                 (msg) =>
@@ -120,7 +118,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
               console.log(
                 `🔄 Moving entity ${name} and children to [${x}, ${y}, ${z}] with rotation ${w}`
               );
-              await rotateHierarchyProgressive(name, [x, y, z], entitiesMap, delayMs);
+              rotateHierarchy(name, [x, y, z], entitiesMap);
             } else {
               const alreadyQueued = messageQueue.current.some(
                 (msg) =>
@@ -172,8 +170,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       const toProcess = messageQueue.current.splice(0, messageQueue.current.length);
       toProcess.forEach(async (parsed) => {
         const [x, y, z, w = 0] = parsed.location.map(Number);
-        await rotateHierarchyProgressive(parsed.name, [x, y, z], entitiesMap, delayMs);
-        await sleep(100);
+        rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
       });
     }
   }, [flushTrigger, instance, entitiesMap, delayMs]);

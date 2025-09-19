@@ -136,7 +136,7 @@ export function applyRotationToEntity(entity: Entity, matrix: mat4) {
 
 export function rotateHierarchy(
   entityName: string,
-  deltaQuatDeg: [number, number, number, number],
+  deltaQuatDeg: [number, number, number],
   entitiesMap: Map<string, EntityWithParentId>
 ) {
   const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
@@ -144,26 +144,7 @@ export function rotateHierarchy(
     console.warn(`Entité ${entityName} introuvable`);
     return;
   }
-
-  const [dx, dy, dz] = deltaQuatDeg;
-  const eulerRad = new THREE.Euler(
-    (dx * Math.PI) / 180,
-    (dy * Math.PI) / 180,
-    (dz * Math.PI) / 180,
-    "ZYX"
-  );
-
-  const deltaQuat = new THREE.Quaternion().setFromEuler(eulerRad);
-  const [qx, qy, qz, qw] = entity.local_transform.orientation ?? [0, 0, 0, 1];
-  const currentQuat = new THREE.Quaternion(qx, qy, qz, qw);
-  const newQuat = deltaQuat.multiply(currentQuat).normalize();
-
-  entity.local_transform.orientation = [
-    newQuat.x,
-    newQuat.y,
-    newQuat.z,
-    newQuat.w,
-  ];
+  entity.global_transform.eulerOrientation = deltaQuatDeg;
 }
 
 export async function rotateHierarchyProgressive(
@@ -185,7 +166,7 @@ export async function rotateHierarchyProgressive(
     Math.ceil(Math.abs(totalDy) / stepDeg),
     Math.ceil(Math.abs(totalDz) / stepDeg)
   );
-
+d
   const stepDx = totalDx / steps;
   const stepDy = totalDy / steps;
   const stepDz = totalDz / steps;
