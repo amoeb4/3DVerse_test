@@ -14,9 +14,7 @@ service CLMService {
 }
 
 message IsConnectedRequest {}
-
 message IsConnectedReply { bool status = 1; }
-
 message ReadRequest {}
 
 message ReadFinal {
@@ -25,13 +23,9 @@ message ReadFinal {
 }
 
 message ReadReply { repeated DataValue values = 1; }
-
 message WriteRequest { map<int32, DataValue> values = 1; }
-
 message WriteReply { bool status = 1; }
-
 message AcquisitionReply { bool status = 1; }
-
 message AcquisitionData { repeated SimpleAcqData values = 1; }
 
 message SimpleAcqData {

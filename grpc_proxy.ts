@@ -16,7 +16,6 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   defaults: true,
   oneofs: true,
 });
-
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const CLMService: any = protoDescriptor.CLMService;
 const client = new CLMService(
@@ -35,7 +34,6 @@ function parsePart1FromResponse(response: any): { name: string; location: number
     location: [0, 0, target],
   };
 }
-
 const ws = new WebSocket("ws://localhost:8767");
 ws.on("open", () => {
   console.log("🔗 Connected to WebSocket server");
