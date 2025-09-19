@@ -16,15 +16,12 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   defaults: true,
   oneofs: true,
 });
-
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const CLMService: any = protoDescriptor.CLMService;
-
 const client = new CLMService(
   "localhost:50051",
   grpc.credentials.createInsecure()
 );
-
 if (!client) console.error("Ya pas Weshh");
 
 // --- 🔧 Parse la 6ème valeur pour part_1 ---
@@ -55,8 +52,7 @@ function query_rpc_server() {
 
       const msg = parsePart1FromResponse(response);
       if (msg && ws.readyState === WebSocket.OPEN) {
-        // 🚫 N'envoie rien si location == [0,0,0]
-        if (msg.location.every((v) => v === 0)) {
+       if (msg.location.every((v) => v === 0)) {
           console.log("⏩ Location == [0,0,0], rien envoyé");
         } else {
           ws.send(JSON.stringify(msg));
@@ -64,7 +60,7 @@ function query_rpc_server() {
         }
       }
     }
-    
+    console.log("Value =", response);
     setTimeout(query_rpc_server, 1000);
   });
 }
