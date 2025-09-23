@@ -37,7 +37,6 @@ export function useSpeed() {
   return context;
 }
 
-// ---------------------- Entity Context ----------------------
 type EntityX = { id: string; name?: string };
 type EntityContextType = {
   selectedEntity: EntityX | null;
