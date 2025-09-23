@@ -1,10 +1,11 @@
 "use client";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 
 export function EntityCreator() {
     const { instance } = useContext(LivelinkContext);
     const [temperature, setTemperature] = useState(50);
+    const [latency, setLatency] = useState(0);
     const { entity: torch } = useEntity({
         euid: "d0d44c23-2d15-48d6-93ee-a46422890baf",
     });
@@ -49,6 +50,15 @@ export function EntityCreator() {
         });
     };
 
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setLatency(instance?.latency || 0);
+        }, 33);
+        return () => {
+            clearInterval(timer);
+        }
+    }, [setLatency]);
+
     return (
         <div className="absolute text-white top-4 left-4 flex flex-col gap-2 bg-black/30 p-3 rounded-xl">
             <button
@@ -59,6 +69,8 @@ export function EntityCreator() {
             </button>
             <label className="flex flex-col text-white text-sm">
                 Température: {temperature}
+                <br/>
+                Latency: {`${latency.toFixed(0)}ms`}
                 <input
                     type="range"
                     min={0}

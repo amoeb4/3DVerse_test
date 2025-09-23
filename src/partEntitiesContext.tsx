@@ -92,13 +92,14 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
         });
         console.log(`📦 ${foundEntities.length} entités récupérées depuis la scène`);
         const filtered = foundEntities.filter(
-          (entity) => typeof entity.name === "string" && /^part_\d+$/.test(entity.name)
+          (entity) => /^part_\d+$/.test(entity.name)
         );
 
         console.log(`🧽 ${filtered.length} entités filtrées avec le pattern /part_\\d+/`);
 
         const enriched: EntityWithParentId[] = filtered.map((entity) => {
           (entity as EntityWithParentId).__parentId = entity.parent?.id ?? null;
+          entity.auto_broadcast = false;
           return entity as EntityWithParentId;
         });
         enriched.sort((a, b) => {
@@ -109,7 +110,7 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
 
         setEntities(enriched);
         setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
-
+        
         console.log(`Chargé ${enriched.length} entités dans entitiesMap`);
       } catch (err) {
         console.error("❌ Erreur chargement des entités part_x :", err);
@@ -144,7 +145,8 @@ export function rotateHierarchy(
     console.warn(`Entité ${entityName} introuvable`);
     return;
   }
-  entity.global_transform.eulerOrientation = deltaQuatDeg;
+  entity.local_transform.eulerOrientation = deltaQuatDeg;
+  //console.debug("rotateHierarchy altered entity", entity.name, entity.euid);
 }
 
 export async function rotateHierarchyProgressive(
@@ -166,7 +168,7 @@ export async function rotateHierarchyProgressive(
     Math.ceil(Math.abs(totalDy) / stepDeg),
     Math.ceil(Math.abs(totalDz) / stepDeg)
   );
-d
+
   const stepDx = totalDx / steps;
   const stepDy = totalDy / steps;
   const stepDz = totalDz / steps;

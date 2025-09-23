@@ -153,6 +153,42 @@ function AppLayout() {
   const [showPipCamera, setShowPipCamera] = useState(true);
   const [showDOM3D, setShowDOM3D] = useState(true);
 
+  useEffect(() => {
+    if(!cameraEntity?.camera) {
+      return;
+    }
+    const { dataJSON } = cameraEntity.camera
+    cameraEntity.camera.dataJSON = {
+      ...dataJSON,
+      ambientBRDF: true,
+      ambientSpecular: true,
+      drawGrid: false,
+      edgeOnSelf: true,
+      edgeOutlines: true,
+      filterSpecular: true,
+      grid: false,
+      sharpen: true
+    }
+  }, [cameraEntity])
+
+  useEffect(() => {
+    if(!pipCamera?.camera) {
+      return;
+    }
+    const { dataJSON } = pipCamera.camera
+    pipCamera.camera.dataJSON = {
+      ...dataJSON,
+      ambientBRDF: true,
+      ambientSpecular: true,
+      drawGrid: false,
+      edgeOnSelf: true,
+      edgeOutlines: true,
+      filterSpecular: true,
+      grid: false,
+      sharpen: true
+    }
+  }, [pipCamera])
+
   return (
     <CameraEntityContext.Provider value={cameraEntity}>
       <EntityProvider>

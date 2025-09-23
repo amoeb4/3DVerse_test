@@ -33,22 +33,19 @@ ws.on("open", () => {
   console.log("🔗 Connected to WebSocket server");
 });
 
-// Table de correspondance part -> fonction de mapping
 const orientationMap: Record<number, (val: number) => [number, number, number]> = {
-  1: (val) => [0, val, 0],
-  2: (val) => [-178.731183, 178, 180],
-  3: (val) => [0, 0, val],
-  4: (val) => [-90, val, 90],
+  1: (val) => [90, 0, -val+90],
+  2: (val) => [-90, -val+270, 90],
+  3: (val) => [0, 0, val-180],
+  4: (val) => [-val, 0, 90],
   5: (val) => [-180, 0, val],
-  6: (val) => [0, 0, val],
+  6: (val) => [-val-180, 0, 180],
 };
 
-// Parse les 6 premiers floats en parts avec orientation personnalisée
 function parsePartsFromResponse(response: any): { name: string; location: number[] }[] {
   if (!response?.values || !Array.isArray(response.values)) return [];
 
   const parts: { name: string; location: number[] }[] = [];
-
   for (let i = 1; i <= 6; i++) {
     const floatVal = response.values[i]?.float_value ?? null;
     if (floatVal !== null && !isNaN(floatVal)) {
@@ -62,7 +59,6 @@ function parsePartsFromResponse(response: any): { name: string; location: number
   return parts;
 }
 
-// Fonction de polling gRPC
 function query_rpc_server() {
   client.ReadData({}, (err: any, response: any) => {
     if (err) {
@@ -83,7 +79,7 @@ function query_rpc_server() {
         });
       }
     }
-    setTimeout(query_rpc_server, 99);
+    setTimeout(query_rpc_server, 33);
   });
 }
 

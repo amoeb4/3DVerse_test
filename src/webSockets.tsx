@@ -58,6 +58,45 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    let lastPart1MessageTime = performance.now();
+    socket.onmessage = async (event) => {
+      const msg = event.data.trim();
+
+      try {
+        const parsed = JSON.parse(msg);
+        if (
+          typeof parsed !== "object" ||
+          typeof parsed.name !== "string" ||
+          !Array.isArray(parsed.location) ||
+          (parsed.location.length !== 3 && parsed.location.length !== 4) ||
+          !parsed.location.every((n: number) => typeof n === "number")
+        ) {
+          return;
+        }
+
+        if (!instance || entitiesMap.size === 0) {
+          return;
+        }
+
+        if(parsed.name === "part_1") {
+          const now = performance.now();
+          const deltaTime = now - lastPart1MessageTime;
+          lastPart1MessageTime = now;
+          if(deltaTime > 100) {
+            console.warn("Warnning, delta time gap:", deltaTime);
+          }
+        }
+        const [x, y, z] = parsed.location;
+        //console.debug("WS message orientation:", parsed.name, [x, y, z]);
+        rotateHierarchy(parsed.name, [x, y, z], entitiesMap);
+      }
+      catch(error) {
+        console.error("Failed to parse WS message:", error);
+      }
+    };
+
+    // Commented by SEB
+    /*
     socket.onmessage = async (event) => {
       const msg = event.data.trim();
 
@@ -145,6 +184,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         console.warn("⚠️ Ignored non-standard message:", msg);
       }
     };
+    */
 
     socket.onclose = () => {
       console.log("❌ WebSocket closed");
@@ -165,6 +205,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
   }, [instance, entitiesMap, delayMs]);
 
+  // Commented by SEB
+  /*
   useEffect(() => {
     if (instance && entitiesMap.size > 0 && messageQueue.current.length > 0) {
       const toProcess = messageQueue.current.splice(0, messageQueue.current.length);
@@ -174,14 +216,19 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       });
     }
   }, [flushTrigger, instance, entitiesMap, delayMs]);
+  */
 
   useEffect(() => {
+    if(!instance ||entitiesMap.size === 0) {
+      return;
+    }
+
     connectWebSocket();
     return () => {
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       socketRef.current?.close();
     };
-  }, []);
+  }, [instance, entitiesMap]);
 
   useEffect(() => {
     if (selectedEntity?.name && socketRef.current?.readyState === WebSocket.OPEN) {

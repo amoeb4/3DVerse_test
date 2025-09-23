@@ -3,12 +3,10 @@ import {
   useContext,
   useState,
   useEffect,
-  ReactNode,
-  ChangeEvent,
+  type ReactNode,
+  type ChangeEvent,
 } from "react";
 import TorchExample from "./torch";
-import type { EntityCore } from "@3dverse/livelink";
-import * as THREE from "three";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "./movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -255,29 +253,31 @@ export function EntityDropdown() {
   const { selectedEntity, setSelectedEntity } = useEntitySimple();
   const [entities, setEntities] = useState<EntityX[]>([]);
 
-  useEffect(() => {
-    const fetchEntities = async () => {
-      if (!instance) return;
-      try {
-        const foundEntities = await instance.scene.findEntitiesWithComponents({
-          mandatory_components: ["local_transform"],
-          forbidden_components: [],
-        });
-        const entitiesWithNames = foundEntities
-          .map((e: any) => ({ id: e.id, name: e.name || "(sans nom)" }))
-          .filter((e: EntityX) => /^part_\d+$/.test(e.name ?? ""))
-          .sort(
-            (a, b) =>
-              parseInt(a.name!.split("_")[1], 10) -
-              parseInt(b.name!.split("_")[1], 10)
-          );
-        setEntities(entitiesWithNames);
-      } catch (err) {
-        console.error("Erreur lors de la récupération des entités :", err);
-      }
-    };
-    fetchEntities();
-  }, [instance]);
+useEffect(() => {
+  const fetchEntities = async () => {
+    if (!instance) return;
+    try {
+      const foundEntities = await instance.scene.findEntitiesWithComponents({
+        mandatory_components: ["local_transform"],
+        forbidden_components: [],
+      });
+      const entitiesWithNames = foundEntities
+        .filter((e: any) => /^part_\d+$/.test(e.name ?? ""))
+        .map((e: any) => {
+          return { id: e.id, name: e.name || "(sans nom)" };
+        })
+        .sort(
+          (a, b) =>
+            parseInt(a.name!.split("_")[1], 10) -
+            parseInt(b.name!.split("_")[1], 10)
+        );
+      setEntities(entitiesWithNames);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des entités :", err);
+    }
+  };
+  fetchEntities();
+}, [instance]);
 
   return (
     <Menu as="div" className="relative inline-block text-left">
