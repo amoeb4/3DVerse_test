@@ -1,16 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { LivelinkContext } from "@3dverse/livelink-react";
-import { Entity } from "@3dverse/livelink";
+import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
+import { Entity, Scene } from "@3dverse/livelink";
 import type { Vec3, Quat } from "@3dverse/livelink.core";
-import { debugEntityTransform } from "./debugTools";
+//import { debugEntityTransform } from "./debugTools";
 import * as THREE from 'three';
 //import { OneFactor, StereoCamera } from "three";
 //import { add } from "three/tsl";
 //import { GPU_CHUNK_BYTES } from "three/src/renderers/common/Constants.js";
 import { mat4, quat, vec3 } from 'gl-matrix';
-import { WrenchScrewdriverIcon } from "@heroicons/react/20/solid";
-import { eulerToQuat } from "./Interface";
-import { useSpeed } from "./Interface";
 
 export type EntityWithParentId = Entity & {
   __parentId: string | null;
@@ -21,27 +18,6 @@ export type EntityWithParentId = Entity & {
   worldPos?: vec3;
   worldRot?: quat;
 };
-
-function quaternionToEuler(q: Quat): Vec3 {
-  const [x, y, z, w] = q;
-  const sinr_cosp = 2 * (w * x + y * z);
-  const cosr_cosp = 1 - 2 * (x * x + y * y);
-  const roll = Math.atan2(sinr_cosp, cosr_cosp);
-  const sinp = 2 * (w * y - z * x);
-  const pitch = Math.abs(sinp) >= 1 ? Math.sign(sinp) * Math.PI / 2 : Math.asin(sinp);
-  const siny_cosp = 2 * (w * z + x * y);
-  const cosy_cosp = 1 - 2 * (y * y + z * z);
-  const yaw = Math.atan2(siny_cosp, cosy_cosp);
-  return [roll, pitch, yaw];
-}
-
-function getRotationMatrix(matrix: mat4): mat4 {
-  const rot = mat4.clone(matrix as mat4);
-  rot[12] = 0;
-  rot[13] = 0;
-  rot[14] = 0;
-  return rot;
-}
 
 export async function getDescendants(
   root: EntityWithParentId,
@@ -74,50 +50,43 @@ export const PartEntitiesContext = createContext<PartEntitiesContextType>({
 });
 
 export function PartEntitiesProvider({ children }: { children: React.ReactNode }) {
-  const { instance } = useContext(LivelinkContext);
+  const { entity: part_1 } = useEntity({ euid: "91153236-a05e-4127-a1c0-49b5761c41e3" });
+  const { entity: part_2 } = useEntity({ euid: "ec221ded-08df-4bae-8982-bb47c82a0917" });
+  const { entity: part_3 } = useEntity({ euid: "32cda313-895a-42e1-a5f6-dd50e398c332" });
+  const { entity: part_4 } = useEntity({ euid: "96b43de7-3c72-4ae5-8d1f-b2137c50bc61" });
+  const { entity: part_5 } = useEntity({ euid: "ed84c3ff-3c7f-445a-a1ff-d531c8f47133" });
+  const { entity: part_6 } = useEntity({ euid: "1274b32e-4d37-41cb-ad2b-0ed4886bf918" });
+
   const [entities, setEntities] = useState<EntityWithParentId[]>([]);
   const [entitiesMap, setEntitiesMap] = useState<Map<string, EntityWithParentId>>(new Map());
 
   useEffect(() => {
-    const fetchEntities = async () => {
-      if (!instance) {
-        console.warn("⛔ instance Livelink non disponible");
-        return;
-      }
-      console.log("🔍 fetchEntities lancé…");
-      try {
-        const foundEntities = await instance.scene.findEntitiesWithComponents({
-          mandatory_components: ["local_transform"],
-          forbidden_components: [],
-        });
-        console.log(`📦 ${foundEntities.length} entités récupérées depuis la scène`);
-        const filtered = foundEntities.filter(
-          (entity) => /^part_\d+$/.test(entity.name)
-        );
+    const parts = [part_1, part_2, part_3, part_4, part_5, part_6].filter((entity): entity is Entity => entity !== null);
+    
+    if (parts.length === 0) {
+      console.warn("⛔ Aucune entité chargée");
+      return;
+    }
+    console.log(`🔍 PartEntitiesByEuid: ${parts.length} entités récupérées via EUID`);
+    // Enrichissement des entités avec parentId
+    const enriched: EntityWithParentId[] = parts.map((entity) => {
+      (entity as EntityWithParentId).__parentId = entity.parent?.id ?? null;
+      entity.auto_broadcast = false;
+      return entity as EntityWithParentId;
+    });
 
-        console.log(`🧽 ${filtered.length} entités filtrées avec le pattern /part_\\d+/`);
+    // Tri par numéro de part
+    enriched.sort((a, b) => {
+      const numA = parseInt(a.name!.split("_")[1], 10);
+      const numB = parseInt(b.name!.split("_")[1], 10);
+      return numA - numB;
+    });
 
-        const enriched: EntityWithParentId[] = filtered.map((entity) => {
-          (entity as EntityWithParentId).__parentId = entity.parent?.id ?? null;
-          entity.auto_broadcast = false;
-          return entity as EntityWithParentId;
-        });
-        enriched.sort((a, b) => {
-          const numA = parseInt(a.name!.split("_")[1], 10);
-          const numB = parseInt(b.name!.split("_")[1], 10);
-          return numA - numB;
-        });
+    setEntities(enriched);
+    setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
+    console.log(`✅ Chargé ${enriched.length} entités dans entitiesMap`);
 
-        setEntities(enriched);
-        setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
-        
-        console.log(`Chargé ${enriched.length} entités dans entitiesMap`);
-      } catch (err) {
-        console.error("❌ Erreur chargement des entités part_x :", err);
-      }
-    };
-    fetchEntities();
-  }, [instance]);
+  }, [part_1, part_2, part_3, part_4, part_5, part_6]);
 
   return (
     <PartEntitiesContext.Provider value={{ entities, entitiesMap }}>
