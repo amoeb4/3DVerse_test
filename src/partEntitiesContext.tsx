@@ -56,12 +56,14 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
   const { entity: part_4 } = useEntity({ euid: "96b43de7-3c72-4ae5-8d1f-b2137c50bc61" });
   const { entity: part_5 } = useEntity({ euid: "ed84c3ff-3c7f-445a-a1ff-d531c8f47133" });
   const { entity: part_6 } = useEntity({ euid: "1274b32e-4d37-41cb-ad2b-0ed4886bf918" });
-
+  const { entity: part_7 } = useEntity({ euid: "df0b0b6f-789d-46a4-be69-4def0f8e1494" });
+  const { entity: part_8 } = useEntity({ euid: "2276b2a3-8a16-4d42-934d-fee7376fab25" });
+  
   const [entities, setEntities] = useState<EntityWithParentId[]>([]);
   const [entitiesMap, setEntitiesMap] = useState<Map<string, EntityWithParentId>>(new Map());
 
   useEffect(() => {
-    const parts = [part_1, part_2, part_3, part_4, part_5, part_6].filter((entity): entity is Entity => entity !== null);
+    const parts = [part_1, part_2, part_3, part_4, part_5, part_6, part_7, part_8].filter((entity): entity is Entity => entity !== null);
     
     if (parts.length === 0) {
       console.warn("⛔ Aucune entité chargée");
@@ -86,7 +88,7 @@ export function PartEntitiesProvider({ children }: { children: React.ReactNode }
     setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
     console.log(`✅ Chargé ${enriched.length} entités dans entitiesMap`);
 
-  }, [part_1, part_2, part_3, part_4, part_5, part_6]);
+  }, [part_1, part_2, part_3, part_4, part_5, part_6, part_7, part_8]);
 
   return (
     <PartEntitiesContext.Provider value={{ entities, entitiesMap }}>

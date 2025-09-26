@@ -11,7 +11,6 @@ import { useEntity, LivelinkContext } from "@3dverse/livelink-react";
 import {
   rotateHierarchy,
   PartEntitiesContext,
-  rotateHierarchyProgressive,
 } from "./partEntitiesContext";
 import { useSpeed } from "./Interface";
 

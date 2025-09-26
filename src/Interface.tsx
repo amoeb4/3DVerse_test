@@ -7,6 +7,7 @@ import {
   type ChangeEvent,
 } from "react";
 import TorchExample from "./torch";
+import { PartEntitiesContext } from "./partEntitiesContext";
 import { LivelinkContext, useEntity } from "@3dverse/livelink-react";
 import { setOrientation } from "./movements";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -248,35 +249,28 @@ function Slider({
 
 // ---------------------- Entity Dropdown ----------------------
 export function EntityDropdown() {
-  const { instance } = useContext(LivelinkContext);
   const { selectedEntity, setSelectedEntity } = useEntitySimple();
+  const { entities: partEntities } = useContext(PartEntitiesContext);
   const [entities, setEntities] = useState<EntityX[]>([]);
 
-useEffect(() => {
-  const fetchEntities = async () => {
-    if (!instance) return;
-    try {
-      const foundEntities = await instance.scene.findEntitiesWithComponents({
-        mandatory_components: ["local_transform"],
-        forbidden_components: [],
-      });
-      const entitiesWithNames = foundEntities
-        .filter((e: any) => /^part_\d+$/.test(e.name ?? ""))
-        .map((e: any) => {
-          return { id: e.id, name: e.name || "(sans nom)" };
-        })
-        .sort(
-          (a, b) =>
-            parseInt(a.name!.split("_")[1], 10) -
-            parseInt(b.name!.split("_")[1], 10)
-        );
-      setEntities(entitiesWithNames);
-    } catch (err) {
-      console.error("Erreur lors de la récupération des entités :", err);
-    }
-  };
-  fetchEntities();
-}, [instance]);
+  useEffect(() => {
+    if (partEntities.length === 0) return;
+    
+    console.log(`🔍 EntityDropdown: ${partEntities.length} entités récupérées depuis PartEntitiesContext`);
+    
+    const entitiesWithNames = partEntities
+      .filter((e) => /^part_\d+$/.test(e.name ?? ""))
+      .map((e) => {
+        return { id: e.id, name: e.name || "(sans nom)" };
+      })
+      .sort(
+        (a, b) =>
+          parseInt(a.name!.split("_")[1], 10) -
+          parseInt(b.name!.split("_")[1], 10)
+      );
+    
+    setEntities(entitiesWithNames);
+  }, [partEntities]);
 
   return (
     <Menu as="div" className="relative inline-block text-left">
