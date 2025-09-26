@@ -7,7 +7,7 @@ export function EntityCreator() {
     const [temperature, setTemperature] = useState(50);
     const [latency, setLatency] = useState(0);
     const { entity: torch } = useEntity({
-        euid: "d0d44c23-2d15-48d6-93ee-a46422890baf",
+        euid: "3951d6d3-bd81-43ff-96b2-0356d0bc7912",
     });
 
     const MATERIAL_REFS = [

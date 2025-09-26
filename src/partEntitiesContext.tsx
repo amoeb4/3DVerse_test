@@ -126,7 +126,8 @@ export async function rotateHierarchyProgressive(
   entitiesMap: Map<string, EntityWithParentId>,
   delayMs: number,
   stepDeg: number = 1
-) {
+) 
+{
   const entity = [...entitiesMap.values()].find((e) => e.name === entityName);
   if (!entity) {
     console.warn(`Entité ${entityName} introuvable`);
