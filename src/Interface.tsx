@@ -117,8 +117,7 @@ export default function ControlPanel() {
     return (
       <button
         className="fixed top-[3%] right-[3%] z-50 bg-white/10 text-white border border-white/20 backdrop-blur px-3 py-2 rounded-full shadow hover:bg-white/20 transition"
-        onClick={() => setIsExpanded(true)}
-      >
+        onClick={() => setIsExpanded(true)}>
         Control Panel
       </button>
     );

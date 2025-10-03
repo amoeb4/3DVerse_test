@@ -36,7 +36,7 @@ export default function Dom3DInfos({ entitiesMap }: Dom3DInfosProps) {
 
       {(
         <DOMEntity entity={part_4} anchor="left-bottom" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">Bras<br />Axe Z</p>
+          <p className="bg-underground p-4 rounded-lg text-white">Bras<br />Axe Y</p>
         </DOMEntity>
       )}
 
@@ -54,13 +54,13 @@ export default function Dom3DInfos({ entitiesMap }: Dom3DInfosProps) {
 
       {(
         <DOMEntity entity={part_7} anchor="right-top" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">Vireur<br />Axe X</p>
+          <p className="bg-underground p-4 rounded-lg text-white">Vireur<br />Axe Y</p>
         </DOMEntity>
       )}
 
       {(
         <DOMEntity entity={part_8} anchor="right-top" scaleFactor={0.0014}>
-          <p className="bg-underground p-4 rounded-lg text-white">Plateau<br />Axe X</p>
+          <p className="bg-underground p-4 rounded-lg text-white">Plateau<br />Axe Y</p>
         </DOMEntity>
       )}
     </DOM3DOverlay>

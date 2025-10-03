@@ -12,13 +12,11 @@ export function EntityStatusPanel({
             <EntityPanel
                 label="Hovered entity"
                 color="bg-informative-500"
-                entity={hoveredEntity}
-            />
+                entity={hoveredEntity}/>
             <EntityPanel
                 label="Picked entity"
                 color="bg-positive-500"
-                entity={pickedEntity}
-            />
+                entity={pickedEntity}/>
         </div>
     );
 }

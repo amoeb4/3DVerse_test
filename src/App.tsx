@@ -133,8 +133,7 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition"
-            >
+              className="bg-yellow-600 hover:bg-yellow-600 text-white px-6 py-2 rounded-md font-semibold transition">
               Submit
             </button>
           </div>
@@ -144,14 +143,13 @@ function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => v
   );
 }
 
-//------------------------------------------------------------------------------
 function AppLayout() {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
   const cameraControllerRef = useRef<DefaultCameraController>(null);
 
-  const [showPipCamera, setShowPipCamera] = useState(true);
+  const [showPipCamera, setShowPipCamera] = useState(false);
   const [showDOM3D, setShowDOM3D] = useState(true);
 
     const { instance } = useContext(LivelinkContext);

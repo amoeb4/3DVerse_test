@@ -60,7 +60,7 @@ export function EntityCreator() {
     }, [setLatency]);
 
     return (
-        <div className="absolute text-white top-4 left-4 flex flex-col gap-2 bg-black/30 p-3 rounded-xl">
+        <div className="absolute text-white top-32 left-5 flex flex-col gap-2 bg-black/30 p-3 rounded-xl">
             <button
                 className="button button-overlay"
                 onClick={createEntity}
