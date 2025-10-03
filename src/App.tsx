@@ -90,7 +90,6 @@ export function App() {
   );
 }
 
-//------------------------------------------------------------------------------
 function StartupModal({ onSubmit }: { onSubmit: (cred: { sceneId: string }) => void }) {
   const [sceneId, setSceneId] = useState("");
   const handleSubmit = (e: React.FormEvent) => {
@@ -283,7 +282,6 @@ function XRButton({
             }
         });
     }, [mode]);
-
     return (
         <button
             className={
@@ -298,5 +296,4 @@ function XRButton({
         </button>
     );
 }
-
 export default App;

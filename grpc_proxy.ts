@@ -48,10 +48,7 @@ function parsePartsFromResponse(response: any): { name: string; location: number
   for (let i = 1; i <= 7; i++) {
     const floatVal = response.values[i]?.float_value ?? null;
     if (i == 7)
-    {
-      
       break;
-    }
     if (floatVal !== null && !isNaN(floatVal)) {
       const location = orientationMap[i](floatVal);
       parts.push({
@@ -69,9 +66,7 @@ function query_rpc_server() {
       console.error("❌ gRPC ReadData error:", err);
     } else {
       console.log("✅ ReadData response:", response);
-
       const parts = parsePartsFromResponse(response);
-
       if (ws.readyState === WebSocket.OPEN) {
         parts.forEach((msg) => {
           if (!msg.location.every((v) => v === 0)) {
