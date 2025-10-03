@@ -23,7 +23,8 @@ import { Avatars } from "./Avatars.tsx";
 import Dom3DInfos from "./DOM3Dinfos.tsx";
 import "./App.css";
 import { EntityCreator } from "./weldBead.tsx";
-import { EntityStatusPanel, EntityPanel } from "./EntityPicking.tsx";4
+import { EntityStatusPanel, EntityPanel } from "./EntityPicking.tsx";
+import { DisplayDashboard } from "./Dashboard.tsx";
 import type { Entity } from "@3dverse/livelink";
 
 //------------------------------------------------------------------------------
@@ -211,6 +212,7 @@ function AppLayout() {
     <CameraEntityContext.Provider value={cameraEntity}>
       <EntityProvider>
         <ControlPanel />
+        <DisplayDashboard />
       </EntityProvider>
       <CameraEventListener />
       <div className="absolute bottom-[5%] right-[1.15%] z-50">
@@ -223,8 +225,7 @@ function AppLayout() {
       <div className="absolute bottom-[3%] left-[3%] z-50">
         <button
           className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
-          onClick={() => setShowDOM3D(prev => !prev)}
-        >
+          onClick={() => setShowDOM3D(prev => !prev)}>
           {showDOM3D ? "Hide infos" : "Show infos"}
         </button>
       </div>
@@ -249,11 +250,9 @@ function AppLayout() {
           )}
         </Viewport>
         <EntityCreator />
-
       <EntityStatusPanel
         hoveredEntity={hoveredEntity?.entity ?? null}
-        pickedEntity={pickedEntity?.entity ?? null}
-    />
+        pickedEntity={pickedEntity?.entity ?? null}/>
           </Canvas>
     </CameraEntityContext.Provider>
   );
@@ -296,8 +295,7 @@ function XRButton({
             onClick={() => setXRMode(mode)}
             disabled={!isSessionSupported}
             style={isSessionSupported ? {} : { cursor: "not-allowed" }}
-            title={message}
-        >
+            title={message}>
             {text} {xrModeTitle}
         </button>
     );
