@@ -23,7 +23,8 @@ import { Avatars } from "./Avatars.tsx";
 import Dom3DInfos from "./DOM3Dinfos.tsx";
 import "./App.css";
 import { EntityCreator } from "./weldBead.tsx";
-import { number } from "framer-motion";
+import { EntityStatusPanel, EntityPanel } from "./EntityPicking.tsx";4
+import type { Entity } from "@3dverse/livelink";
 
 //------------------------------------------------------------------------------
 export function App() {
@@ -147,11 +148,28 @@ function AppLayout() {
   const { cameraEntity } = useCameraEntity();
   const { cameraEntity: pipCamera } = useCameraEntity();
   const { isConnecting } = useContext(LivelinkContext);
-
   const cameraControllerRef = useRef<DefaultCameraController>(null);
 
   const [showPipCamera, setShowPipCamera] = useState(true);
   const [showDOM3D, setShowDOM3D] = useState(true);
+
+    const { instance } = useContext(LivelinkContext);
+    const [pickedEntity, setPickedEntity] = useState<{ entity: Entity } | null>(
+        null,
+    );
+    const [hoveredEntity, setHoveredEntity] = useState<{
+        entity: Entity;
+    } | null>(null);
+
+    useEffect(() => {
+        document.body.style.cursor = hoveredEntity ? "pointer" : "default";
+    }, [hoveredEntity]);
+
+    useEffect(() => {
+        instance?.scene.highlightEntities({
+            entities: pickedEntity ? [pickedEntity.entity] : [],
+        });
+    }, [pickedEntity]);
 
   useEffect(() => {
     if(!cameraEntity?.camera) {
@@ -198,8 +216,7 @@ function AppLayout() {
       <div className="absolute bottom-[5%] right-[1.15%] z-50">
         <button
           className="p-3 rounded-xl backdrop-blur bg-white/10 border border-white/20 shadow-xl text-white w-[120px] text-sm"
-          onClick={() => setShowPipCamera(prev => !prev)}
-        >
+          onClick={() => setShowPipCamera(prev => !prev)}>
           {showPipCamera ? "Minimize" : "Alt. Camera"}
         </button>
       </div>
@@ -212,14 +229,13 @@ function AppLayout() {
         </button>
       </div>
       <Canvas className="w-full h-screen">
-        <Viewport cameraEntity={cameraEntity} className="w-full h-full">
+        <Viewport cameraEntity={cameraEntity} className="w-full h-full" setHoveredEntity={setHoveredEntity} setPickedEntity={setPickedEntity}>
           {!isConnecting && (
             <a
               href="https://docs.3dverse.com/livelink.react/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden"
-            />
+              className="hidden"/>
           )}
           <CameraController ref={cameraControllerRef} />
           <Avatars />
@@ -233,7 +249,12 @@ function AppLayout() {
           )}
         </Viewport>
         <EntityCreator />
-      </Canvas>
+
+      <EntityStatusPanel
+        hoveredEntity={hoveredEntity?.entity ?? null}
+        pickedEntity={pickedEntity?.entity ?? null}
+    />
+          </Canvas>
     </CameraEntityContext.Provider>
   );
 }

@@ -50,45 +50,50 @@ export const PartEntitiesContext = createContext<PartEntitiesContextType>({
 });
 
 export function PartEntitiesProvider({ children }: { children: React.ReactNode }) {
-  const { entity: part_1 } = useEntity({ euid: "91153236-a05e-4127-a1c0-49b5761c41e3" });
-  const { entity: part_2 } = useEntity({ euid: "ec221ded-08df-4bae-8982-bb47c82a0917" });
-  const { entity: part_3 } = useEntity({ euid: "32cda313-895a-42e1-a5f6-dd50e398c332" });
-  const { entity: part_4 } = useEntity({ euid: "96b43de7-3c72-4ae5-8d1f-b2137c50bc61" });
-  const { entity: part_5 } = useEntity({ euid: "ed84c3ff-3c7f-445a-a1ff-d531c8f47133" });
-  const { entity: part_6 } = useEntity({ euid: "1274b32e-4d37-41cb-ad2b-0ed4886bf918" });
-  const { entity: part_7 } = useEntity({ euid: "df0b0b6f-789d-46a4-be69-4def0f8e1494" });
-  const { entity: part_8 } = useEntity({ euid: "2276b2a3-8a16-4d42-934d-fee7376fab25" });
-  
+  const { instance } = useContext(LivelinkContext);
   const [entities, setEntities] = useState<EntityWithParentId[]>([]);
   const [entitiesMap, setEntitiesMap] = useState<Map<string, EntityWithParentId>>(new Map());
 
   useEffect(() => {
-    const parts = [part_1, part_2, part_3, part_4, part_5, part_6, part_7, part_8].filter((entity): entity is Entity => entity !== null);
-    
-    if (parts.length === 0) {
-      console.warn("⛔ Aucune entité chargée");
-      return;
-    }
-    console.log(`🔍 PartEntitiesByEuid: ${parts.length} entités récupérées via EUID`);
-    // Enrichissement des entités avec parentId
-    const enriched: EntityWithParentId[] = parts.map((entity) => {
-      (entity as EntityWithParentId).__parentId = entity.parent?.id ?? null;
-      entity.auto_broadcast = false;
-      return entity as EntityWithParentId;
-    });
+    const fetchEntities = async () => {
+      if (!instance) {
+        console.warn("⛔ instance Livelink non disponible");
+        return;
+      }
+      console.log("🔍 fetchEntities lancé…");
+      try {
+        const foundEntities = await instance.scene.findEntitiesWithComponents({
+          mandatory_components: ["local_transform"],
+          forbidden_components: [],
+        });
+        console.log(`📦 ${foundEntities.length} entités récupérées depuis la scène`);
+        const filtered = foundEntities.filter(
+          (entity) => /^part_\d+$/.test(entity.name)
+        );
 
-    // Tri par numéro de part
-    enriched.sort((a, b) => {
-      const numA = parseInt(a.name!.split("_")[1], 10);
-      const numB = parseInt(b.name!.split("_")[1], 10);
-      return numA - numB;
-    });
+        console.log(`🧽 ${filtered.length} entités filtrées avec le pattern /part_\\d+/`);
 
-    setEntities(enriched);
-    setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
-    console.log(`✅ Chargé ${enriched.length} entités dans entitiesMap`);
+        const enriched: EntityWithParentId[] = filtered.map((entity) => {
+          (entity as EntityWithParentId).__parentId = entity.parent?.id ?? null;
+          entity.auto_broadcast = false;
+          return entity as EntityWithParentId;
+        });
+        enriched.sort((a, b) => {
+          const numA = parseInt(a.name!.split("_")[1], 10);
+          const numB = parseInt(b.name!.split("_")[1], 10);
+          return numA - numB;
+        });
 
-  }, [part_1, part_2, part_3, part_4, part_5, part_6, part_7, part_8]);
+        setEntities(enriched);
+        setEntitiesMap(new Map(enriched.map((e) => [e.name!, e])));
+        
+        console.log(`Chargé ${enriched.length} entités dans entitiesMap`);
+      } catch (err) {
+        console.error("❌ Erreur chargement des entités part_x :", err);
+      }
+    };
+    fetchEntities();
+  }, [instance]);
 
   return (
     <PartEntitiesContext.Provider value={{ entities, entitiesMap }}>

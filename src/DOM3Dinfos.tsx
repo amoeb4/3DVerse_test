@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { DOM3DOverlay, DOM3DElement, DOMEntity, useEntity } from "@3dverse/livelink-react";
-import { vec3, mat4 } from "gl-matrix";
+import { DOM3DOverlay, DOMEntity, useEntity } from "@3dverse/livelink-react";
 import type { EntityWithParentId } from "./partEntitiesContext";
 
 interface Dom3DInfosProps {
@@ -8,15 +6,14 @@ interface Dom3DInfosProps {
 }
 
 export default function Dom3DInfos({ entitiesMap }: Dom3DInfosProps) {
-  const { entity: part_1 } = useEntity({ euid: "3bd3e72c-3082-466d-af8b-b477735d6c68" });
-  const { entity: part_2 } = useEntity({ euid: "ecf78ebe-0ca1-4bb4-98ce-49222bd745b2" });
-  const { entity: part_3 } = useEntity({ euid: "2ff894de-d51d-4b28-8794-31cf16bbb957" });
-  const { entity: part_4 } = useEntity({ euid: "c5dd1b61-85d4-471d-a460-b35301f319f1" });
-  const { entity: part_5 } = useEntity({ euid: "a6721617-08ec-4bef-911e-35baee70fa7d" });
-  const { entity: part_6 } = useEntity({ euid: "f5215d69-b99d-4890-859d-409051d8295d" });
-  const { entity: part_7 } = useEntity({ euid: "7a97a4b6-62e7-4adf-89a8-6c700a917e88" });
-  const { entity: part_8 } = useEntity({ euid: "bca1e55e-0191-4011-a9be-b7aae005277a" });
-
+  const { entity: part_1 } = useEntity({ euid: "91153236-a05e-4127-a1c0-49b5761c41e3" });
+  const { entity: part_2 } = useEntity({ euid: "ec221ded-08df-4bae-8982-bb47c82a0917" });
+  const { entity: part_3 } = useEntity({ euid: "32cda313-895a-42e1-a5f6-dd50e398c332" });
+  const { entity: part_4 } = useEntity({ euid: "96b43de7-3c72-4ae5-8d1f-b2137c50bc61" });
+  const { entity: part_5 } = useEntity({ euid: "ed84c3ff-3c7f-445a-a1ff-d531c8f47133" });
+  const { entity: part_6 } = useEntity({ euid: "1274b32e-4d37-41cb-ad2b-0ed4886bf918" });
+  const { entity: part_7 } = useEntity({ euid: "df0b0b6f-789d-46a4-be69-4def0f8e1494" });
+  const { entity: part_8 } = useEntity({ euid: "2276b2a3-8a16-4d42-934d-fee7376fab25" });
   return (
     <DOM3DOverlay>
       {(
